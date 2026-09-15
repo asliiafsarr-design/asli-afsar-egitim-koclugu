@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aslı Afşar Eğitim Koçluğu — V18.1</title>
+<style>
+:root{
+ --blue:#4f46e5;--cyan:#06b6d4;--purple:#8b5cf6;--pink:#ec4899;--yellow:#f59e0b;
+ --bg:#f6f7ff;--card:#fff;--text:#182033;--muted:#68738a;--line:#e6e8f0;--ok:#10b981;--danger:#ef4444;
+}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#f8fbff,#f8f3ff);font-family:Inter,Arial,sans-serif;color:var(--text)}
+button,input,select,textarea{font:inherit}button{border:0;border-radius:10px;padding:11px 15px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-weight:700;cursor:pointer}
+button.secondary{background:#64748b}button.danger{background:var(--danger)}button.light{background:#eef2ff;color:#4f46e5}
+.hidden{display:none!important}
+.login{max-width:560px;margin:7vh auto;padding:28px;background:#fff;border-radius:22px;box-shadow:0 15px 45px #4f46e51a}
+.brand{font-weight:900;font-size:25px;background:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;color:transparent}
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}.roles button:nth-child(2){background:linear-gradient(135deg,var(--cyan),var(--blue))}.roles button:nth-child(3){background:linear-gradient(135deg,var(--pink),var(--purple))}
+.app{display:flex;min-height:100vh}.side{width:245px;background:#fff;border-right:1px solid var(--line);padding:20px;position:fixed;top:0;bottom:0;overflow:auto}.main{margin-left:245px;padding:25px;max-width:1400px;width:calc(100% - 245px)}
+/* Öğrenci/Veli portalı: tam ekran, üst boşluk yok; koçun sol menüsü portalda gösterilmez. */
+.app.portal-user-layout{display:block;position:relative;width:100%;min-height:100vh;overflow-x:hidden;overflow-y:auto;background:linear-gradient(135deg,#f8fbff,#f8f3ff);z-index:1;}
+.app.portal-user-layout .side{display:none;}
+.app.portal-user-layout .main{display:block;margin-left:0;width:100%;max-width:none;padding:0 18px 28px;}
+.app.portal-user-layout .main > .top{display:none;}
+.app.portal-user-layout .main > #portal{display:block!important;width:min(1180px,100%);margin:0 auto;}
+.app.portal-user-layout #portal.active{display:block!important;visibility:visible!important;opacity:1!important;}
+.app.portal-user-layout #portal > .card{width:100%;}
+.portal-slogan{min-height:104px;margin:0 -18px 14px;padding:22px 18px;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(120deg,rgba(236,72,153,.20),rgba(124,92,255,.18),rgba(6,182,212,.18));border-bottom:1px solid rgba(79,70,229,.10);overflow:hidden;}
+.portal-slogan-text{font-size:clamp(22px,3vw,34px);font-weight:900;letter-spacing:-.035em;color:#25304a;line-height:1.15;min-height:1.2em;}
+.portal-slogan-text .word{display:inline-block;opacity:0;transform:translateY(10px);animation:portalWordIn .45s ease forwards;margin:0 .16em;}
+@keyframes portalWordIn{to{opacity:1;transform:translateY(0)}}
+.portal-header-row{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 14px;margin-bottom:12px;box-shadow:0 5px 18px rgba(79,70,229,.07);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.portal-header-row h3{font-size:18px;margin:0;}
+.portal-exit-btn{padding:8px 13px;font-size:13px;}
+@media(max-width:800px){
+ .app.portal-user-layout .main{padding:0 10px 20px;}
+ .portal-slogan{margin:0 -10px 10px;min-height:86px;padding:16px 10px;}
+ .portal-slogan-text{font-size:22px;}
+ .app.portal-user-layout .main > #portal{width:100%;}
+ .portal-header-row h3{font-size:16px;}
+ .portal-header-row{padding:9px 10px;}
+ .portal-exit-btn{padding:7px 11px;}
+ .portal-shell{font-size:14px;}
+ .portal-shell h3{font-size:17px;}
+ .portal-shell .kpi{padding:12px;}
+ .portal-shell .kpi b{font-size:21px;}
+ .portal-shell .feature-card{padding:12px;}
+}
+.nav{margin-top:22px}.nav button{display:block;width:100%;text-align:left;margin:6px 0;background:transparent;color:#526078}.nav button.active{background:linear-gradient(90deg,#eef2ff,#faefff);color:var(--blue)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}.view{display:none}.view.active{display:block}
+.portal-shell{background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:0;}
+.portal-shell > .row{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 19px;margin-bottom:12px;box-shadow:0 6px 25px #4f46e50a;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:19px;box-shadow:0 6px 25px #4f46e50a;margin-bottom:16px}
+.kpi{border-radius:18px;padding:18px;background:linear-gradient(135deg,#eef2ff,#fff0fa)}.kpi b{font-size:28px}
+label{display:block;font-size:13px;font-weight:800;color:var(--muted);margin:10px 0 5px}input,select,textarea{width:100%;padding:11px;border:1px solid #dfe3ec;border-radius:10px;background:#fff}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.row button{flex:0 0 auto}.tag{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef2ff;color:var(--blue);font-size:12px;font-weight:700;margin:3px}
+.list{display:grid;gap:10px}.item{padding:14px;border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:12px;background:#fff}.item.done{border-left-color:var(--ok)}
+.small{font-size:12px}.muted{color:var(--muted)}.ok{color:var(--ok)}.dangerText{color:var(--danger)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:13px}
+.chart{height:250px;display:flex;align-items:flex-end;gap:12px;padding:20px 10px 5px}.bar{flex:1;min-width:18px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,var(--purple),var(--cyan));position:relative}.bar span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:11px}.bar small{position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;margin-top:5px}
+.pie{width:180px;height:180px;border-radius:50%;background:conic-gradient(var(--blue) 0 40%,var(--pink) 40% 65%,var(--yellow) 65% 82%,var(--cyan) 82% 100%);margin:auto}.legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.legend span{padding:6px 9px;background:#f7f8fc;border-radius:8px;font-size:12px}
+.profile-section{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.notice{background:linear-gradient(135deg,#eefcff,#f5efff);padding:15px;border-radius:14px;margin-bottom:16px}
+
+.task-status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.task-status-card{padding:10px;border-radius:12px;background:rgba(127,127,127,.07);text-align:center}.alarm{margin-top:5px;padding:6px 8px;border-radius:8px;background:#fff1f2;color:#b42318;font-size:12px}.good{padding:10px;border-radius:10px;background:#ecfdf3;color:#16803c}.growth-chart{height:150px;display:flex;align-items:flex-end;gap:8px;padding:12px 4px;border-bottom:1px solid var(--border,#e5e7eb)}.growth-bar{min-width:28px;flex:1;max-width:60px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#7c3aed,#2563eb);position:relative;text-align:center;color:#fff;font-size:11px;padding-top:4px}.growth-bar small{position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;margin-top:5px;color:inherit}.weak-map-item{padding:9px 10px;border-radius:10px;margin-bottom:7px;background:rgba(127,127,127,.07);border-left:4px solid currentColor}.journey-step{display:flex;gap:10px;align-items:center;padding:8px}.journey-dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#eee;font-weight:800}.journey-step.done .journey-dot,.journey-step.active .journey-dot{background:#7c3aed;color:#fff}
+
+@media(max-width:800px){.side{position:static;width:100%;border-right:0;border-bottom:1px solid var(--line)}.app{display:block}.main{margin:0;width:100%;padding:15px}.nav{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}.nav button{margin:0}.roles{grid-template-columns:1fr}.top{align-items:flex-start}}
+
+.weekly-scroll{overflow-x:auto;padding-bottom:4px}
+.weekly-grid{display:grid;grid-template-columns:repeat(7,minmax(190px,1fr));gap:10px;min-width:1330px}
+.day-column{border:1px solid var(--border,#e5e7eb);border-radius:14px;overflow:hidden;background:var(--card,#fff);min-height:260px}
+.day-head{padding:12px 10px;font-weight:800;text-align:center;background:rgba(127,127,127,.08);border-bottom:1px solid var(--border,#e5e7eb)}
+.day-items{padding:8px;display:flex;flex-direction:column;gap:8px}
+.program-chip{border-radius:12px;padding:10px;border-left:5px solid currentColor;background:rgba(127,127,127,.07)}
+.program-chip b{display:block}
+.program-chip .small{margin-top:4px}
+.subject-palette{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.subject-group{margin-bottom:14px}
+.subject-group-title{font-weight:800;margin-bottom:7px}
+.subject-btn{border:0;border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:700;background:rgba(127,127,127,.10);color:inherit}
+.subject-btn.active{outline:2px solid currentColor;outline-offset:1px}
+.subject-btn.math{color:#16803c}
+.subject-btn.turkish{color:#c2185b}
+.subject-btn.social{color:#b42318}
+.subject-btn.geometry{color:#2563eb}
+.subject-btn.science{color:#7c3aed}
+.subject-btn.language{color:#b45309}
+
+
+.portal-program-card .program-chip button{width:100%}
+.program-chip.completed{opacity:.78}
+.program-chip.completed b{text-decoration:line-through}
+.program-done-btn{width:100%;margin-top:7px}
+
+
+#portalWeeklyProgramGrid.weekly-grid{display:grid;grid-template-columns:repeat(7,minmax(190px,1fr));gap:10px;min-width:1330px}
+#portalWeeklyProgramGrid .day-column{min-width:190px}
+#portalWeeklyProgramGrid .program-chip.math{color:#16803c;background:rgba(22,128,60,.08)}
+#portalWeeklyProgramGrid .program-chip.turkish{color:#c2185b;background:rgba(194,24,91,.08)}
+#portalWeeklyProgramGrid .program-chip.social{color:#b42318;background:rgba(180,35,24,.08)}
+#portalWeeklyProgramGrid .program-chip.geometry{color:#2563eb;background:rgba(37,99,235,.08)}
+#portalWeeklyProgramGrid .program-chip.science{color:#7c3aed;background:rgba(124,58,237,.08)}
+#portalWeeklyProgramGrid .program-chip.language{color:#b45309;background:rgba(180,83,9,.08)}
+#weeklyProgramGrid .program-chip.math{color:#16803c;background:rgba(22,128,60,.08)}
+#weeklyProgramGrid .program-chip.turkish{color:#c2185b;background:rgba(194,24,91,.08)}
+#weeklyProgramGrid .program-chip.social{color:#b42318;background:rgba(180,35,24,.08)}
+#weeklyProgramGrid .program-chip.geometry{color:#2563eb;background:rgba(37,99,235,.08)}
+#weeklyProgramGrid .program-chip.science{color:#7c3aed;background:rgba(124,58,237,.08)}
+#weeklyProgramGrid .program-chip.language{color:#b45309;background:rgba(180,83,9,.08)}
+
+
+.dashboard-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}.feature-card{background:var(--card,#fff);border:1px solid var(--line,#e5e7eb);border-radius:16px;padding:16px;box-shadow:0 6px 20px rgba(0,0,0,.04)}.progress-track{height:10px;background:rgba(127,127,127,.12);border-radius:99px;overflow:hidden;margin:9px 0}.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue,#2563eb),var(--purple,#7c3aed))}.stat-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line,#e5e7eb)}.stat-row:last-child{border-bottom:0}.alarm{border-left:4px solid #dc2626;background:rgba(220,38,38,.06);padding:10px 12px;border-radius:10px;margin:7px 0}.good{border-left:4px solid #16803c;background:rgba(22,128,60,.06);padding:10px 12px;border-radius:10px;margin:7px 0}.journey-step{display:flex;gap:12px;align-items:flex-start;padding:10px 0}.journey-dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:rgba(127,127,127,.12);flex:none}.journey-step.active .journey-dot{background:rgba(37,99,235,.14);color:#2563eb}.journey-step.done .journey-dot{background:rgba(22,128,60,.14);color:#16803c}
+.task-status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.task-status-card{padding:10px;border-radius:12px;background:rgba(127,127,127,.07);text-align:center}.alarm{margin-top:5px;padding:6px 8px;border-radius:8px;background:#fff1f2;color:#b42318;font-size:12px}.good{padding:10px;border-radius:10px;background:#ecfdf3;color:#16803c}.growth-chart{height:150px;display:flex;align-items:flex-end;gap:8px;padding:12px 4px;border-bottom:1px solid var(--border,#e5e7eb)}.growth-bar{min-width:28px;flex:1;max-width:60px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#7c3aed,#2563eb);position:relative;text-align:center;color:#fff;font-size:11px;padding-top:4px}.growth-bar small{position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;margin-top:5px;color:inherit}.weak-map-item{padding:9px 10px;border-radius:10px;margin-bottom:7px;background:rgba(127,127,127,.07);border-left:4px solid currentColor}.journey-step{display:flex;gap:10px;align-items:center;padding:8px}.journey-dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#eee;font-weight:800}.journey-step.done .journey-dot,.journey-step.active .journey-dot{background:#7c3aed;color:#fff}
+
+@media(max-width:800px){.dashboard-feature-grid{grid-template-columns:1fr}}
+
+.challenge-box{padding:12px 0}
+.challenge-score{font-size:30px;font-weight:800;margin-bottom:8px}
+.challenge-milestones{display:flex;justify-content:space-between;gap:8px;margin-top:12px}
+.challenge-milestones span{padding:7px 10px;border-radius:999px;background:#f1f3f7;font-size:12px;font-weight:700;opacity:.65}
+.challenge-milestones span.hit{opacity:1}
+.challenge-overlay{position:fixed;inset:0;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999;backdrop-filter:blur(4px)}
+.challenge-modal{width:min(460px,100%);background:#fff;border-radius:24px;padding:30px 24px;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,.25);animation:challengePop .28s ease-out}
+.challenge-icon{font-size:54px;margin-bottom:8px}
+.challenge-title{font-size:24px;font-weight:900;margin-bottom:10px}
+.challenge-text{font-size:18px;font-weight:700;line-height:1.45}
+.challenge-sub{font-size:13px;color:#667085;margin:12px 0 20px}
+.challenge-modal button{min-width:150px}
+@keyframes challengePop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+
+
+/* V19.7 — Canlı giriş ekranı */
+body.login-bright{
+  background:
+    radial-gradient(circle at 10% 15%, rgba(255,108,154,.34), transparent 27%),
+    radial-gradient(circle at 90% 15%, rgba(83,215,255,.30), transparent 28%),
+    radial-gradient(circle at 82% 88%, rgba(177,118,255,.30), transparent 30%),
+    linear-gradient(135deg,#fdf7ff 0%,#eefcff 48%,#fff3f8 100%);
+}
+body.login-bright::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 22% 76%, rgba(255,195,92,.20), transparent 18%),
+    radial-gradient(circle at 72% 35%, rgba(126,229,184,.18), transparent 18%);
+}
+body.login-bright::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.20;
+  background-image:
+    linear-gradient(rgba(120,100,180,.10) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,100,180,.10) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:linear-gradient(to bottom,transparent,black 18%,black 82%,transparent);
+}
+.login.login-bright-card{
+  position:relative;
+  z-index:2;
+  width:min(490px,calc(100% - 30px));
+  padding:38px 34px 29px;
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:30px;
+  background:rgba(255,255,255,.88);
+  box-shadow:0 24px 70px rgba(92,72,140,.18),0 8px 25px rgba(255,101,153,.08);
+  backdrop-filter:blur(15px);
+  -webkit-backdrop-filter:blur(15px);
+}
+.login.login-bright-card .brand{
+  font-size:29px;
+  font-weight:900;
+  letter-spacing:-.04em;
+  color:#5b35c9;
+}
+.login.login-bright-card .login-subtitle{
+  margin:6px 0 24px;
+  color:#667085;
+  font-size:14px;
+}
+.login.login-bright-card .login-tagline{
+  min-height:30px;
+  margin:-3px 0 20px;
+  color:#344054;
+  font-size:18px;
+  font-weight:850;
+  letter-spacing:-.02em;
+  line-height:1.35;
+}
+.login.login-bright-card .roles{
+  gap:10px;
+}
+.login.login-bright-card .roles button{
+  min-height:58px;
+  border:0;
+  border-radius:16px;
+  background:linear-gradient(135deg,#7c5cff,#a855f7);
+  color:#fff;
+  font-weight:850;
+  box-shadow:0 9px 20px rgba(124,92,255,.18);
+  transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;
+}
+.login.login-bright-card .roles button:nth-child(2){
+  background:linear-gradient(135deg,#ff6b9d,#ff8a65);
+  box-shadow:0 9px 20px rgba(255,107,157,.18);
+}
+.login.login-bright-card .roles button:nth-child(3){
+  background:linear-gradient(135deg,#16b8d4,#38d9a9);
+  box-shadow:0 9px 20px rgba(22,184,212,.18);
+}
+.login.login-bright-card .roles button:hover{
+  transform:translateY(-3px);
+  filter:saturate(1.08);
+  box-shadow:0 13px 26px rgba(92,72,140,.20);
+}
+.login.login-bright-card #pinBox{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid #eaecf0;
+}
+.login.login-bright-card #pinBox button{
+  border-radius:13px;
+  background:linear-gradient(135deg,#7c5cff,#ff6b9d);
+}
+.login.login-bright-card .login-footer{
+  margin-top:21px;
+  padding-top:14px;
+  border-top:1px solid #eaecf0;
+  text-align:center;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.12em;
+  color:#98a2b3;
+}
+.login-login-orb{
+  position:fixed;
+  width:190px;height:190px;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:1;
+  filter:blur(1px);
+}
+.login-login-orb.one{
+  left:-65px;bottom:7%;
+  background:radial-gradient(circle,rgba(255,107,157,.22),transparent 68%);
+}
+.login-login-orb.two{
+  right:-65px;top:16%;
+  background:radial-gradient(circle,rgba(22,184,212,.23),transparent 68%);
+}
+.login-bright-card .login-tagline::after{
+  content:"";
+  display:block;
+  width:54px;
+  height:4px;
+  margin-top:9px;
+  border-radius:10px;
+  background:linear-gradient(90deg,#7c5cff,#ff6b9d,#16b8d4);
+}
+@media(max-width:600px){
+  .login.login-bright-card{padding:30px 22px 24px;border-radius:23px}
+  .login.login-bright-card .brand{font-size:25px}
+  .login.login-bright-card .login-tagline{font-size:17px}
+  .login.login-bright-card .roles{grid-template-columns:1fr}
+}
+
+
+.task-status-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}.task-status-card{padding:12px;border-radius:12px;background:rgba(127,127,127,.07);border:1px solid var(--border,#e5e7eb)}.task-status-card b{font-size:22px}.growth-chart{display:flex;align-items:flex-end;gap:8px;height:150px;padding:10px 4px 0;overflow-x:auto}.growth-bar{min-width:34px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--purple,#7c3aed),var(--blue,#2563eb));position:relative}.growth-bar span{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800}.growth-bar small{position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;margin-top:5px}.weak-map-item{padding:10px;border-radius:12px;margin-top:8px;border-left:5px solid currentColor;background:rgba(127,127,127,.06)}.weak-map-item.math{color:#16803c}.weak-map-item.turkish{color:#c2185b}.weak-map-item.social{color:#b42318}.weak-map-item.geometry{color:#2563eb}.weak-map-item.science{color:#7c3aed}.weak-map-item.language{color:#b45309}
+.task-status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.task-status-card{padding:10px;border-radius:12px;background:rgba(127,127,127,.07);text-align:center}.alarm{margin-top:5px;padding:6px 8px;border-radius:8px;background:#fff1f2;color:#b42318;font-size:12px}.good{padding:10px;border-radius:10px;background:#ecfdf3;color:#16803c}.growth-chart{height:150px;display:flex;align-items:flex-end;gap:8px;padding:12px 4px;border-bottom:1px solid var(--border,#e5e7eb)}.growth-bar{min-width:28px;flex:1;max-width:60px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#7c3aed,#2563eb);position:relative;text-align:center;color:#fff;font-size:11px;padding-top:4px}.growth-bar small{position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;margin-top:5px;color:inherit}.weak-map-item{padding:9px 10px;border-radius:10px;margin-bottom:7px;background:rgba(127,127,127,.07);border-left:4px solid currentColor}.journey-step{display:flex;gap:10px;align-items:center;padding:8px}.journey-dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#eee;font-weight:800}.journey-step.done .journey-dot,.journey-step.active .journey-dot{background:#7c3aed;color:#fff}
+
+@media(max-width:800px){.task-status-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="login-bright">
+
+<div class="login-login-orb one"></div><div class="login-login-orb two"></div>
+<div id="login" class="login login-bright-card">
+ <div class="brand">Aslı Afşar Eğitim Koçluğu</div>
+ <p class="muted">V19.7 — Öğrenci, program, görev, deneme, branş denemeleri ve gelişim portalı</p>
+ <div class="login-tagline" id="loginTagline" aria-live="polite"></div>
+  <div class="roles">
+  <button onclick="selectRole('coach')">Koç</button>
+  <button onclick="selectRole('student')">Öğrenci</button>
+  <button onclick="selectRole('parent')">Veli</button>
+ </div>
+ <div id="pinBox" class="hidden">
+  <label id="pinLabel">PIN</label><input id="pin" type="password" inputmode="numeric" placeholder="PIN" onkeydown="if(event.key==='Enter')login()">
+  <button style="width:100%" onclick="login()">Giriş Yap</button><p id="loginError" class="dangerText small"></p>
+ </div>
+ <p class="small muted">Koç, öğrenci ve veli girişleri birbirinden ayrıdır. Öğrenci ve veli yalnızca kendi portalını görür.</p><div class="login-footer">PLAN • TAKİP • GELİŞİM • BAŞARI</div>
+</div>
+
+<div id="app" class="app hidden">
+<aside class="side">
+ <div class="brand">Aslı Afşar</div><div class="small muted">Eğitim Koçluğu</div>
+ <nav id="nav" class="nav">
+  <button data-v="home" onclick="show('home')">Ana Sayfa</button>
+  <button data-v="students" onclick="show('students')">Öğrenciler</button>
+  <button data-v="profile" onclick="show('profile')">Öğrenci Bilgileri</button>
+  <button data-v="program" onclick="show('program')">Haftalık Program</button>
+   <button data-v="tasks" onclick="show('tasks')">Görevler</button>
+  <button data-v="exams" onclick="show('exams')">Deneme Analizleri</button>
+  <button data-v="branchExams" onclick="show('branchExams')">Branş Denemeleri</button>
+  <button data-v="mockExams" onclick="show('mockExams')">Denemeler</button>
+  <button data-v="curriculum" onclick="show('curriculum')">Müfredat & Konular</button>
+  <button data-v="inventories" onclick="show('inventories')">Testler & Envanterler</button>
+  <button data-v="reports" onclick="show('reports')">Veli Raporu</button>
+  <button data-v="archive" onclick="show('archive')">Arşiv & Gelişim</button>
+  <button data-v="share" onclick="show('share')">Öğrenci / Veli Portalı</button>
+ </nav>
+ <button class="secondary" style="width:100%;margin-top:18px" onclick="logout()">Çıkış Yap</button>
+</aside>
+
+<main class="main">
+ <div class="top"><div><h2 id="pageTitle">Ana Sayfa</h2><span id="pageSub" class="muted"></span></div><span class="tag">V20.4</span></div>
+
+ <section id="home" class="view active">
+  <div class="notice"><b id="welcome">Hoş geldiniz.</b><br><span class="small muted">Öğrencinin bilgileri, programı, görevleri ve deneme gelişimi tek merkezden yönetilir.</span></div>
+  <div class="grid">
+   <div class="kpi"><span class="muted">Öğrenci</span><br><b id="kStudents">0</b></div>
+   <div class="kpi"><span class="muted">Bu haftaki görev</span><br><b id="kTasks">0</b></div>
+   <div class="kpi"><span class="muted">Tamamlanan</span><br><b id="kDone">0</b></div>
+   <div class="kpi"><span class="muted">Deneme</span><br><b id="kExams">0</b></div>
+  </div>
+  <div class="card">
+   <h3>Bugünün Motivasyonu</h3>
+   <div class="notice" id="homeMotivation">Küçük ama düzenli adımlar büyük ilerleme oluşturur.</div>
+  </div>
+  <div class="grid">
+   <div class="card"><h3>Haftalık Program Özeti</h3><div id="homeProgram"></div></div>
+   <div class="card"><h3>Son Deneme</h3><div id="homeExam"></div></div>
+  </div>
+  <div class="dashboard-feature-grid">
+   <div class="feature-card"><h3>Bugün Ne Yapacağım?</h3><div id="todayPlanCard"></div></div>
+   <div class="feature-card"><h3>Haftalık İlerleme</h3><div id="weeklyProgressCard"></div></div>
+   <div class="feature-card"><h3>Eksik Haritası</h3><div id="weaknessMapCard"></div></div>
+   <div class="feature-card"><h3>Bugünün Koç Notu</h3><div id="coachNoteCard"></div></div>
+  </div>
+ </section>
+
+ <section id="students" class="view">
+  <div class="card"><h3>Öğrenci Alarm Merkezi</h3><p class="muted small">Tamamlanmamış programlar, son tarihi gelen görevler ve konu bazlı hata kayıtları.</p><div id="studentAlarmCenter"></div></div>
+  <div class="card"><h3>Öğrenci Sistem Kullanımı</h3><p class="muted small">Öğrencilerin portal giriş, çıkış ve oturum süreleri burada izlenir. Bu takip koç/veli tarafı içindir.</p><div id="sessionReportsList"></div><div id="coachProgramProgressList" style="margin-top:12px"></div></div>
+  <div class="card"><h3>Gelişim Özeti</h3><p class="muted small">Öğrencilerin son denemelerdeki toplam net değişimi.</p><div id="coachGrowthSummary"></div></div>
+  <div class="card"><h3>Öğrenci Ekle</h3>
+   <div class="grid"><div><label>Ad Soyad</label><input id="sName" placeholder="Örn. Ayşe Kaya"></div><div><label>Sınıf</label><select id="sGrade" onchange="updateStudentAreaField()"><option>9</option><option>10</option><option>11</option><option>12</option><option>Mezun</option></select></div><div id="sAreaWrap"><label>Alan</label><select id="sArea"><option>Eşit Ağırlık</option><option>Sayısal</option><option>Sözel</option><option>YDT</option></select></div></div>
+   <div class="grid"><div><label>Öğrenci PIN</label><input id="sPin" value="1234"></div><div><label>Veli PIN</label><input id="pPin" value="1234"></div></div>
+   <button onclick="addStudent()">Öğrenciyi Kaydet</button>
+  </div>
+  <div class="card"><h3>Öğrenciler</h3><div id="studentList" class="list"></div></div>
+ </section>
+
+ <section id="profile" class="view">
+  <div class="card"><h3>Öğrencinin Her Şeyi</h3>
+   <div class="row"><select id="profileStudent" onchange="loadProfile()"></select><button class="light" onclick="saveProfile()">Bilgileri Kaydet</button></div>
+   <div class="profile-section"><h4>Aile Bilgileri</h4>
+    <div class="grid">
+     <div><label>Anne adı soyadı</label><input id="motherName"></div><div><label>Anne telefon</label><input id="motherPhone"></div><div><label>Anne WhatsApp?</label><select id="motherWA"><option>Evet</option><option>Hayır</option></select></div>
+     <div><label>Baba adı soyadı</label><input id="fatherName"></div><div><label>Baba telefon</label><input id="fatherPhone"></div><div><label>Baba WhatsApp?</label><select id="fatherWA"><option>Evet</option><option>Hayır</option></select></div>
+     <div><label>Anne hayatta mı?</label><select id="motherAlive"><option>Evet</option><option>Hayır</option></select></div><div><label>Baba hayatta mı?</label><select id="fatherAlive"><option>Evet</option><option>Hayır</option></select></div>
+     <div><label>Anne-baba durumu</label><select id="parentsStatus"><option>Birlikte</option><option>Ayrı</option><option>Boşanmış</option><option>Diğer</option></select></div><div><label>Kardeş sayısı</label><input id="siblings" type="number" min="0"></div>
+    </div>
+   </div>
+   <div class="profile-section"><h4>Eğitim & Hedef</h4>
+    <div class="grid"><div><label>Okul</label><input id="school"></div><div><label>Mezun olduğu okul</label><input id="gradSchool"></div><div><label>Durum / sınıf</label><select id="eduStatus"><option>9. sınıf</option><option>10. sınıf</option><option>11. sınıf</option><option>12. sınıf</option><option>Mezun</option></select></div><div><label>Hedef</label><input id="goal" placeholder="Örn. Hukuk"></div><div><label>İstediği fakülte</label><input id="faculty"></div><div><label>İstediği üniversite</label><input id="university"></div></div>
+    <label>Öğrencinin isteği / özel notlar</label><textarea id="studentWish" rows="4"></textarea>
+   </div>
+  </div>
+ </section>
+
+ <section id="program" class="view">
+  <div class="card">
+   <div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <div><h3>Haftalık Program</h3><p class="muted small">Günler soldan sağa ilerler. Dersi seç, konuyu seç; sistem önerilen soru ve süreyi otomatik getirir. İstersen süreyi değiştirebilirsin.</p></div>
+    <div><label>Öğrenci</label><select id="programStudent" onchange="refreshProgramPalette();renderProgram();"></select></div>
+   </div>
+  </div>
+
+  <div class="card">
+   <h3>Ders Seç</h3>
+   <div id="programPalette"></div>
+  </div>
+
+  <div class="card">
+   <h3>Konu ve Çalışma Süresi</h3>
+   <div class="grid">
+    <div><label>Gün</label><select id="day"><option>Pazartesi</option><option>Salı</option><option>Çarşamba</option><option>Perşembe</option><option>Cuma</option><option>Cumartesi</option><option>Pazar</option></select></div>
+    <div><label>Seçilen ders</label><select id="progSubject" onchange="refreshProgramTopics()"></select></div>
+    <div><label>Konu</label><select id="progTopic" onchange="applyTopicPlan()"></select></div>
+    <div><label>Süre (dk)</label><input id="duration" type="number" min="5" value="60"></div>
+    <div><label>Soru / görev adedi</label><input id="questionCount" type="number" min="1" value="20"></div>
+   </div>
+   <div id="programRecommendation" class="notice small" style="margin-top:12px">Ders ve konu seçtiğinde önerilen süre ile soru sayısı burada görünecek.</div>
+   <button onclick="addProgram()">Programa Ekle</button><button class="secondary" onclick="saveWeeklyProgram()">Programı Kaydet</button>
+   <div id="smartProgramRecommendations" class="notice small" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+   <h3>Haftalık Çizelge</h3>
+   <div class="weekly-scroll">
+    <div id="weeklyProgramGrid" class="weekly-grid"></div>
+   </div>
+  </div>
+ </section>
+
+
+ <section id="tasks" class="view">
+  <div class="card"><h3>Öğrenciye Görev Ata</h3>
+   <div class="grid"><div><label>Öğrenci</label><select id="taskStudent"></select></div><div><label>Görev başlığı</label><input id="taskTitle" placeholder="Örn. 40 paragraf sorusu çöz"></div></div>
+   <div class="grid"><div><label>Açıklama</label><textarea id="taskDescription" rows="3" placeholder="Görevin ayrıntısı"></textarea></div><div><label>Son tarih</label><input id="taskDueDate" type="date"></div></div>
+   <button onclick="addTask()">Görevi Ata</button>
+  </div>
+  <div class="card"><h3>Atanan Görevler</h3><div id="taskList" class="list"></div></div>
+ </section>
+
+ <section id="exams" class="view">
+  <div class="card"><h3>Deneme Ekle & Analiz Et</h3>
+   <div class="grid"><div><label>Öğrenci</label><select id="examStudent"></select></div><div><label>Deneme adı</label><input id="examName" placeholder="TYT Deneme 1"></div><div><label>Tarih</label><input id="examDate" type="date"></div></div>
+   <div class="grid">
+    <div><label>Türkçe net</label><input id="turkce" type="number" step=".01" value="0"></div><div><label>Matematik net</label><input id="matematik" type="number" step=".01" value="0"></div><div><label>Fen net</label><input id="fen" type="number" step=".01" value="0"></div><div><label>Sosyal net</label><input id="sosyal" type="number" step=".01" value="0"></div>
+   </div>
+   <h4>Konu bazlı eksik / hata</h4>
+   <div class="grid"><div><label>Ders</label><select id="errorSubject" onchange="fillTopics('errorSubject','errorTopic')"></select></div><div><label>Konu</label><select id="errorTopic"></select></div><div><label>Hata türü</label><select id="errorType"><option>Bilgi eksiği</option><option>Dikkat hatası</option><option>İşlem hatası</option><option>Süre problemi</option><option>Yorum / muhakeme</option></select></div><div><label>Not</label><input id="errorNote" placeholder="Örn. Fonksiyonlarda temel kavram tekrarı"></div></div>
+   <button onclick="addExam()">Denemeyi Kaydet</button>
+  </div>
+  <div class="grid">
+   <div class="card"><h3>Net Grafiği</h3><div id="barChart" class="chart"></div></div>
+   <div class="card"><h3>Hata Dağılımı</h3><div class="pie"></div><div class="legend"><span>Bilgi</span><span>Dikkat</span><span>İşlem</span><span>Süre</span></div></div>
+  </div>
+  <div class="card"><h3>Konu Eksikleri</h3><div id="weaknessList"></div></div>
+  <div class="card"><h3>Deneme Geçmişi</h3><div id="examList"></div></div>
+ </section>
+
+
+ <section id="branchExams" class="view">
+  <div class="card">
+   <div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <div>
+     <h3>Branş Denemeleri</h3>
+     <p class="muted small">Deneme Analizleri'nden bağımsızdır. Özellikle 12. sınıf ve mezun öğrenciler için TYT–AYT branş denemelerini ayrı ayrı yönetmek için kullanılır.</p>
+    </div>
+    <span class="tag">TYT + AYT</span>
+   </div>
+   <div class="grid">
+    <div>
+     <label>Düzey</label>
+     <select id="branchLevel" onchange="renderBranchSubjects()">
+      <option value="TYT">TYT</option>
+      <option value="AYT">AYT</option>
+     </select>
+    </div>
+    <div>
+     <label>Öğrenci grubu</label>
+     <select id="branchGrade">
+      <option value="12">12. Sınıf</option>
+      <option value="Mezun">Mezun</option>
+      <option value="11">11. Sınıf</option>
+      <option value="10">10. Sınıf</option>
+     </select>
+    </div>
+   </div>
+  </div>
+
+  <div class="card">
+   <h3 id="branchSubjectTitle">TYT Branşları</h3>
+   <div id="branchSubjectGrid" class="grid"></div>
+  </div>
+
+  <div class="card">
+   <h3>Branş Denemesi Ekle</h3>
+   <div class="grid">
+    <div><label>Düzey</label><select id="branchAddLevel" onchange="fillBranchAddSubjects()"><option value="TYT">TYT</option><option value="AYT">AYT</option></select></div>
+    <div><label>Ders</label><select id="branchAddSubject"></select></div>
+    <div><label>Deneme adı</label><input id="branchAddName" placeholder="Örn. TYT Matematik Branş Denemesi 1"></div>
+    <div><label>Tarih</label><input id="branchAddDate" type="date"></div>
+    <div><label>PDF (isteğe bağlı)</label><input id="branchAddPdf" type="file" accept="application/pdf"></div>
+   </div>
+   <p id="branchPdfInfo" class="small muted">PDF dosyası seçebilirsiniz. Bu sürümde dosyanın kendisi tarayıcıda geçici olarak açılır; kalıcı PDF depolaması için sonraki aşamada Supabase Storage bağlantısı eklenebilir.</p>
+   <button onclick="addBranchExam()">Branş Denemesini Ekle</button>
+  </div>
+
+  <div class="card">
+   <h3>Eklenen Branş Denemeleri</h3>
+   <div id="branchExamList"></div>
+  </div>
+ </section>
+
+
+ <section id="mockExams" class="view">
+  <div class="card">
+   <div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <div>
+     <h3>Denemeler</h3>
+     <p class="muted small">12. sınıf ve mezun öğrenciler için TYT–AYT alan denemelerini ayrı olarak ekleyin ve yönetin. Bu bölüm Deneme Analizleri'nden bağımsızdır.</p>
+    </div>
+    <span class="tag">TYT + AYT · 12 + Mezun</span>
+   </div>
+  </div>
+
+  <div class="card">
+   <h3>Deneme Ekle</h3>
+   <div class="grid">
+    <div>
+     <label>Düzey</label>
+     <select id="mockLevel" onchange="refreshMockSubjects()">
+      <option value="TYT">TYT</option>
+      <option value="AYT">AYT</option>
+     </select>
+    </div>
+    <div>
+     <label>Alan</label>
+     <select id="mockArea" onchange="refreshMockSubjects()">
+      <option value="Sayısal">Sayısal</option>
+      <option value="Eşit Ağırlık">Eşit Ağırlık</option>
+      <option value="Sözel">Sözel</option>
+      <option value="Dil">Dil</option>
+     </select>
+    </div>
+    <div>
+     <label>Sınıf</label>
+     <select id="mockGrade">
+      <option value="12">12. Sınıf</option>
+      <option value="Mezun">Mezun</option>
+     </select>
+    </div>
+    <div>
+     <label>Ders / Deneme türü</label>
+     <select id="mockSubject"></select>
+    </div>
+    <div>
+     <label>Deneme adı</label>
+     <input id="mockName" placeholder="Örn. TYT Türkiye Geneli Deneme 1">
+    </div>
+    <div>
+     <label>Tarih</label>
+     <input id="mockDate" type="date">
+    </div>
+    <div>
+     <label>Dosya seç</label>
+     <input id="mockFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png">
+    </div>
+   </div>
+   <p id="mockFileInfo" class="small muted">PDF veya uygun bir deneme dosyası seçebilirsiniz. Dosya daha sonra öğrenciye atanabilecek deneme kaydının parçası olarak kullanılacaktır.</p>
+   <button onclick="addMockExam()">Denemeyi Ekle</button>
+  </div>
+
+  <div class="card">
+   <h3>Denemeler</h3>
+   <div id="mockExamFilters" class="grid">
+    <div><label>Düzey</label><select id="mockFilterLevel" onchange="renderMockExams()"><option value="Tümü">Tümü</option><option value="TYT">TYT</option><option value="AYT">AYT</option></select></div>
+    <div><label>Alan</label><select id="mockFilterArea" onchange="renderMockExams()"><option value="Tümü">Tümü</option><option value="Sayısal">Sayısal</option><option value="Eşit Ağırlık">Eşit Ağırlık</option><option value="Sözel">Sözel</option><option value="Dil">Dil</option></select></div>
+    <div><label>Sınıf</label><select id="mockFilterGrade" onchange="renderMockExams()"><option value="Tümü">Tümü</option><option value="12">12. Sınıf</option><option value="Mezun">Mezun</option></select></div>
+   </div>
+   <div id="mockExamList" style="margin-top:14px"></div>
+  </div>
+ </section>
+
+ <section id="curriculum" class="view">
+  <div class="card"><h3>Müfredat & Konu Havuzu</h3><p class="muted small">Alan ve sınıfa göre ders seç; ardından konu listesi otomatik gelir.</p>
+   <div class="grid"><div><label>Sınıf</label><select id="curGrade" onchange="refreshCurriculum()"><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="Mezun">Mezun</option></select></div><div id="curAreaWrap"><label>Alan</label><select id="curArea"></select></div><div><label>Ders</label><select id="curSubject"></select></div></div>
+  </div>
+  <div class="card"><h3>Konular</h3><div id="topicList"></div></div>
+ </section>
+
+
+ <section id="inventories" class="view">
+  <div class="card">
+   <h3>Öğrenci Testleri & Envanterler</h3>
+   <div class="notice small"><b>Koçluk notu:</b> Bu araçlar eğitim koçluğu amaçlı öz-değerlendirmelerdir. Klinik tanı koymaz. Özellikle dikkat/hiperaktivite sonuçları yalnızca gözlem ve yönlendirme amacıyla kullanılmalıdır.</div>
+   <div class="grid">
+    <div><label>Öğrenci</label><select id="invStudent"></select></div>
+    <div><label>Test</label><select id="invType" onchange="renderInventoryForm()">
+      <option value="attention">Dikkat & Odaklanma</option>
+      <option value="motivation">Moral & Motivasyon</option>
+      <option value="career">Meslek & İlgi Alanları</option>
+      <option value="study">Derse Oturma / Erteleme</option>
+      <option value="activity">Hareketlilik & Dürtüsellik Öz-Değerlendirmesi</option>
+    </select></div>
+   </div>
+   <div id="inventoryForm"></div>
+  </div>
+  <div class="card"><h3>Sonuçlar</h3><div id="inventoryResults"></div></div>
+ </section>
+
+ <section id="reports" class="view">
+  <div class="card">
+   <h3>Veli Raporu</h3>
+   <div class="grid"><div><label>Öğrenci</label><select id="reportStudent" onchange="renderReport()"></select></div><div><label>Rapor tarihi</label><input id="reportDate" type="date"></div></div>
+   <div id="reportContent"></div>
+   <button onclick="copyParentReport()">WhatsApp Raporunu Kopyala</button><button class="secondary" onclick="saveCurrentReportSnapshot()">Raporu Arşive Kaydet</button>
+  </div>
+ </section>
+
+ <section id="archive" class="view">
+  <div class="card"><h3>Arşiv & Gelişim Merkezi</h3><p class="muted small">Eski haftalık programlar, denemeler, raporlar ve öğrencinin gelişim özeti burada tarih sırasıyla tutulur.</p>
+   <div class="grid"><div class="kpi"><b id="archiveProgramCount">0</b><div class="small muted">Program kaydı</div></div><div class="kpi"><b id="archiveExamCount">0</b><div class="small muted">Deneme</div></div><div class="kpi"><b id="archiveReportCount">0</b><div class="small muted">Arşiv raporu</div></div><div class="kpi"><b id="archiveTaskCount">0</b><div class="small muted">Görev</div></div></div>
+  </div>
+  <div class="card"><h3>Hedef & Mevcut Durum</h3><div id="archiveGoalSummary"></div></div>
+  <div class="card"><h3>Deneme Geçmişi</h3><div id="archiveExamHistory"></div></div>
+  <div class="card"><h3>Haftalık Program Arşivi</h3><div id="archiveProgramHistory"></div></div>
+  <div class="card"><h3>Veli Rapor Arşivi</h3><div id="archiveReportHistory"></div></div>
+  </div>
+ </section>
+
+ <section id="share" class="view">
+  <div class="card"><h3>Öğrenci / Veli Portalı</h3>
+   <div class="grid"><div><label>Öğrenci</label><select id="shareStudent" onchange="updateShareLinks()"></select></div><div><label>Portal türü</label><select id="shareRole" onchange="updateShareLinks()"><option value="student">Öğrenci</option><option value="parent">Veli</option></select></div></div>
+   <div class="notice"><b>Sabit Portal Sistemi</b><br>
+   Öğrenci ve veliye göndereceğiniz adres aynı kalır. Kişiye özel bilgileri bağlantının içine yazmak yerine PIN ile giriş yaptırıyoruz.
+   <br><span class="small muted">Not: Gerçek cihazlar arası anlık veri paylaşımı için ortak veritabanı bağlantısı ayrıca gereklidir.</span></div>
+   <div class="card" style="background:#fafaff">
+    <h4>Tek Portal Adresi</h4>
+    <p class="small muted">Bu adresi veli ve öğrenciye bir kez gönderin.</p>
+    <textarea id="fixedPortalLink" rows="2" readonly></textarea>
+    <button onclick="copyFixedPortal()">Portal Adresini Kopyala</button>
+   </div>
+   <div class="card" style="background:#fafaff"><label>Portal bağlantısı</label><textarea id="shareLink" rows="3" readonly></textarea><button onclick="copyShare()">Bağlantıyı Kopyala</button></div>
+   <h4>Portalda görülecekler</h4><div class="grid"><div class="kpi">Öğrenci bilgileri</div><div class="kpi">Haftalık program</div><div class="kpi">Atanan görevler</div><div class="kpi">Deneme gelişimi</div></div>
+  </div>
+ </section>
+
+
+ <section id="portalLogin" class="view">
+  <div class="card" style="max-width:520px;margin:auto">
+   <h3>Öğrenci / Veli Portalı</h3>
+   <p class="muted small">Tek bağlantıdan giriş yapın. Öğrenci veya veli PIN'inizi girin.</p>
+   <div class="grid"><div><label>Giriş türü</label><select id="portalLoginRole"><option value="student">Öğrenci</option><option value="parent">Veli</option></select></div><div><label>Öğrenci</label><select id="portalStudentChoice"></select></div><div><label>PIN</label><input id="portalLoginPin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"></div></div>
+   <button onclick="portalLogin()">Portala Gir</button><button class="secondary" style="margin-left:8px" onclick="goCoachLogin()">Koç Girişi</button>
+   <div id="portalStudentPick" class="hidden"></div>
+   <p id="portalLoginError" class="dangerText small"></p>
+  </div>
+ </section>
+
+ <section id="portal" class="view">
+  <div class="portal-slogan"><div id="portalSloganText" class="portal-slogan-text">Hayatını planla. Geleceğini kur.</div></div>
+  <div class="portal-header-row"><h3 id="portalTitle">Portal</h3><button class="secondary portal-exit-btn" onclick="portalLogout()">Çıkış Yap</button></div>
+  <div class="card portal-shell"><div id="portalMotivation" class="notice" style="margin-top:0"></div><div id="studentSessionReport"></div>
+<div id="portalWeeklyProgram" class="card" style="margin-top:12px">
+ <h3>Haftalık Program</h3>
+ <p class="small muted">Programın Pazartesi'den Pazar'a soldan sağa gösterilir. Ders, konu ve süre bilgileri koçun hazırladığı programla aynıdır.</p>
+ <div class="weekly-scroll"><div id="portalWeeklyProgramGrid" class="weekly-grid"></div></div>
+</div>
+<div id="studentProgramProgress"></div>
+<div id="parentProgramProgress" class="card" style="margin-top:12px"></div>
+<div id="parentStudentSessionReport" class="card" style="margin-top:12px;display:none">
+ <h3>Öğrencinin Sistem Kullanımı</h3>
+ <p class="small muted">Çocuğunuzun portal kullanım oturumlarıdır; ders çalışma süresi olarak yorumlanmaz.</p>
+ <div class="grid">
+  <div class="kpi"><b>Son giriş</b><div id="parentLastLogin" class="small">—</div></div>
+  <div class="kpi"><b>Son çıkış</b><div id="parentLastLogout" class="small">—</div></div>
+  <div class="kpi"><b>Son oturum</b><div id="parentLastDuration" class="small">—</div></div>
+  <div class="kpi"><b>Toplam oturum</b><div id="parentSessionCount" class="small">—</div></div>
+ </div>
+ <div id="parentSessionHistory" style="margin-top:12px"></div>
+</div>
+<div id="portalProfile"></div>
+<div class="dashboard-feature-grid">
+ <div class="feature-card"><h3>Bugün Ne Yapacağım?</h3><div id="portalTodayPlan"></div></div>
+ <div class="feature-card"><h3>Haftalık İlerlemem</h3><div id="portalWeeklyProgress"></div></div>
+ <div class="feature-card"><h3>Hedefim & Mevcut Durum</h3><div id="portalGoalSummary"></div></div>
+ <div class="feature-card"><h3>YKS Yolculuğum</h3><div id="portalYksJourney"></div></div>
+ <div class="feature-card"><h3>🔥 Challenge</h3><div id="portalChallenge"></div></div>
+ <div class="feature-card"><h3>Çalışma Serim</h3><div id="portalStudyStreak"></div></div>
+ <div class="feature-card"><h3>Görev Takip Merkezi</h3><div id="portalTaskTracker"></div></div>
+ <div class="feature-card"><h3>Gelişim Grafiğim</h3><div id="portalGrowthChart"></div></div>
+ <div class="feature-card"><h3>Eksik Haritam</h3><div id="portalWeaknessMap"></div></div>
+ <div class="feature-card"><h3>Arşiv & Gelişim</h3><div id="portalArchive"></div></div>
+</div>
+<h3>Haftalık Program</h3><div id="portalProgram" style="display:none !important"></div><h3>Atanan Görevler</h3><div id="portalTasks"></div><h3>Deneme Özeti</h3><div id="portalExam"></div></div>
+ </section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://spapvhplgdmbgqibpvof.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_J-7oyMzxaRBW2w-H0QXKGg_l7fMINDT";
+const supa=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let cloudReady=false;
+let cloudBusy=false;
+
+const DB='asli_v16_db';
+const defaultSubjects={
+"9":{areas:[],subjects:["Türk Dili ve Edebiyatı","Matematik","Fizik","Kimya","Biyoloji","Tarih","Coğrafya","Din Kültürü ve Ahlak Bilgisi","İngilizce"]},
+"10":{areas:[],subjects:["Türk Dili ve Edebiyatı","Matematik","Fizik","Kimya","Biyoloji","Tarih","Coğrafya","Din Kültürü ve Ahlak Bilgisi","İngilizce"]},
+"11":{areas:["Sayısal","Sözel","Eşit Ağırlık","Dil"],subjects:["Türk Dili ve Edebiyatı","Matematik","Fizik","Kimya","Biyoloji","Tarih","Coğrafya","Din Kültürü ve Ahlak Bilgisi","İngilizce"]},
+"12":{areas:["Sayısal","Sözel","Eşit Ağırlık","Dil"],subjects:["Türk Dili ve Edebiyatı","Matematik","Fizik","Kimya","Biyoloji","Tarih","Coğrafya","Din Kültürü ve Ahlak Bilgisi","İngilizce"]},
+"Mezun":{areas:["Sayısal","Sözel","Eşit Ağırlık","Dil"],subjects:["TYT Türkçe","TYT Matematik","TYT Sosyal Bilimler","TYT Fen Bilimleri","AYT Matematik","AYT Türk Dili ve Edebiyatı","AYT Tarih","AYT Coğrafya","AYT Fizik","AYT Kimya","AYT Biyoloji"]}
+};
+let db=JSON.parse(localStorage.getItem(DB)||'{"students":[],"programs":[],"tasks":[],"exams":[],"inventories":[],"reports":[]}');
+db.inventories=db.inventories||[]; db.reports=db.reports||[]; db.programs=db.programs||[]; db.tasks=db.tasks||[]; db.exams=db.exams||[]; db.students=db.students||[];
+let role=localStorage.getItem('v16role')||'';
+let selectedStudent=localStorage.getItem('v16student')||'';
+
+function save(){localStorage.setItem(DB,JSON.stringify(db)); syncCloud();}
+function uuid(){return crypto.randomUUID?crypto.randomUUID():('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{let r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16)}))}
+function normalizeLocalIds(){
+ const map=new Map();
+ db.students.forEach(s=>{if(!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(String(s.id))){let n=uuid();map.set(String(s.id),n);s.id=n}else map.set(String(s.id),String(s.id))});
+ db.programs.forEach(x=>{if(!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(String(x.id)))x.id=uuid();x.student=map.get(String(x.student))||x.student});
+ db.tasks.forEach(x=>{if(!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(String(x.id)))x.id=uuid();x.student=map.get(String(x.student))||x.student});
+ db.exams.forEach(x=>{if(!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(String(x.id)))x.id=uuid();x.student=map.get(String(x.student))||x.student});
+ db.inventories.forEach(x=>{if(!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(String(x.id)))x.id=uuid();x.student=map.get(String(x.student))||x.student});
+ db.reports.forEach(x=>{if(!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(String(x.id)))x.id=uuid();x.student=map.get(String(x.student))||x.student});
+ if(selectedStudent)selectedStudent=map.get(String(selectedStudent))||selectedStudent;
+ localStorage.setItem(DB,JSON.stringify(db)); if(selectedStudent)localStorage.setItem('v16student',selectedStudent);
+}
+function studentRow(s){let p=s.profile||{};return {id:s.id,name:s.name||'',student_pin:s.studentPin||'1234',parent_pin:s.parentPin||'1234',school:s.grade? (p.school||'') : (p.school||''),grade:s.grade||'',area:s.area||'',goal:p.goal||'',faculty:p.faculty||'',university:p.university||'',mother_name:p.motherName||'',mother_phone:p.motherPhone||'',mother_alive:p.motherAlive||'',father_name:p.fatherName||'',father_phone:p.fatherPhone||'',father_alive:p.fatherAlive||'',parent_status:p.parentsStatus||'',sibling_count:Number(p.siblings||0),whatsapp:p.motherWA||p.fatherWA||'',notes:p.studentWish||'',updated_at:new Date().toISOString()}}
+function studentFromRow(r){return {id:r.id,name:r.name,grade:r.grade||'',area:r.area||'',studentPin:r.student_pin||'1234',parentPin:r.parent_pin||'1234',profile:{school:r.school||'',goal:r.goal||'',faculty:r.faculty||'',university:r.university||'',motherName:r.mother_name||'',motherPhone:r.mother_phone||'',motherAlive:r.mother_alive||'',fatherName:r.father_name||'',fatherPhone:r.father_phone||'',fatherAlive:r.father_alive||'',parentsStatus:r.parent_status||'',siblings:r.sibling_count||0,motherWA:r.whatsapp||'',fatherWA:'',studentWish:r.notes||''}}}
+async function loadCloud(){
+ try{
+  const [st,pr,ta,ex,iv,re]=await Promise.all([supa.from('students').select('*'),supa.from('programs').select('*'),supa.from('tasks').select('*'),supa.from('exams').select('*'),supa.from('inventories').select('*'),supa.from('reports').select('*')]);
+  if(st.error) throw st.error;
+  if(pr.error) console.warn('Program verisi okunamadı:',pr.error.message);
+  if(ta.error) console.warn('Görev verisi okunamadı:',ta.error.message);
+  if(ex.error) console.warn('Deneme verisi okunamadı:',ex.error.message);
+  if(iv.error) console.warn('Envanter verisi okunamadı:',iv.error.message);
+  if(re.error) console.warn('Rapor verisi okunamadı:',re.error.message);
+  if(st.data?.length){
+   db.students=st.data.map(studentFromRow);
+   db.programs=pr.error?db.programs:(pr.data||[]).map(x=>({id:x.id,student:x.student_id,day:x.day||'',subject:x.subject||'',topic:x.topic||'',duration:x.duration||0,questions:x.question_count||0,done:!!x.completed}));
+   db.tasks=ta.error?db.tasks:(ta.data||[]).map(x=>({id:x.id,student:x.student_id,title:x.title||'Görev',description:x.description||'',dueDate:x.due_date||'',done:!!x.completed}));
+   db.exams=ex.error?db.exams:(ex.data||[]).map(x=>({id:x.id,student:x.student_id,name:x.exam_name||'Deneme',date:x.exam_date||'',nets:{Türkçe:Number(x.turkish||0),Matematik:Number(x.math||0),Fen:Number(x.science||0),Sosyal:Number(x.social||0)},errors:x.errors||[],notes:x.notes||''}));
+   db.inventories=iv.error?db.inventories:(iv.data||[]).map(x=>({id:x.id,student:x.student_id,type:x.test_type,answers:x.answers||[],result:x.result_text?JSON.parse(x.result_text):{score:Number(x.score||0),level:''},date:(x.created_at||'').slice(0,10)}));
+   db.reports=re.error?db.reports:(re.data||[]).map(x=>({id:x.id,student:x.student_id,type:x.report_type||'',content:x.content||'',created_at:x.created_at}));
+   localStorage.setItem(DB,JSON.stringify(db));
+   if(selectedStudent&&!db.students.some(s=>s.id===selectedStudent))selectedStudent=db.students[0]?.id||'';
+   if(selectedStudent)localStorage.setItem('v16student',selectedStudent);
+  } else if(db.students.length){ normalizeLocalIds(); await syncCloud(true); }
+  cloudReady=true; return true;
+ }catch(e){console.warn('Supabase bağlantısı:',e.message); cloudReady=false; return false;}
+}
+async function syncCloud(force=false){
+ if(cloudBusy || !db.students.length) return;
+ cloudBusy=true;
+ try{
+  normalizeLocalIds();
+  await supa.from('students').upsert(db.students.map(studentRow),{onConflict:'id'});
+  await supa.from('programs').upsert(db.programs.map(x=>({id:x.id,student_id:x.student,day:x.day,subject:x.subject,topic:x.topic,duration:Number(x.duration)||0,question_count:Number(x.questions)||0,completed:!!x.done})),{onConflict:'id'});
+  await supa.from('tasks').upsert(db.tasks.map(x=>({id:x.id,student_id:x.student,title:x.title||'Görev',description:x.description||'',due_date:x.dueDate||null,completed:!!x.done})),{onConflict:'id'});
+  await supa.from('exams').upsert(db.exams.map(x=>({id:x.id,student_id:x.student,exam_name:x.name,exam_date:x.date||null,turkish:Number(x.nets?.Türkçe||0),math:Number(x.nets?.Matematik||0),science:Number(x.nets?.Fen||0),social:Number(x.nets?.Sosyal||0),total_net:Object.values(x.nets||{}).reduce((a,b)=>a+Number(b||0),0),errors:x.errors||[],notes:x.notes||''})),{onConflict:'id'});
+  await supa.from('inventories').upsert(db.inventories.map(x=>({id:x.id,student_id:x.student,test_type:x.type,score:Number(x.result?.score||0),result_text:JSON.stringify(x.result||{}),answers:x.answers||[],created_at:(x.date?x.date+'T00:00:00Z':new Date().toISOString())})),{onConflict:'id'});
+  await supa.from('reports').upsert(db.reports.map(x=>({id:x.id,student_id:x.student,report_type:x.type||'',content:x.content||''})),{onConflict:'id'});
+ }catch(e){console.warn('Veri eşitleme hatası:',e.message)} finally{cloudBusy=false}
+}
+
+
+function fillCurriculumSubjects(){
+ const g=document.getElementById('curGrade')?.value;
+ const s=document.getElementById('curSubject');
+ const d=defaultSubjects[g]||defaultSubjects["9"];
+ if(s)s.innerHTML=d.common.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+ updateCurriculumAreaField();
+ if(typeof showTopics==='function')showTopics();
+}
+
+function refreshPortalLoginStudents(){
+ const box=document.getElementById('portalStudentBox'),sel=document.getElementById('portalStudentSelect');
+ if(!box||!sel)return;
+ if(role==='coach'){box.classList.add('hidden');return;}
+ box.classList.remove('hidden');
+ sel.innerHTML=db.students.length?db.students.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join(''):'<option value="">Öğrenci bulunamadı</option>';
+ if(selectedStudent&&db.students.some(s=>s.id===selectedStudent))sel.value=selectedStudent;
+}
+function selectRole(r){role=r;document.getElementById('pinBox').classList.remove('hidden');document.getElementById('pinLabel').textContent=r==='coach'?'Koç PIN':r==='student'?'Öğrenci PIN':'Veli PIN';document.getElementById('pin').value='';document.getElementById('loginError').textContent='';document.getElementById('pin').focus()}
+async function studentQuickLogin(){
+ await loadCloud();
+ const id=document.getElementById('homeStudentLogin')?.value;
+ const pin=document.getElementById('homeStudentPin')?.value.trim();
+ const s=db.students.find(x=>x.id===id);
+ if(!s)return alert('Öğrenci hesabı bulunamadı.');
+ if(pin!==s.studentPin)return alert('Öğrenci PIN hatalı.');
+ enterPortal('student',s.id);
+}
+async function login(){
+ await loadCloud();
+ refreshPortalLoginStudents();
+ const p=document.getElementById('pin').value.trim();
+ if(role==='coach'){
+  if(p!=='1989'){document.getElementById('loginError').textContent='Koç PIN hatalı.';return;}
+  localStorage.setItem('v18role','coach');
+  localStorage.removeItem('v18student');
+  start();
+  return;
+ }
+ if(!db.students.length){document.getElementById('loginError').textContent='Henüz öğrenci kaydı bulunamadı. Önce koç panelinden öğrenci ekleyin.';return;}
+ const matches=db.students.filter(s=>p===String(role==='student'?s.studentPin:s.parentPin));
+ if(!matches.length){document.getElementById('loginError').textContent=role==='student'?'Öğrenci PIN hatalı.':'Veli PIN hatalı.';return;}
+ enterPortal(role,matches[0].id);
+}
+const portalSloganPhrases=[
+ ['Hayatını','planla.','Geleceğini','kur.'],
+ ['Hedefini','belirle.','Adımını','at.'],
+ ['Bugününü','yönet.','Yarınına','yön','ver.']
+];
+let portalSloganTimer=null;
+function startPortalSlogan(){
+ const el=document.getElementById('portalSloganText'); if(!el)return;
+ if(portalSloganTimer)clearInterval(portalSloganTimer);
+ let idx=0;
+ const paint=()=>{const words=portalSloganPhrases[idx%portalSloganPhrases.length];el.innerHTML=words.map((w,i)=>`<span class="word" style="animation-delay:${i*180}ms">${esc(w)}</span>`).join('');idx++;};
+ paint(); portalSloganTimer=setInterval(paint,4300);
+}
+
+function enterPortal(portalRole,studentId){
+ role=portalRole;
+ selectedStudent=studentId;
+ localStorage.setItem('v18role',portalRole);
+ localStorage.setItem('v18student',studentId);
+ document.getElementById('login').classList.add('hidden');
+ document.getElementById('app').classList.remove('hidden');
+ document.getElementById('app').classList.add('portal-user-layout');
+ document.getElementById('nav').classList.add('hidden');
+ document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+ document.getElementById('portal').classList.add('active');
+ startPortalSlogan();
+ document.getElementById('pageTitle').textContent=portalRole==='parent'?'Veli Portalı':'Öğrenci Portalı';
+ try{renderPortalForStudent(portalRole,studentId);}catch(e){console.error("Portal render hatası",e);const pe=document.getElementById("portalProfile");if(pe)pe.innerHTML=`<div class="notice"><b>Portal yüklenirken bir hata oluştu.</b><div class="small muted">Sayfayı yenileyip tekrar deneyin.</div></div>`;}
+ if(portalRole==='student'){const _st=(db.students||[]).find(x=>String(x.id)===String(studentId));startStudentSession(studentId,_st?.name||'');installStudentSessionTracking();renderStudentSessionReport(studentId);}
+ renderPortalWeeklyProgram(studentId);
+ if(portalRole==='parent'){renderParentStudentSessionReport(studentId);}
+ renderPortalWeeklyProgram(studentId);
+ renderPortalMotivation();renderParentStudentSessionReport(studentId);renderPortalWeeklyProgram(studentId);
+}
+function start(){
+ document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');
+ document.getElementById('nav').classList.remove('hidden');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('hidden'));
+ show('home'); refreshSelectors(); renderAll();
+updateStudentAreaField();updateCurriculumAreaField();fillCurriculumSubjects();updateStudentAreaField();updateCurriculumAreaField();refreshCurriculum();updateStudentAreaField();}
+function logout(){localStorage.removeItem('v18role');localStorage.removeItem('v18student');role='';selectedStudent='';location.hash='';location.reload()}
+function goPortalLogin(){location.hash='#portal-login'; location.reload();}
+function portalLogout(){logout()}
+function goCoachLogin(){localStorage.removeItem('v18role');localStorage.removeItem('v18student');role='';selectedStudent='';location.hash='';location.reload()}
+function renderPortalArchive(studentId){
+ const el=document.getElementById('portalArchive'); if(!el)return;
+ ensureArchives();
+ const pro=(db.programs||[]).filter(x=>String(x.student)===String(studentId));
+ const ex=(db.exams||[]).filter(x=>String(x.student)===String(studentId)).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+ const reps=(db.reportArchive||[]).filter(x=>String(x.student)===String(studentId)).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+ const done=pro.filter(x=>x.done).length;
+ const last=ex[0];
+ el.innerHTML=`<div class="stat-row"><span>Program kaydı</span><b>${pro.length}</b></div>
+ <div class="stat-row"><span>Tamamlanan çalışma</span><b>${done}/${pro.length}</b></div>
+ <div class="stat-row"><span>Deneme</span><b>${ex.length}</b></div>
+ <div class="stat-row"><span>Veli raporu</span><b>${reps.length}</b></div>
+ <div class="small muted" style="margin-top:10px">${last?`Son deneme: <b>${esc(last.name||'Deneme')}</b> · ${esc(last.date||'')} · ${totalNet(last).toFixed(1)} net`:'Henüz arşivlenmiş deneme yok.'}</div>`;
+}
+
+function renderPortalForStudent(portalRole,studentId){
+ const s=db.students.find(x=>x.id===studentId);
+ if(!s){document.getElementById('portalTitle').textContent='Portal';document.getElementById('portalProfile').innerHTML='<p class=\"dangerText\">Öğrenci bulunamadı.</p>';return;}
+ const pinfo=s.profile||{};
+ document.getElementById('portalTitle').textContent=(portalRole==='parent'?'Veli — ':'Öğrenci — ')+s.name;
+ document.getElementById('portalProfile').innerHTML=`<div class=\"grid\"><div class=\"kpi\"><span class=\"muted\">Sınıf</span><br><b>${esc(s.grade)}</b></div><div class=\"kpi\"><span class=\"muted\">Alan</span><br><b>${esc(s.area)}</b></div><div class=\"kpi\"><span class=\"muted\">Hedef</span><br><b>${esc(pinfo.goal||'Belirtilmedi')}</b></div><div class=\"kpi\"><span class=\"muted\">Üniversite</span><br><b>${esc(pinfo.university||'Belirtilmedi')}</b></div></div>`;
+ let pro=db.programs.filter(x=>x.student===studentId),tasks=db.tasks.filter(x=>x.student===studentId),ex=db.exams.filter(x=>x.student===studentId);
+ document.getElementById('portalProgram').innerHTML=pro.length?pro.map(x=>`<div class=\"item ${x.done?'done':''}\"><b>${esc(x.day)} — ${esc(x.subject)}</b><div class=\"small\">${esc(x.topic)} · ${x.duration} dk · ${x.questions} soru · ${x.done?'Tamamlandı ✓':'Bekliyor'}</div></div>`).join(''):'<p class=\"muted\">Program yok.</p>';
+ let taskHtml=tasks.length?tasks.map(x=>`<div class=\"item ${x.done?'done':''}\"><b>${esc(x.title)}</b><div class=\"small muted\">${esc(x.description)}${x.dueDate?' · Son tarih: '+esc(x.dueDate):''}</div></div>`).join(''):'<p class=\"muted\">Atanan görev yok.</p>';
+ document.getElementById('portalTasks').innerHTML=taskHtml;
+ let e=ex[0];document.getElementById('portalExam').innerHTML=e?`<b>${esc(e.name)}</b><div class=\"small\">${e.date} · Türkçe ${e.nets.Türkçe} · Matematik ${e.nets.Matematik} · Fen ${e.nets.Fen} · Sosyal ${e.nets.Sosyal}</div>`:'<p class=\"muted\">Deneme yok.</p>';
+ renderPortalFeatureCards(studentId);
+ renderPortalArchive(studentId);
+}
+function show(id){
+ document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.v===id));
+ if(id==='mockExams'){refreshMockSubjects();renderMockExams();}
+ if(id==='students'){renderAllStudentSessionReports();}
+ if(id==='branchExams'){renderBranchSubjects();fillBranchAddSubjects();renderBranchExamList();}
+ const names={home:'Ana Sayfa',students:'Öğrenciler',profile:'Öğrenci Bilgileri',program:'Haftalık Program',tasks:'Görevler',exams:'Deneme Analizleri',curriculum:'Müfredat & Konular',share:'Öğrenci / Veli Portalı',portal:'Portal',branchExams:'Branş Denemeleri',mockExams:'Denemeler'};
+ document.getElementById('pageTitle').textContent=names[id]||'Portal';renderAll();
+}
+
+const inventoryQuestions={
+ attention:[
+  ['Bir göreve başladıktan sonra başka şeylere yönelmeden devam ederim.','Odaklanma'],
+  ['Okurken veya soru çözerken ayrıntıları kaçırdığım olur.','Dikkat hatası'],
+  ['Uzun süreli çalışmada dikkatim dağılır.','Sürdürülebilir dikkat'],
+  ['Bir işi bitirmeden başka bir işe geçerim.','Odaklanma'],
+  ['Sınavda bildiğim sorularda dikkatsizlikten hata yaparım.','Dikkat hatası'],
+  ['Telefon, ses veya çevredeki hareketler çalışmamı kolayca böler.','Dış uyaran'],
+  ['Bir görevin yönergesini sonuna kadar okuyabilirim.','Odaklanma'],
+  ['Çalışırken aklım sık sık başka yerlere gider.','Zihinsel dağılma']
+ ],
+ motivation:[
+  ['Çalışmaya başladığımda neden çalıştığımı hatırlarım.','Amaç'],
+  ['Emek verdiğimde gelişebileceğime inanırım.','Öz yeterlik'],
+  ['Kötü geçen bir denemeden sonra yeniden başlayabilirim.','Dayanıklılık'],
+  ['Hedefim için kısa vadeli sıkıntılara katlanabilirim.','Hedef bağlılığı'],
+  ['Sonuç alamayınca çalışmayı bırakma eğilimindeyim.','Süreklilik'],
+  ['Kendimi başkalarıyla kıyaslamak çalışma isteğimi azaltır.','Duygusal yük'],
+  ['Başardığım küçük şeyleri fark ederim.','İlerleme farkındalığı'],
+  ['Bir planım olduğunda uygulama ihtimalim artar.','Planlı çalışma']
+ ],
+ study:[
+  ['Ders çalışma saatim geldiğinde masaya oturmakta zorlanırım.','Başlama güçlüğü'],
+  ['“Birazdan başlarım” diyerek çalışmayı ertelerim.','Erteleme'],
+  ['Telefon veya sosyal medya yüzünden başlangıç gecikir.','Dijital dikkat'],
+  ['Masaya oturduğumda ne yapacağımı bilirim.','Plan netliği'],
+  ['Görev büyük göründüğünde başlamaktan kaçınırım.','Görev yükü'],
+  ['25–30 dakikalık bir çalışma bloğunu tamamlayabilirim.','Sürdürme'],
+  ['Ödevleri son ana bırakırım.','Erteleme'],
+  ['Çalışma alanımı hazırlamak başlamamı kolaylaştırır.','Çevresel düzen']
+ ],
+ activity:[
+  ['Uzun süre otururken sık sık hareket etme ihtiyacı duyarım.','Hareketlilik'],
+  ['Sıra beklemek benim için zor olabilir.','Dürtüsellik'],
+  ['Birinin konuşmasını bitirmesini beklemeden araya girebilirim.','Dürtüsellik'],
+  ['Çalışma sırasında sık sık ayağa kalkarım.','Hareketlilik'],
+  ['Bir işi düşünmeden hemen yapmaya eğilimliyim.','Dürtüsellik'],
+  ['Sessiz ve sakin çalışmak benim için kolaydır.','Hareketlilik'],
+  ['Ders sırasında ellerim/ayaklarım sürekli hareket eder.','Hareketlilik'],
+  ['Sonucu düşünmeden cevap verdiğim olur.','Dürtüsellik']
+ ]
+};
+const careerQuestions=[
+ ['İnsanlara bir şeyi anlatmak ve öğretmek hoşuma gider.','Eğitim/İnsan'],
+ ['Sayısal problemleri çözmekten keyif alırım.','Sayısal/Teknoloji'],
+ ['Yazmak, okumak ve dil kullanmak ilgimi çeker.','Dil/İletişim'],
+ ['Bir sistemi düzenlemek ve planlamak hoşuma gider.','Yönetim/Organizasyon'],
+ ['Yeni fikirler üretmek ve tasarlamak hoşuma gider.','Yaratıcı'],
+ ['İnsanlarla konuşmak ve ikna etmekten enerji alırım.','İletişim/Ticaret'],
+ ['Canlılar, sağlık veya doğa hakkında öğrenmek ilgimi çeker.','Sağlık/Bilim'],
+ ['Adalet, toplum ve insan davranışları üzerine düşünmek ilgimi çeker.','Hukuk/Sosyal Bilimler'],
+ ['Bilgisayarlar, teknoloji veya mühendislik konuları ilgimi çeker.','Mühendislik/Teknoloji'],
+ ['Sanat, tasarım, müzik veya görsel üretim bana çekici gelir.','Sanat/Tasarım'],
+ ['Ekonomi, para, işletme veya girişimcilik ilgimi çeker.','Ekonomi/Girişimcilik'],
+ ['İnsanların sorunlarını dinlemek ve çözüm üretmek hoşuma gider.','Psikoloji/İnsan']
+];
+function renderInventoryForm(){
+ const type=document.getElementById('invType').value;
+ let qs=type==='career'?careerQuestions:inventoryQuestions[type];
+ let html='<p class="muted small">Her maddeyi 1–5 arasında değerlendir: 1=Hiç uygun değil, 5=Tam uygun.</p>';
+ qs.forEach((q,i)=>{html+=`<div class="card"><b>${i+1}. ${esc(q[0])}</b><div class="row" style="margin-top:9px">${[1,2,3,4,5].map(v=>`<label style="flex:1;text-align:center"><input type="radio" name="inv${i}" value="${v}" ${v===3?'checked':''}> ${v}</label>`).join('')}</div></div>`});
+ html+='<button onclick="saveInventory()">Testi Tamamla</button>';
+ document.getElementById('inventoryForm').innerHTML=html;
+}
+function scoreInventory(type,answers){
+ if(type==='career'){
+  let cats={};careerQuestions.forEach((q,i)=>cats[q[1]]=(cats[q[1]]||0)+answers[i]);
+  return {summary:Object.entries(cats).sort((a,b)=>b[1]-a[1]),score:Math.round(answers.reduce((a,b)=>a+b,0)/(answers.length*5)*100)};
+ }
+ let score=answers.reduce((a,b)=>a+b,0),pct=Math.round(score/(answers.length*5)*100);
+ let level=pct<45?'Düşük':pct<65?'Orta':pct<82?'Belirgin':'Yüksek';
+ return {score:pct,level};
+}
+function saveInventory(){
+ let s=document.getElementById('invStudent').value,type=document.getElementById('invType').value;
+ if(!s)return alert('Önce öğrenci ekleyin.');
+ let qs=type==='career'?careerQuestions:inventoryQuestions[type];
+ let answers=qs.map((_,i)=>Number(document.querySelector(`input[name="inv${i}"]:checked`)?.value||3));
+ let result=scoreInventory(type,answers);
+ db.inventories.unshift({id:uuid(),student:s,type,answers,result,date:new Date().toISOString().slice(0,10)});
+ save();renderInventoryResults();renderReport();alert('Test sonucu kaydedildi.');
+}
+function inventoryLabel(t){return {attention:'Dikkat & Odaklanma',motivation:'Moral & Motivasyon',career:'Meslek & İlgi Alanları',study:'Derse Oturma / Erteleme',activity:'Hareketlilik & Dürtüsellik Öz-Değerlendirmesi'}[t]}
+function interpretInventory(x){
+ if(x.type==='career'){let top=x.result.summary.slice(0,3).map(a=>a[0]);return `Öne çıkan ilgi alanları: ${top.join(', ')}. Bu sonuç bir meslek önerisi değil; öğrencinin araştırabileceği alanları daraltan bir başlangıç göstergesidir.`}
+ let p=x.result.score;
+ if(x.type==='motivation')return p>=75?'Motivasyon ve hedef bağlılığı güçlü görünüyor. Programda hedefi somutlaştıran kısa ve ölçülebilir görevler sürdürülebilirliği destekleyebilir.':p>=55?'Motivasyon orta düzeyde görünüyor. Küçük hedefler, görünür ilerleme ve düzenli geri bildirim faydalı olabilir.':'Motivasyon alanında destek ihtiyacı görülüyor. Önce küçük ve tamamlanabilir görevlerle çalışma rutini kurulması uygun olabilir.';
+ if(x.type==='study')return p>=75?'Derse başlama/erteleme alanında belirgin zorlanma işareti var. Çalışmayı küçük bloklara bölmek ve başlangıç saatini netleştirmek yararlı olabilir.':p>=55?'Derse başlama konusunda orta düzeyde zorlanma görülüyor. Net görev ve kısa başlangıç blokları denenebilir.':'Derse başlama alanında belirgin bir zorlanma görünmüyor.';
+ if(x.type==='attention')return p>=75?'Dikkat ve odaklanma alanında belirgin zorlanma işaretleri var. Bu sonuç tanı değildir; çalışma ortamı, uyku, ekran kullanımı ve sınav koşullarıyla birlikte değerlendirilmelidir.':p>=55?'Dikkat alanında orta düzeyde zorlanma işareti var. Kısa çalışma blokları ve dikkat dağıtıcıların azaltılması denenebilir.':'Dikkat alanında belirgin bir zorlanma görünmüyor.';
+ return p>=75?'Hareketlilik/dürtüsellik alanında belirgin işaretler var. Bu bir DEHB tanısı değildir; farklı ortamlardaki süreklilik ve işlev kaybı ayrıca değerlendirilmelidir.':p>=55?'Hareketlilik/dürtüsellik alanında orta düzeyde işaret var. Çalışma sırasında kontrollü hareket molaları ve net yönergeler denenebilir.':'Belirgin hareketlilik/dürtüsellik işareti görünmüyor.';
+}
+function renderInventoryResults(){
+ let s=student(),arr=db.inventories.filter(x=>!s||x.student===s.id);
+ document.getElementById('inventoryResults').innerHTML=arr.length?arr.map(x=>`<div class="item"><b>${inventoryLabel(x.type)}</b> <span class="tag">${x.date}</span><p>${esc(interpretInventory(x))}</p>${x.type==='career'?'<div>'+x.result.summary.slice(0,4).map(a=>`<span class="tag">${esc(a[0])}: ${a[1]}</span>`).join('')+'</div>':`<div class="tag">Skor: ${x.result.score}/100 — ${x.result.level}</div>`}</div>`).join(''):'<p class="muted">Henüz test sonucu yok.</p>';
+}
+function renderReport(){
+ let s=student();if(!s)return;
+ let inv=db.inventories.filter(x=>x.student===s.id), pro=db.programs.filter(x=>x.student===s.id), ex=db.exams.filter(x=>x.student===s.id);
+ let done=pro.filter(x=>x.done).length, rate=pro.length?Math.round(done/pro.length*100):0;
+ let strengths=inv.map(interpretInventory).slice(0,3);
+ document.getElementById('reportContent').innerHTML=`<div class="notice"><b>${esc(s.name)} — Veli Gelişim Özeti</b><br><span class="small muted">Program uyumu: ${rate}% · Görev: ${done}/${pro.length} · Deneme: ${ex.length} · Envanter: ${inv.length}</span></div>
+ <div class="card"><h4>Koç Değerlendirmesi</h4><p>${strengths.length?esc(strengths.join(' ')):'Henüz envanter sonucu bulunmuyor. İlk değerlendirmeler tamamlandığında burada otomatik özet oluşacaktır.'}</p></div>
+ <div class="card"><h4>Veliye Gönderilecek Mesaj</h4><textarea id="waReport" rows="10" readonly>${esc(makeParentReport(s,rate,done,pro.length,ex,inv))}</textarea></div>`;
+}
+function makeParentReport(s,rate,done,total,ex,inv){
+ let mot=['Bugün küçük bir adım, yarın büyük bir ilerleme.','Düzen, motivasyondan önce gelir; küçük hedeflerle devam.','Bir deneme sonucu değil, gelişim süreci önemlidir.','Bugünün emeği yarının güvenini oluşturur.'];
+ let lines=[`Merhaba, ${s.name} öğrencimizin bu haftaki koçluk özeti:`,`• Program/görev tamamlama: ${done}/${total} (${rate}%)`,`• Deneme sayısı: ${ex.length}`,`• Envanter değerlendirmeleri: ${inv.length}`];
+ if(inv.length)lines.push('• Son değerlendirme: '+interpretInventory(inv[0]));
+ lines.push('• Koç notu: Programı küçük, ölçülebilir adımlarla takip etmeye devam edeceğiz.');
+ lines.push('• Motivasyon: '+mot[(new Date().getDate())%mot.length]);
+ return lines.join('\\n');
+}
+function copyParentReport(){let e=document.getElementById('waReport');if(!e)return; navigator.clipboard?.writeText(e.value);alert('WhatsApp mesajı kopyalandı.')}
+function addStudent(){
+ const name=document.getElementById('sName').value.trim();if(!name)return alert('Ad soyad girin.');
+ const s={id:uuid(),name,grade:document.getElementById('sGrade').value,area:(document.getElementById('sGrade').value==='9'||document.getElementById('sGrade').value==='10')?'':document.getElementById('sArea').value,studentPin:document.getElementById('sPin').value||'1234',parentPin:document.getElementById('pPin').value||'1234',profile:{},};
+ db.students.push(s);selectedStudent=s.id;localStorage.setItem('v16student',selectedStudent);save();document.getElementById('sName').value='';refreshSelectors();renderAll();alert('Öğrenci kaydedildi.');
+}
+function updateStudentAreaField(){
+ const g=document.getElementById('sGrade')?.value,w=document.getElementById('sAreaWrap'),a=document.getElementById('sArea');
+ const show=g!=='9'&&g!=='10';if(w)w.style.display=show?'':'none';if(a)a.disabled=!show;
+}
+function updateCurriculumAreaField(){
+ const g=document.getElementById('curGrade')?.value,w=document.getElementById('curAreaWrap'),a=document.getElementById('curArea');
+ const show=g==='11'||g==='12'||g==='Mezun';if(w)w.style.display=show?'':'none';if(a)a.disabled=!show;
+}
+function refreshCurriculum(){
+ const g=document.getElementById('curGrade')?.value;
+ const data=defaultSubjects[g]||defaultSubjects["9"];
+ const aw=document.getElementById('curAreaWrap');
+ const a=document.getElementById('curArea');
+ const s=document.getElementById('curSubject');
+ const hasArea=Array.isArray(data.areas)&&data.areas.length>0;
+ if(aw)aw.style.display=hasArea?'':'none';
+ if(a){a.disabled=!hasArea;a.innerHTML=hasArea?data.areas.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join(''):'';}
+ if(s)s.innerHTML=(data.subjects||[]).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+}
+function updateStudentAreaField(){
+ const g=document.getElementById('sGrade')?.value;
+ const w=document.getElementById('sAreaWrap'),a=document.getElementById('sArea');
+ const show=g==='11'||g==='12'||g==='Mezun';
+ if(w)w.style.display=show?'':'none';
+ if(a)a.disabled=!show;
+}
+function refreshSelectors(){
+ ['profileStudent','programStudent','taskStudent','examStudent','shareStudent','homeStudentLogin','invStudent','reportStudent'].forEach(id=>{let e=document.getElementById(id);if(!e)return;e.innerHTML=db.students.map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.grade)} / ${esc(s.area)}</option>`).join('');if(selectedStudent)e.value=selectedStudent});
+ fillSubjects('progSubject');fillSubjects('errorSubject');fillCurrSubjects();
+}
+function student(){return db.students.find(s=>s.id===selectedStudent)||db.students[0]}
+function loadProfile(){
+ selectedStudent=document.getElementById('profileStudent').value;localStorage.setItem('v16student',selectedStudent);let p=student()?.profile||{};
+ const map=['motherName','motherPhone','motherWA','fatherName','fatherPhone','fatherWA','motherAlive','fatherAlive','parentsStatus','siblings','school','gradSchool','eduStatus','goal','faculty','university','studentWish'];
+ map.forEach(k=>{let e=document.getElementById(k);if(e)e.value=p[k]??(k==='siblings'?0:'')});
+}
+function saveProfile(){
+ selectedStudent=document.getElementById('profileStudent').value;let s=student();if(!s)return;
+ let p={};['motherName','motherPhone','motherWA','fatherName','fatherPhone','fatherWA','motherAlive','fatherAlive','parentsStatus','siblings','school','gradSchool','eduStatus','goal','faculty','university','studentWish'].forEach(k=>p[k]=document.getElementById(k).value);
+ s.profile=p;save();renderAll();alert('Öğrenci bilgileri kaydedildi.');
+}
+
+const programSubjects={
+ common:[
+  {name:'Türkçe',group:'Eşit Ağırlık',cls:'turkish'},
+  {name:'Türk Dili ve Edebiyatı',group:'Eşit Ağırlık',cls:'turkish'},
+  {name:'Matematik',group:'Sayısal',cls:'math'},
+  {name:'Geometri',group:'Sayısal',cls:'geometry'},
+  {name:'Fizik',group:'Sayısal',cls:'science'},
+  {name:'Kimya',group:'Sayısal',cls:'science'},
+  {name:'Biyoloji',group:'Sayısal',cls:'science'},
+  {name:'Tarih',group:'Sözel',cls:'social'},
+  {name:'Coğrafya',group:'Sözel',cls:'social'},
+  {name:'Din Kültürü',group:'Sözel',cls:'social'},
+  {name:'İngilizce',group:'Dil',cls:'language'}
+ ],
+ 'AYT Eşit Ağırlık':[
+  {name:'AYT Matematik',group:'Eşit Ağırlık',cls:'math'},
+  {name:'AYT Geometri',group:'Eşit Ağırlık',cls:'geometry'},
+  {name:'AYT Türk Dili ve Edebiyatı',group:'Eşit Ağırlık',cls:'turkish'},
+  {name:'AYT Tarih',group:'Eşit Ağırlık',cls:'social'},
+  {name:'AYT Coğrafya',group:'Eşit Ağırlık',cls:'social'}
+ ],
+ 'AYT Sayısal':[
+  {name:'AYT Matematik',group:'Sayısal',cls:'math'},
+  {name:'AYT Geometri',group:'Sayısal',cls:'geometry'},
+  {name:'AYT Fizik',group:'Sayısal',cls:'science'},
+  {name:'AYT Kimya',group:'Sayısal',cls:'science'},
+  {name:'AYT Biyoloji',group:'Sayısal',cls:'science'}
+ ],
+ 'AYT Sözel':[
+  {name:'AYT Türk Dili ve Edebiyatı',group:'Sözel',cls:'turkish'},
+  {name:'AYT Tarih',group:'Sözel',cls:'social'},
+  {name:'AYT Coğrafya',group:'Sözel',cls:'social'},
+  {name:'AYT Felsefe Grubu',group:'Sözel',cls:'social'},
+  {name:'AYT Din Kültürü',group:'Sözel',cls:'social'}
+ ],
+ 'AYT Dil':[{name:'AYT YDT / İngilizce',group:'Dil',cls:'language'}]
+};
+
+const programTopicPlans={
+ 'Türkçe':{
+  'Paragraf':{minutes:30,questions:30},'Sözcükte Anlam':{minutes:20,questions:20},
+  'Cümlede Anlam':{minutes:20,questions:20},'Dil Bilgisi':{minutes:30,questions:25},
+  'Anlatım Bozukluğu':{minutes:25,questions:20}
+ },
+ 'Matematik':{
+  'Problemler':{minutes:30,questions:30},'Temel Kavramlar':{minutes:30,questions:25},
+  'Sayılar':{minutes:30,questions:25},'Denklem':{minutes:30,questions:25},
+  'Fonksiyonlar':{minutes:40,questions:25},'Polinomlar':{minutes:40,questions:25},
+  'Limit':{minutes:40,questions:20},'Türev':{minutes:45,questions:20},
+  'İntegral':{minutes:45,questions:20}
+ },
+ 'Geometri':{
+  'Üçgenler':{minutes:35,questions:25},'Dörtgenler':{minutes:35,questions:20},
+  'Çember ve Daire':{minutes:35,questions:20},'Analitik Geometri':{minutes:40,questions:20}
+ },
+ 'Türk Dili ve Edebiyatı':{
+  'Şiir':{minutes:35,questions:25},'Edebî Sanatlar':{minutes:25,questions:20},
+  'Roman':{minutes:35,questions:25},'Hikâye':{minutes:30,questions:20},
+  'Cumhuriyet Dönemi':{minutes:40,questions:25}
+ },
+ 'Tarih':{
+  'İlk Türk Devletleri':{minutes:30,questions:20},'Osmanlı Tarihi':{minutes:40,questions:25},
+  'Millî Mücadele':{minutes:35,questions:25},'Cumhuriyet Dönemi':{minutes:35,questions:25}
+ },
+ 'Coğrafya':{
+  'Harita Bilgisi':{minutes:30,questions:20},'İklim':{minutes:30,questions:20},
+  'Nüfus':{minutes:30,questions:20},'Ekonomik Faaliyetler':{minutes:30,questions:20}
+ },
+ 'Fizik':{
+  'Hareket ve Kuvvet':{minutes:40,questions:20},'Elektrik':{minutes:40,questions:20},
+  'Dalgalar':{minutes:35,questions:20},'Optik':{minutes:35,questions:20}
+ },
+ 'Kimya':{
+  'Atom ve Periyodik Sistem':{minutes:30,questions:20},'Kimyasal Türler':{minutes:30,questions:20},
+  'Maddenin Halleri':{minutes:35,questions:20},'Kimyasal Tepkimeler':{minutes:40,questions:20}
+ },
+ 'Biyoloji':{
+  'Hücre':{minutes:30,questions:20},'Canlıların Yapısı':{minutes:30,questions:20},
+  'Kalıtım':{minutes:35,questions:20},'Ekosistem':{minutes:30,questions:20}
+ },
+ 'İngilizce':{
+  'Reading':{minutes:30,questions:25},'Vocabulary':{minutes:25,questions:30},
+  'Grammar':{minutes:30,questions:25}
+ },
+ 'AYT Matematik':{
+  'Fonksiyonlar':{minutes:40,questions:25},'Polinomlar':{minutes:40,questions:25},
+  'Trigonometri':{minutes:45,questions:20},'Limit':{minutes:40,questions:20},
+  'Türev':{minutes:45,questions:20},'İntegral':{minutes:45,questions:20}
+ },
+ 'AYT Geometri':{
+  'Çember ve Daire':{minutes:35,questions:20},'Analitik Geometri':{minutes:40,questions:20},
+  'Katı Cisimler':{minutes:35,questions:20}
+ },
+ 'AYT Türk Dili ve Edebiyatı':{
+  'Edebî Akımlar':{minutes:30,questions:20},'Şiir Bilgisi':{minutes:30,questions:20},
+  'Roman ve Hikâye':{minutes:35,questions:25},'Cumhuriyet Dönemi':{minutes:40,questions:25}
+ },
+ 'AYT Tarih':{
+  'Osmanlı Tarihi':{minutes:40,questions:25},'Millî Mücadele':{minutes:35,questions:25},
+  'Atatürk Dönemi':{minutes:35,questions:25}
+ },
+ 'AYT Coğrafya':{
+  'Türkiye Coğrafyası':{minutes:35,questions:20},'Ekonomik Coğrafya':{minutes:35,questions:20},
+  'Bölgeler':{minutes:30,questions:20}
+ },
+ 'AYT Fizik':{
+  'Elektrik ve Manyetizma':{minutes:45,questions:20},'Dalgalar':{minutes:40,questions:20},
+  'Modern Fizik':{minutes:45,questions:20}
+ },
+ 'AYT Kimya':{
+  'Kimyasal Tepkimelerde Denge':{minutes:45,questions:20},'Organik Kimya':{minutes:45,questions:20},
+  'Elektrokimya':{minutes:40,questions:20}
+ },
+ 'AYT Biyoloji':{
+  'Sistemler':{minutes:45,questions:20},'Genetik':{minutes:40,questions:20},
+  'Bitki Biyolojisi':{minutes:35,questions:20}
+ },
+ 'AYT YDT / İngilizce':{
+  'Reading':{minutes:40,questions:30},'Vocabulary':{minutes:30,questions:30},
+  'Grammar':{minutes:30,questions:25}
+ }
+};
+
+function programSubjectCatalog(){
+ const s=student(), g=String(s?.grade||'');
+ if(g==='9'||g==='10')return {groups:[{title:'Dersler',items:programSubjects.common}]};
+ const groups=[
+  {title:'Sayısal',items:programSubjects.common.filter(x=>x.group==='Sayısal')},
+  {title:'Eşit Ağırlık',items:programSubjects.common.filter(x=>['Eşit Ağırlık'].includes(x.group))},
+  {title:'Sözel',items:programSubjects.common.filter(x=>x.group==='Sözel')},
+  {title:'Dil',items:programSubjects.common.filter(x=>x.group==='Dil')}
+ ];
+ if(g==='11'||g==='12'||g==='Mezun'){
+  groups[0].items=groups[0].items.concat(programSubjects['AYT Sayısal']);
+  groups[1].items=groups[1].items.concat(programSubjects['AYT Eşit Ağırlık']);
+  groups[2].items=groups[2].items.concat(programSubjects['AYT Sözel']);
+  groups[3].items=groups[3].items.concat(programSubjects['AYT Dil']);
+ }
+ return {groups};
+}
+
+function selectProgramSubject(subject){
+ const sel=document.getElementById('progSubject'); if(!sel)return;
+ sel.value=subject;
+ document.querySelectorAll('.subject-btn').forEach(b=>b.classList.toggle('active',b.dataset.subject===subject));
+ refreshProgramTopics();
+}
+
+
+function refreshProgramStudentSelector(){
+ const sel=document.getElementById('programStudent'); if(!sel)return;
+ const current=sel.value;
+ sel.innerHTML=(db.students||[]).map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+ if(current && (db.students||[]).some(s=>String(s.id)===String(current)))sel.value=current;
+}
+function refreshProgramPalette(){
+ const box=document.getElementById('programPalette'); if(!box)return;
+ const catalog=programSubjectCatalog();
+ box.innerHTML=catalog.groups.map(g=>`<div class="subject-group"><div class="subject-group-title">${esc(g.title)}</div><div class="subject-palette">${g.items.map(x=>`<button type="button" class="subject-btn ${esc(x.cls)}" data-subject="${esc(x.name)}" onclick="selectProgramSubject('${x.name.replace(/'/g,"\\'")}')">${esc(x.name)}</button>`).join('')}</div></div>`).join('');
+ const sel=document.getElementById('progSubject');
+ sel.innerHTML=catalog.groups.flatMap(g=>g.items).map(x=>`<option value="${esc(x.name)}">${esc(x.name)}</option>`).join('');
+ refreshProgramTopics();
+}
+
+function refreshProgramTopics(){
+ const subject=document.getElementById('progSubject')?.value||'';
+ const topicSel=document.getElementById('progTopic'); if(!topicSel)return;
+ const plans=programTopicPlans[subject]||{};
+ const topics=Object.keys(plans);
+ topicSel.innerHTML=(topics.length?topics:['Konu seçimi']).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+ applyTopicPlan();
+}
+
+function applyTopicPlan(){
+ const subject=document.getElementById('progSubject')?.value||'';
+ const topic=document.getElementById('progTopic')?.value||'';
+ const plan=programTopicPlans[subject]?.[topic]||{minutes:60,questions:20};
+ const d=document.getElementById('duration'),q=document.getElementById('questionCount'),r=document.getElementById('programRecommendation');
+ if(d)d.value=plan.minutes;
+ if(q)q.value=plan.questions;
+ if(r)r.innerHTML=`<b>${esc(subject)} — ${esc(topic)}</b><br>Önerilen çalışma: <b>${plan.questions} soru / ${plan.minutes} dakika</b>. Bu süre koçluk planlama önerisidir; öğrencinin hızına göre değiştirebilirsin.`;
+}
+
+
+function saveWeeklyProgram(){
+ save();
+ renderProgram();
+ renderStudentProgramProgress();
+ renderCoachProgramProgress();
+ renderParentProgramProgress();
+ alert('Haftalık program kaydedildi.');
+}
+
+function programStats(studentId){
+ const arr=(db.programs||[]).filter(x=>!studentId||String(x.student)===String(studentId));
+ const total=arr.length, done=arr.filter(x=>x.done).length;
+ return {arr,total,done,pct:total?Math.round(done*100/total):0};
+}
+
+function renderStudentProgramProgress(){
+ const el=document.getElementById('studentProgramProgress'); if(!el)return;
+ const s=student(); if(!s){el.innerHTML='';return;}
+ const p=programStats(s.id);
+ el.innerHTML=`<div class="card" style="margin-top:12px"><h3>Program İlerlemesi</h3>
+ <div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div></div>`;
+}
+
+function renderCoachProgramProgress(){
+ const el=document.getElementById('coachProgramProgressList'); if(!el)return;
+ const students=db.students||[];
+ el.innerHTML='<h3>Program Tamamlama Durumu</h3>'+(
+  students.map(s=>{
+   const p=programStats(s.id);
+   return `<div class="item"><b>${esc(s.name||'Öğrenci')}</b><div class="small">Program: <b>%${p.pct}</b> tamamlandı · ${p.done}/${p.total}</div></div>`;
+  }).join('')||'<p class="muted">Öğrenci bulunmuyor.</p>'
+ );
+}
+
+function renderParentProgramProgress(){
+ const el=document.getElementById('parentProgramProgress'); if(!el)return;
+ const s=student(); if(!s){el.innerHTML='';return;}
+ const p=programStats(s.id);
+ el.innerHTML=`<h3>Program Tamamlama Durumu</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div>`;
+}
+
+function renderWeeklyProgramGrid(){
+ const el=document.getElementById('weeklyProgramGrid'); if(!el)return;
+ const selected=document.getElementById('programStudent')?.value;
+ const s=(db.students||[]).find(x=>String(x.id)===String(selected))||student();
+ const arr=(db.programs||[]).filter(x=>!s||String(x.student)===String(s.id));
+ const days=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+ const subjectClass=(subject)=>{const v=String(subject||'').toLowerCase();if(v.includes('matematik'))return 'math';if(v.includes('geometri'))return 'geometry';if(v.includes('türkçe')||v.includes('edebiyat'))return 'turkish';if(v.includes('tarih')||v.includes('coğrafya')||v.includes('din')||v.includes('felsefe'))return 'social';if(v.includes('fizik')||v.includes('kimya')||v.includes('biyoloji'))return 'science';if(v.includes('ingilizce')||v.includes('ydt')||v.includes('dil'))return 'language';return '';};
+ el.innerHTML=days.map(dayName=>{
+  const items=arr.filter(x=>x.day===dayName);
+  return `<div class="day-column"><div class="day-head">${dayName}</div><div class="day-items">${items.length?items.map(x=>`<div class="program-chip ${subjectClass(x.subject)} ${x.done?'done':''}"><b>${esc(x.subject)}</b><div class="small">${esc(x.topic)}</div><div class="small muted">${esc(String(x.questions))} soru · ${esc(String(x.duration))} dk</div><button class="secondary" style="margin-top:7px" onclick="toggleProgram('${x.id}')">${x.done?'Tamamlandı ✓':'Tamamlandı'}</button></div>`).join(''):'<div class="small muted" style="padding:8px;text-align:center">Henüz program yok.</div>'}</div></div>`;
+ }).join('');
+}
+
+function addProgram(){
+ let s=document.getElementById('programStudent').value;if(!s)return alert('Öğrenci ekleyin.');
+ db.programs.push({id:uuid(),student:s,day:day.value,subject:progSubject.value,topic:progTopic.value,duration:duration.value,questions:questionCount.value,done:false,weekKey:currentWeekKey(),completedAt:''});save();renderAll();
+}
+function toggleProgram(id){let x=db.programs.find(x=>x.id===id);if(x){x.done=!x.done;x.completedAt=x.done?new Date().toISOString():'';}save();renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();renderAll()}
+function addTask(){
+  let s=document.getElementById('taskStudent').value, title=document.getElementById('taskTitle').value.trim();
+  if(!s)return alert('Öğrenci ekleyin.');
+  if(!title)return alert('Görev başlığı girin.');
+  db.tasks.unshift({id:uuid(),student:s,title,description:document.getElementById('taskDescription').value.trim(),dueDate:document.getElementById('taskDueDate').value||'',done:false});
+  save();
+  document.getElementById('taskTitle').value=''; document.getElementById('taskDescription').value=''; document.getElementById('taskDueDate').value='';
+  renderAll(); alert('Görev öğrenciye atandı.');
+}
+function toggleTask(id){let x=db.tasks.find(x=>x.id===id);if(x)x.done=!x.done;save();renderAll()}
+function renderTasks(){
+  let s=student(),a=db.tasks.filter(x=>!s||x.student===s.id);
+  document.getElementById('taskList').innerHTML=a.length?a.map(x=>`<div class="item ${x.done?'done':''}"><div class="row"><div><b>${esc(x.title)}</b><div class="small muted">${esc(x.description||'')}${x.dueDate?' · Son tarih: '+esc(x.dueDate):''}</div></div><button onclick="toggleTask('${x.id}')">${x.done?'Geri Al':'Tamamladım'}</button></div></div>`).join(''):'<p class="muted">Henüz atanmış görev yok.</p>';
+}
+function addExam(){
+ let s=document.getElementById('examStudent').value;if(!s)return alert('Öğrenci ekleyin.');
+ let e={id:Date.now(),student:s,name:document.getElementById('examName').value||'Deneme',date:document.getElementById('examDate').value||new Date().toISOString().slice(0,10),nets:{Türkçe:+turkce.value,Matematik:+matematik.value,Fen:+fen.value,Sosyal:+sosyal.value},errors:[{subject:errorSubject.value,topic:errorTopic.value,type:errorType.value,note:errorNote.value}]};db.exams.unshift(e);save();renderAll();alert('Deneme analizi kaydedildi.')}
+
+function currentWeekKey(offset=0){const d=new Date();d.setHours(0,0,0,0);const day=d.getDay()||7;d.setDate(d.getDate()-day+1+offset*7);return d.toISOString().slice(0,10);}
+function ensureProgramWeeks(){const wk=currentWeekKey(0);(db.programs||[]).forEach(x=>{if(!x.weekKey)x.weekKey=wk;});}
+function featureTodayPlan(studentId){const arr=(db.programs||[]).filter(x=>String(x.student)===String(studentId));const names=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];const items=arr.filter(x=>x.day===names[new Date().getDay()]);if(!items.length)return '<p class="muted">Bugün için atanmış program yok.</p>';return items.map(x=>`<div class="stat-row"><div><b>${esc(x.subject)}</b><div class="small muted">${esc(x.topic)} · ${x.questions} soru · ${x.duration} dk</div></div><span>${x.done?'✓':'○'}</span></div>`).join('');}
+function weeklyProgramStats(studentId,offset=0){const wk=currentWeekKey(offset);const arr=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&x.weekKey===wk);const done=arr.filter(x=>x.done).length,total=arr.length;return{done,total,pct:total?Math.round(done/total*100):0};}
+function renderWeeklyProgressCard(studentId,targetId){const el=document.getElementById(targetId);if(!el)return;const cur=weeklyProgramStats(studentId,0),prev=weeklyProgramStats(studentId,-1),diff=cur.pct-prev.pct;el.innerHTML=`<div class="kpi"><b>%${cur.pct}</b><div class="small muted">${cur.done}/${cur.total} çalışma tamamlandı</div></div><div class="progress-track"><div class="progress-fill" style="width:${cur.pct}%"></div></div><div class="small">Geçen haftaya göre <b>${diff>=0?'+':''}${diff} puan</b>${prev.total?'':' · Önceki hafta kaydı henüz yok.'}</div>`;}
+function renderWeaknessMap(studentId,targetId){const el=document.getElementById(targetId);if(!el)return;const exams=(db.exams||[]).filter(x=>String(x.student)===String(studentId));const errors=exams.flatMap(e=>(e.errors||[]).map(er=>({...er,date:e.date})));if(!errors.length){el.innerHTML='<p class="muted">Henüz konu bazlı hata kaydı yok.</p>';return;}const counts={};errors.forEach(e=>{const k=`${e.subject||'Ders'} — ${e.topic||'Konu'}`;counts[k]=(counts[k]||0)+1});const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);el.innerHTML=top.map(([k,n])=>{const sample=errors.find(e=>`${e.subject||'Ders'} — ${e.topic||'Konu'}`===k);return `<div class="stat-row"><div><b>${esc(k)}</b><div class="small muted">${esc(sample?.type||'Tekrar gerekli')}${sample?.note?' · '+esc(sample.note):''}</div></div><b>${n} hata</b></div>`}).join('');}
+function renderCoachNote(studentId,targetId){const el=document.getElementById(targetId);if(!el)return;const s=(db.students||[]).find(x=>String(x.id)===String(studentId));if(!s){el.innerHTML='<p class="muted">Öğrenci seçildiğinde kişisel koç notu görünür.</p>';return;}const p=weeklyProgramStats(s.id,0);const note=p.total===0?`<b>${esc(s.name)}</b> için bu hafta henüz program kaydı yok.`:p.pct<40?`<b>${esc(s.name)}</b> için tamamlanma oranı %${p.pct}. Günlük küçük hedeflerle devam etmek uygun.`:p.pct<80?`<b>${esc(s.name)}</b> düzenli ilerliyor. Eksik kalan çalışmaları hafta bitmeden tamamlamaya odaklan.`:`<b>${esc(s.name)}</b> bu haftaki programın %${p.pct}'ini tamamladı. Ritmi korumaya odaklan.`;el.innerHTML=`<div class="notice">${note}</div>`;}
+function renderStudentAlarmCenter(){const el=document.getElementById('studentAlarmCenter');if(!el)return;let html='';const today=new Date().toISOString().slice(0,10);(db.students||[]).forEach(s=>{const pending=(db.programs||[]).filter(x=>String(x.student)===String(s.id)&&!x.done&&x.weekKey===currentWeekKey());const due=(db.tasks||[]).filter(x=>String(x.student)===String(s.id)&&!x.done&&x.dueDate&&x.dueDate<=today);const weak=(db.exams||[]).filter(x=>String(x.student)===String(s.id)).flatMap(x=>x.errors||[]).length;if(pending.length||due.length||weak)html+=`<div class="item"><b>${esc(s.name)}</b>${pending.length?`<div class="alarm">${pending.length} tamamlanmamış program</div>`:''}${due.length?`<div class="alarm">${due.length} son tarihi gelen/geçen görev</div>`:''}${weak?`<div class="alarm">${weak} konu bazlı hata kaydı</div>`:''}</div>`;});el.innerHTML=html||'<div class="good">Şu anda belirgin bir alarm bulunmuyor.</div>';}
+
+function challengeDayNames(){return ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];}
+function challengeDateKey(d){const x=new Date(d);x.setHours(0,0,0,0);return x.toISOString().slice(0,10);}
+function challengeDateDayName(dateKey){const d=new Date(dateKey+'T12:00:00');return challengeDayNames()[d.getDay()];}
+function isChallengeDayComplete(studentId,dateKey){
+ const day=challengeDateDayName(dateKey);
+ const items=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&x.day===day);
+ if(!items.length)return false;
+ return items.every(x=>x.done&&x.completedAt);
+}
+function challengeStreak(studentId){
+ let cursor=new Date();cursor.setHours(0,0,0,0);
+ let todayKey=challengeDateKey(cursor);
+ if(!isChallengeDayComplete(studentId,todayKey)){
+   cursor.setDate(cursor.getDate()-1);
+   todayKey=challengeDateKey(cursor);
+ }
+ let count=0;
+ for(let i=0;i<60;i++){
+   const key=challengeDateKey(cursor);
+   if(!isChallengeDayComplete(studentId,key))break;
+   count++;
+   cursor.setDate(cursor.getDate()-1);
+ }
+ return count;
+}
+function challengeMessage(n){
+ if(n===3)return {title:'🔥 3 GÜNLÜK CHALLENGE!',text:'Harika gidiyorsun! Üç günü de tamamladın. Aynen böyle devam!',icon:'🔥'};
+ if(n===5)return {title:'⚡ 5 GÜNLÜK CHALLENGE!',text:'Sağlam ilerliyorsun! Beş gün üst üste programını tamamladın.',icon:'⚡'};
+ if(n===7)return {title:'🏆 7 GÜNLÜK CHALLENGE!',text:'Sen efsanesin! 7/7 tamamladın. Harika bir iş başardın!',icon:'🏆'};
+ return null;
+}
+function renderChallenge(studentId){
+ const el=document.getElementById('portalChallenge');
+ if(!el)return;
+ const n=challengeStreak(studentId);
+ const next=n<3?3:n<5?5:n<7?7:7;
+ const progress=Math.min(n,7);
+ const status=n>=7?'7/7 tamamlandı! Yeni challenge serisine devam.':`${n}/7 gün · Sonraki hedef: ${next}. gün`;
+ el.innerHTML=`<div class="challenge-box">
+   <div class="challenge-score">${progress}/7</div>
+   <div class="progress-track"><div class="progress-fill" style="width:${Math.min(progress/7*100,100)}%"></div></div>
+   <div class="small muted" style="margin-top:8px">${esc(status)}</div>
+   <div class="challenge-milestones"><span class="${n>=3?'hit':''}">3 🔥</span><span class="${n>=5?'hit':''}">5 ⚡</span><span class="${n>=7?'hit':''}">7 🏆</span></div>
+ </div>`;
+}
+function maybeShowChallengeReward(studentId){
+ if(role!=='student')return;
+ const n=challengeStreak(studentId);
+ if(![3,5,7].includes(n))return;
+ const key=`asliChallengeShown_${studentId}_${n}`;
+ if(localStorage.getItem(key)==='1')return;
+ const msg=challengeMessage(n);
+ if(!msg)return;
+ localStorage.setItem(key,'1');
+ const overlay=document.createElement('div');
+ overlay.className='challenge-overlay';
+ overlay.innerHTML=`<div class="challenge-modal">
+   <div class="challenge-icon">${msg.icon}</div>
+   <div class="challenge-title">${msg.title}</div>
+   <div class="challenge-text">${msg.text}</div>
+   <div class="challenge-sub">Programını tam tamamladın. Seriyi bozma!</div>
+   <button onclick="this.closest('.challenge-overlay').remove()">Devam Et</button>
+ </div>`;
+ document.body.appendChild(overlay);
+}
+
+function subjectClassForFeature(subject){const v=String(subject||'').toLowerCase();if(v.includes('matematik'))return 'math';if(v.includes('geometri'))return 'geometry';if(v.includes('türkçe')||v.includes('edebiyat'))return 'turkish';if(v.includes('tarih')||v.includes('coğrafya')||v.includes('din')||v.includes('felsefe'))return 'social';if(v.includes('fizik')||v.includes('kimya')||v.includes('biyoloji'))return 'science';if(v.includes('ingilizce')||v.includes('ydt')||v.includes('dil'))return 'language';return '';}
+function renderPortalTaskTracker(studentId){const el=document.getElementById('portalTaskTracker');if(!el)return;const a=(db.tasks||[]).filter(x=>String(x.student)===String(studentId));const done=a.filter(x=>x.done).length,pending=a.length-done,overdue=a.filter(x=>!x.done&&x.dueDate&&x.dueDate<new Date().toISOString().slice(0,10)).length;el.innerHTML=`<div class="task-status-grid"><div class="task-status-card"><span class="muted small">Toplam</span><br><b>${a.length}</b></div><div class="task-status-card"><span class="muted small">Tamamlanan</span><br><b>${done}</b></div><div class="task-status-card"><span class="muted small">Bekleyen</span><br><b>${pending}</b></div></div>${overdue?`<div class="small dangerText" style="margin-top:9px"><b>${overdue}</b> görev gecikmiş.</div>`:'<div class="small muted" style="margin-top:9px">Gecikmiş görev yok.</div>'}`;}
+function renderPortalGrowthChart(studentId){const el=document.getElementById('portalGrowthChart');if(!el)return;const ex=(db.exams||[]).filter(x=>String(x.student)===String(studentId)).sort((a,b)=>String(a.date).localeCompare(String(b.date)));if(!ex.length){el.innerHTML='<p class="muted small">Henüz gelişim grafiği oluşturacak deneme yok.</p>';return;}const vals=ex.slice(-8).map(x=>({v:Object.values(x.nets||{}).reduce((a,b)=>a+(Number(b)||0),0),d:String(x.date||'').slice(5).replace('-','/')}));const max=Math.max(...vals.map(x=>x.v),1);el.innerHTML=`<div class="growth-chart">${vals.map(x=>`<div class="growth-bar" style="height:${Math.max(18,Math.round(x.v/max*115))}px"><span>${x.v.toFixed(1)}</span><small>${esc(x.d)}</small></div>`).join('')}</div><div class="small muted">Son ${vals.length} denemenin toplam neti.</div>`;}
+function renderPortalWeaknessMap(studentId){const el=document.getElementById('portalWeaknessMap');if(!el)return;const errors=(db.exams||[]).filter(x=>String(x.student)===String(studentId)).flatMap(x=>x.errors||[]);const map={};errors.forEach(e=>{const k=(e.subject||'Ders')+'|'+(e.topic||'Konu');map[k]=(map[k]||0)+1;});const top=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,6);el.innerHTML=top.length?top.map(([k,n])=>{const [sub,topic]=k.split('|');return `<div class="weak-map-item ${subjectClassForFeature(sub)}"><b>${esc(sub)}</b> — ${esc(topic)} <span class="small">· ${n} hata</span></div>`}).join(''):'<p class="muted small">Henüz konu bazlı hata kaydı yok.</p>';}
+function renderCoachGrowthSummary(){const el=document.getElementById('coachGrowthSummary');if(!el)return;const rows=(db.students||[]).map(s=>{const ex=(db.exams||[]).filter(x=>String(x.student)===String(s.id)).sort((a,b)=>String(a.date).localeCompare(String(b.date)));if(ex.length<1)return `<div class="item"><b>${esc(s.name)}</b><div class="small muted">Henüz deneme verisi yok.</div></div>`;const last=Object.values(ex[ex.length-1].nets||{}).reduce((a,b)=>a+(Number(b)||0),0);const prev=ex.length>1?Object.values(ex[ex.length-2].nets||{}).reduce((a,b)=>a+(Number(b)||0),0):null;const diff=prev===null?null:last-prev;return `<div class="item"><b>${esc(s.name)}</b><div class="small">Son net: <b>${last.toFixed(1)}</b>${diff===null?'':' · '+(diff>=0?'▲ ':'▼ ')+Math.abs(diff).toFixed(1)+' net'}</div></div>`}).join('');el.innerHTML=rows||'<p class="muted">Öğrenci bulunmuyor.</p>';}
+
+function renderPortalFeatureCards(studentId){renderWeeklyProgressCard(studentId,'portalWeeklyProgress');renderPortalTaskTracker(studentId);renderPortalGrowthChart(studentId);renderGoalSummary(studentId,'portalGoalSummary');renderPortalWeaknessMap(studentId);renderChallenge(studentId);maybeShowChallengeReward(studentId);const today=document.getElementById('portalTodayPlan');if(today)today.innerHTML=featureTodayPlan(studentId);const journey=document.getElementById('portalYksJourney');if(journey){const s=(db.students||[]).find(x=>String(x.id)===String(studentId));const grade=s?.grade||'';const steps=[['Temel oluşturma','9. sınıf'],['Alan ve yön belirleme','10–11. sınıf'],['YKS hazırlığı','12. sınıf'],['Hedefe son hazırlık','Mezun / YKS']];const idx=grade==='9'?0:grade==='10'?1:grade==='11'?1:grade==='12'?2:3;journey.innerHTML=steps.map((x,i)=>`<div class="journey-step ${i<idx?'done':''} ${i===idx?'active':''}"><div class="journey-dot">${i<idx?'✓':i+1}</div><div><b>${esc(x[0])}</b><div class="small muted">${esc(x[1])}</div></div></div>`).join('');} const streak=document.getElementById('portalStudyStreak');if(streak){const completed=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&x.done&&x.completedAt).map(x=>x.completedAt.slice(0,10));const uniq=[...new Set(completed)].sort().reverse();let streakN=0;let cursor=new Date();cursor.setHours(0,0,0,0);for(const d of uniq){const ds=cursor.toISOString().slice(0,10);if(d===ds){streakN++;cursor.setDate(cursor.getDate()-1);}else if(streakN===0&&d===new Date(Date.now()-86400000).toISOString().slice(0,10)){cursor.setDate(cursor.getDate()-1);streakN++;}else break;}streak.innerHTML=`<div class="kpi"><b>${streakN} gün</b><div class="small muted">Arka arkaya program tamamlanan gün sayısı.</div></div>`;}}
+
+
+function ensureArchives(){ db.reportArchive=db.reportArchive||[]; }
+function totalNet(ex){ return Object.values(ex?.nets||{}).reduce((a,b)=>a+(Number(b)||0),0); }
+function smartRecommendations(studentId){
+ const el=document.getElementById('smartProgramRecommendations'); if(!el)return;
+ const errors=(db.exams||[]).filter(x=>String(x.student)===String(studentId)).flatMap(x=>x.errors||[]);
+ const counts={}; errors.forEach(e=>{const key=(e.subject||'Ders')+'|'+(e.topic||'Konu');counts[key]=(counts[key]||0)+1;});
+ const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,4);
+ el.innerHTML=top.length?'<b>Akıllı program önerisi</b><br>'+top.map(([k,n])=>{const [sub,topic]=k.split('|');return `• <b>${esc(sub)}</b> — ${esc(topic)}: ${n} hata → gelecek programa tekrar + soru çözümü eklenmesi önerilir.`}).join('<br>'):'<b>Akıllı program önerisi</b><br>Deneme hata verisi oluştuğunda burada konu bazlı öneriler görünecek.';
+}
+function renderGoalSummary(studentId,targetId='archiveGoalSummary'){
+ const el=document.getElementById(targetId);if(!el)return;const s=(db.students||[]).find(x=>String(x.id)===String(studentId));if(!s){el.innerHTML='';return;}
+ const p=s.profile||{}, ex=(db.exams||[]).filter(x=>String(x.student)===String(s.id)).sort((a,b)=>String(a.date).localeCompare(String(b.date))), last=ex.at(-1), net=last?totalNet(last):null;
+ el.innerHTML=`<div class="grid"><div class="kpi"><span class="muted">Hedef</span><br><b>${esc(p.goal||'Belirlenmedi')}</b><div class="small">${esc(p.university||'')} ${p.faculty?'· '+esc(p.faculty):''}</div></div><div class="kpi"><span class="muted">Son toplam net</span><br><b>${net===null?'—':net.toFixed(1)}</b><div class="small">${last?esc(last.date):'Henüz deneme yok'}</div></div></div>`;
+}
+function renderArchive(){
+ ensureArchives(); const s=student(); if(!s)return; const sid=s.id;
+ const pro=(db.programs||[]).filter(x=>String(x.student)===String(sid)), ex=(db.exams||[]).filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), reps=db.reportArchive.filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), tasks=(db.tasks||[]).filter(x=>String(x.student)===String(sid));
+ const ids={archiveProgramCount:pro.length,archiveExamCount:ex.length,archiveReportCount:reps.length,archiveTaskCount:tasks.length};Object.entries(ids).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
+ renderGoalSummary(s);
+ const eh=document.getElementById('archiveExamHistory'); eh.innerHTML=ex.length?ex.map((x,i)=>`<div class="item"><b>${esc(x.name||'Deneme')}</b><div class="small muted">${esc(x.date||'')} · Toplam net: <b>${totalNet(x).toFixed(1)}</b>${i<ex.length-1?' · Önceki karşılaştırma mevcut':''}</div></div>`).join(''):'<p class="muted">Henüz deneme yok.</p>';
+ const weeks={};pro.forEach(x=>{const k=x.weekKey||'Arşivsiz';(weeks[k]??=[]).push(x)}); const ph=document.getElementById('archiveProgramHistory');ph.innerHTML=Object.keys(weeks).sort().reverse().map(k=>{const a=weeks[k],d=a.filter(x=>x.done).length;return `<div class="item"><b>Hafta: ${esc(k)}</b><div class="small muted">${d}/${a.length} çalışma tamamlandı · %${a.length?Math.round(d/a.length*100):0}</div></div>`}).join('')||'<p class="muted">Program arşivi yok.</p>';
+ const rh=document.getElementById('archiveReportHistory');rh.innerHTML=reps.length?reps.map(r=>`<div class="item"><b>${esc(r.title||'Veli raporu')}</b><div class="small muted">${esc(r.date||'')}</div><div class="small">${esc(r.summary||'')}</div></div>`).join(''):'<p class="muted">Arşivlenmiş rapor yok.</p>';
+}
+function saveCurrentReportSnapshot(){ ensureArchives(); const s=student(); if(!s)return; const rate=programStats(s.id).pct, a=(db.tasks||[]).filter(x=>String(x.student)===String(s.id)), ex=(db.exams||[]).filter(x=>String(x.student)===String(s.id)); db.reportArchive.unshift({id:uuid(),student:s.id,date:new Date().toISOString().slice(0,10),title:'Veli Haftalık Raporu',summary:`Program %${rate} · Görev ${a.filter(x=>x.done).length}/${a.length} · Deneme ${ex.length}`}); save();renderArchive();alert('Rapor arşive kaydedildi.');}
+function renderTodayTaskAndAlerts(studentId,targetId='todayPlanCard'){
+ const el=document.getElementById(targetId);if(!el)return;const today=new Date().toISOString().slice(0,10), tasks=(db.tasks||[]).filter(x=>String(x.student)===String(studentId)&&!x.done), overdue=tasks.filter(x=>x.dueDate&&x.dueDate<today), p=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&!x.done&&x.weekKey===currentWeekKey());
+ el.innerHTML=`${featureTodayPlan(studentId)}${overdue.length?`<div class="small dangerText" style="margin-top:8px"><b>${overdue.length}</b> görev gecikmiş.</div>`:''}${p.length?`<div class="small muted" style="margin-top:8px">Bu hafta <b>${p.length}</b> program çalışması bekliyor.</div>`:''}`;
+}
+
+function renderAll(){
+ ensureProgramWeeks();
+ refreshProgramStudentSelector();
+ db.studentSessions=db.studentSessions||[];
+ renderAllStudentSessionReports();
+ renderCoachGrowthSummary();
+ db.mockExams=db.mockExams||[];
+ refreshMockSubjects();renderMockExams();
+ db.branchExams=db.branchExams||[];
+ renderBranchSubjects();fillBranchAddSubjects();renderBranchExamList();
+ let s=student();document.getElementById('welcome').textContent=role==='coach'?'Aslı Afşar — Koç Yönetim Merkezi':role==='student'?'Hoş geldin, '+(s?.name||'Öğrenci'):'Veli Takip Merkezi';
+ document.getElementById('kStudents').textContent=db.students.length;let mine=db.programs.filter(x=>!s||x.student===s.id), myTasks=db.tasks.filter(x=>!s||x.student===s.id);document.getElementById('kTasks').textContent=myTasks.length;document.getElementById('kDone').textContent=myTasks.filter(x=>x.done).length;document.getElementById('kExams').textContent=db.exams.filter(x=>!s||x.student===s.id).length;
+ document.getElementById('homeProgram').innerHTML=mine.slice(0,5).map(x=>`<div class="item ${x.done?'done':''}"><b>${esc(x.day)} — ${esc(x.subject)}</b><div class="small muted">${esc(x.topic)} · ${x.duration} dk · ${x.questions} soru</div></div>`).join('')||'<p class="muted">Henüz program yok.</p>';
+ let ex=db.exams.find(x=>!s||x.student===s.id);document.getElementById('homeMotivation').textContent=['Küçük adımlar, düzenli tekrarlar ve sabır.','Bugün yaptığın çalışma, yarının özgüvenidir.','Mükemmel olmak değil, devam etmek önemlidir.','Bir soruyu daha çözmek bile ilerlemedir.'][new Date().getDate()%4];
+ document.getElementById('homeExam').innerHTML=ex?`<b>${esc(ex.name)}</b><div class="small muted">${ex.date} · Türkçe ${ex.nets.Türkçe} · Mat ${ex.nets.Matematik} · Fen ${ex.nets.Fen} · Sosyal ${ex.nets.Sosyal}</div>`:'<p class="muted">Henüz deneme yok.</p>';
+ document.getElementById('studentList').innerHTML=db.students.map(x=>`<div class="item"><b>${esc(x.name)}</b><div class="small muted">${esc(x.grade)}${x.area?' · '+esc(x.area):''}</div><button class="light" onclick="selectedStudent='${x.id}';localStorage.setItem('v16student','${x.id}');refreshSelectors();loadProfile();show('profile')">Profili Aç</button></div>`).join('')||'<p class="muted">Henüz öğrenci yok.</p>';
+ loadProfile();refreshProgramPalette();renderProgram();
+ const featureStudent=s||((db.students||[])[0]||null); if(featureStudent){document.getElementById('todayPlanCard')&&(document.getElementById('todayPlanCard').innerHTML=featureTodayPlan(featureStudent.id));renderWeeklyProgressCard(featureStudent.id,'weeklyProgressCard');renderWeaknessMap(featureStudent.id,'weaknessMapCard');renderCoachNote(featureStudent.id,'coachNoteCard');renderTodayTaskAndAlerts(featureStudent.id,'todayPlanCard');renderGoalSummary(featureStudent.id,'archiveGoalSummary');smartRecommendations(featureStudent.id);}renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();renderTasks();renderExams();updateShareLinks();renderInventoryForm();renderInventoryResults();renderReport();renderArchive();
+}
+function renderProgram(){renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();}
+
+const branchSubjects={
+ TYT:['Türkçe','Matematik','Geometri','Tarih','Coğrafya','Fizik','Kimya','Biyoloji'],
+ AYT:['Matematik','Geometri','Türk Dili ve Edebiyatı','Tarih','Coğrafya','Fizik','Kimya','Biyoloji']
+};
+
+function renderBranchSubjects(){
+ const level=document.getElementById('branchLevel')?.value||'TYT';
+ const box=document.getElementById('branchSubjectGrid');
+ const title=document.getElementById('branchSubjectTitle');
+ if(!box)return;
+ title.textContent=level+' Branşları';
+ box.innerHTML=(branchSubjects[level]||[]).map(s=>{
+   const count=(db.branchExams||[]).filter(x=>x.level===level&&x.subject===s).length;
+   return `<div class="kpi"><b>${esc(level+' '+s)}</b><div class="small muted">${count} deneme</div><button class="secondary" style="margin-top:8px" onclick="filterBranchExam('${level}','${s.replace(/'/g,"\\'")}')">Denemeleri Gör</button></div>`;
+ }).join('');
+}
+
+function fillBranchAddSubjects(){
+ const level=document.getElementById('branchAddLevel')?.value||'TYT';
+ const sel=document.getElementById('branchAddSubject');
+ if(!sel)return;
+ sel.innerHTML=(branchSubjects[level]||[]).map(s=>`<option value="${esc(s)}">${esc(level+' '+s)}</option>`).join('');
+}
+
+function addBranchExam(){
+ db.branchExams=db.branchExams||[];
+ const level=document.getElementById('branchAddLevel').value;
+ const subject=document.getElementById('branchAddSubject').value;
+ const name=document.getElementById('branchAddName').value.trim()||`${level} ${subject} Branş Denemesi`;
+ const date=document.getElementById('branchAddDate').value||new Date().toISOString().slice(0,10);
+ const file=document.getElementById('branchAddPdf').files[0];
+ const item={id:Date.now(),level,subject,name,date,pdfName:file?file.name:'',studentGroup:document.getElementById('branchGrade').value};
+ db.branchExams.unshift(item);
+ save();
+ document.getElementById('branchAddName').value='';
+ document.getElementById('branchAddPdf').value='';
+ document.getElementById('branchPdfInfo').textContent=file?`PDF seçildi: ${file.name} — deneme kaydına dosya adı eklendi.`:'PDF seçilmedi.';
+ renderBranchSubjects();
+ renderBranchExamList();
+ alert('Branş denemesi eklendi.');
+}
+
+function filterBranchExam(level,subject){
+ const el=document.getElementById('branchExamList');
+ if(!el)return;
+ const arr=(db.branchExams||[]).filter(x=>x.level===level&&x.subject===subject);
+ el.innerHTML=`<div class="notice"><b>${esc(level+' '+subject)}</b> — ${arr.length} deneme</div>`+
+ (arr.map(x=>`<div class="item"><b>${esc(x.name)}</b><div class="small muted">${esc(x.date)} · ${esc(x.studentGroup||'12')} · ${x.pdfName?'PDF: '+esc(x.pdfName):'PDF yok'}</div></div>`).join('')||'<p class="muted">Bu derste henüz branş denemesi yok.</p>');
+}
+
+function renderBranchExamList(){
+ const el=document.getElementById('branchExamList');
+ if(!el)return;
+ const arr=db.branchExams||[];
+ el.innerHTML=arr.map(x=>`<div class="item"><b>${esc(x.name)}</b><div class="small">${esc(x.level)} ${esc(x.subject)} · ${esc(x.date)}</div><div class="small muted">Hedef grup: ${esc(x.studentGroup||'12. Sınıf')}${x.pdfName?' · PDF: '+esc(x.pdfName):''}</div></div>`).join('')||'<p class="muted">Henüz branş denemesi eklenmedi.</p>';
+}
+
+
+const mockExamSubjects={
+ TYT:{
+  'Sayısal':['TYT Genel Deneme','TYT Matematik','TYT Geometri','TYT Fizik','TYT Kimya','TYT Biyoloji','TYT Türkçe','TYT Tarih','TYT Coğrafya'],
+  'Eşit Ağırlık':['TYT Genel Deneme','TYT Türkçe','TYT Matematik','TYT Geometri','TYT Tarih','TYT Coğrafya'],
+  'Sözel':['TYT Genel Deneme','TYT Türkçe','TYT Tarih','TYT Coğrafya','TYT Felsefe','TYT Din Kültürü'],
+  'Dil':['TYT Genel Deneme','TYT Türkçe','TYT Tarih','TYT Coğrafya']
+ },
+ AYT:{
+  'Sayısal':['AYT Genel Deneme','AYT Matematik','AYT Geometri','AYT Fizik','AYT Kimya','AYT Biyoloji'],
+  'Eşit Ağırlık':['AYT Genel Deneme','AYT Matematik','AYT Geometri','AYT Türk Dili ve Edebiyatı','AYT Tarih','AYT Coğrafya'],
+  'Sözel':['AYT Genel Deneme','AYT Türk Dili ve Edebiyatı','AYT Tarih','AYT Coğrafya','AYT Felsefe Grubu','AYT Din Kültürü'],
+  'Dil':['AYT YDT / İngilizce']
+ }
+};
+
+function refreshMockSubjects(){
+ const level=document.getElementById('mockLevel')?.value||'TYT';
+ const area=document.getElementById('mockArea')?.value||'Sayısal';
+ const sel=document.getElementById('mockSubject');
+ if(!sel)return;
+ sel.innerHTML=(mockExamSubjects[level]?.[area]||[]).map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+}
+
+function addMockExam(){
+ db.mockExams=db.mockExams||[];
+ const file=document.getElementById('mockFile')?.files?.[0];
+ const level=document.getElementById('mockLevel').value;
+ const area=document.getElementById('mockArea').value;
+ const grade=document.getElementById('mockGrade').value;
+ const subject=document.getElementById('mockSubject').value;
+ const name=document.getElementById('mockName').value.trim()||subject+' — Deneme';
+ const date=document.getElementById('mockDate').value||new Date().toISOString().slice(0,10);
+ db.mockExams.unshift({
+   id:Date.now(), level, area, grade, subject, name, date,
+   fileName:file?file.name:'',
+   fileType:file?file.type:'',
+   createdAt:new Date().toISOString()
+ });
+ save();
+ document.getElementById('mockName').value='';
+ document.getElementById('mockFile').value='';
+ document.getElementById('mockFileInfo').textContent=file
+   ? `Dosya seçildi: ${file.name}`
+   : 'Dosya seçilmedi.';
+ renderMockExams();
+ alert('Deneme eklendi.');
+}
+
+function renderMockExams(){
+ const el=document.getElementById('mockExamList'); if(!el)return;
+ const level=document.getElementById('mockFilterLevel')?.value||'Tümü';
+ const area=document.getElementById('mockFilterArea')?.value||'Tümü';
+ const grade=document.getElementById('mockFilterGrade')?.value||'Tümü';
+ let arr=db.mockExams||[];
+ if(level!=='Tümü')arr=arr.filter(x=>x.level===level);
+ if(area!=='Tümü')arr=arr.filter(x=>x.area===area);
+ if(grade!=='Tümü')arr=arr.filter(x=>String(x.grade)===String(grade));
+ el.innerHTML=arr.map(x=>`
+  <div class="item">
+   <b>${esc(x.name)}</b>
+   <div class="small">${esc(x.level)} · ${esc(x.area)} · ${esc(x.subject)}</div>
+   <div class="small muted">${esc(x.grade==='Mezun'?'Mezun':'12. Sınıf')} · ${esc(x.date)}${x.fileName?' · Dosya: '+esc(x.fileName):' · Dosya yok'}</div>
+  </div>`).join('')||'<p class="muted">Seçilen ölçütlerde henüz deneme eklenmedi.</p>';
+}
+
+
+function ensureSessionStore(){
+ db.studentSessions=db.studentSessions||[];
+ return db.studentSessions;
+}
+function currentStudentSession(){
+ try{return JSON.parse(sessionStorage.getItem('asli_active_student_session')||'null');}catch(e){return null;}
+}
+function startStudentSession(studentId,studentName){
+ if(!studentId)return;
+ const sessions=ensureSessionStore();
+ const now=new Date();
+ const active=currentStudentSession();
+ if(active && active.studentId===studentId)return;
+ const s={id:'sess_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),studentId,studentName:studentName||'',loginAt:now.toISOString(),logoutAt:null,durationMinutes:null};
+ sessions.unshift(s);
+ save();
+ sessionStorage.setItem('asli_active_student_session',JSON.stringify({sessionId:s.id,studentId}));
+}
+function endStudentSession(){
+ const active=currentStudentSession(); if(!active)return;
+ const s=(db.studentSessions||[]).find(x=>x.id===active.sessionId);
+ if(s){
+  const end=new Date();
+  s.logoutAt=end.toISOString();
+  s.durationMinutes=Math.max(0,Math.round((end-new Date(s.loginAt))/60000));
+  save();
+ }
+ sessionStorage.removeItem('asli_active_student_session');
+}
+function formatDateTimeTR(v){
+ if(!v)return '—';
+ try{return new Date(v).toLocaleString('tr-TR',{dateStyle:'short',timeStyle:'short'});}catch(e){return v;}
+}
+function studentSessionSummary(studentId){
+ const arr=(db.studentSessions||[]).filter(x=>String(x.studentId)===String(studentId));
+ const completed=arr.filter(x=>x.logoutAt);
+ const total=completed.reduce((a,x)=>a+Number(x.durationMinutes||0),0);
+ const last=arr[0];
+ return {arr,total,last};
+}
+function renderStudentSessionReport(studentId){
+ const el=document.getElementById('studentSessionReport'); if(!el)return;
+ const s=studentSessionSummary(studentId);
+ const last=s.last;
+ el.innerHTML=`<div class="card" style="margin-top:12px"><h3>Sistem Kullanım Takibi</h3><p class="small muted">Bu süre portalda açık kalan oturumu gösterir; ders çalışma süresi olarak yorumlanmaz.</p>
+  <div class="grid">
+   <div class="kpi"><b>Son giriş</b><div class="small">${formatDateTimeTR(last?.loginAt)}</div></div>
+   <div class="kpi"><b>Son çıkış</b><div class="small">${formatDateTimeTR(last?.logoutAt)}</div></div>
+   <div class="kpi"><b>Son oturum</b><div class="small">${last?.durationMinutes!=null?last.durationMinutes+' dk':'Devam ediyor'}</div></div>
+   <div class="kpi"><b>Toplam oturum</b><div class="small">${s.arr.length}</div></div>
+  </div>
+ </div>`;
+}
+function renderAllStudentSessionReports(){
+ const box=document.getElementById('sessionReportsList'); if(!box)return;
+ const students=db.students||[];
+ box.innerHTML=students.map(st=>{
+  const s=studentSessionSummary(st.id), last=s.last;
+  return `<div class="item"><b>${esc(st.name||'Öğrenci')}</b>
+   <div class="small">Son giriş: ${esc(formatDateTimeTR(last?.loginAt))} · Son çıkış: ${esc(formatDateTimeTR(last?.logoutAt))} · ${last?.durationMinutes!=null?'Son oturum: '+last.durationMinutes+' dk':'Oturum devam ediyor'}</div>
+   <div class="small muted">Toplam ${s.arr.length} oturum · Tamamlanan oturum süresi: ${s.total} dk</div>
+  </div>`;
+ }).join('')||'<p class="muted">Henüz öğrenci oturumu kaydedilmedi.</p>';
+}
+function installStudentSessionTracking(){
+ const active=currentStudentSession();
+ if(!active)return;
+ const sid=active.sessionId;
+ const s=(db.studentSessions||[]).find(x=>x.id===sid);
+ if(!s)return;
+ const finish=()=>{
+  const current=currentStudentSession();
+  if(current&&current.sessionId===sid)endStudentSession();
+ };
+ window.addEventListener('pagehide',finish,{once:true});
+ window.addEventListener('beforeunload',finish,{once:true});
+}
+
+function renderParentStudentSessionReport(studentId){
+ const card=document.getElementById('parentStudentSessionReport');
+ if(!card)return;
+ const s=studentSessionSummary(studentId);
+ card.style.display='block';
+ const last=s.last;
+ document.getElementById('parentLastLogin').textContent=formatDateTimeTR(last?.loginAt);
+ document.getElementById('parentLastLogout').textContent=formatDateTimeTR(last?.logoutAt);
+ document.getElementById('parentLastDuration').textContent=last?.durationMinutes!=null?(last.durationMinutes+' dk'):'Devam ediyor';
+ document.getElementById('parentSessionCount').textContent=String(s.arr.length);
+ const recent=s.arr.slice(0,10);
+ document.getElementById('parentSessionHistory').innerHTML=recent.length
+  ? '<h4>Son Oturumlar</h4>'+recent.map(x=>`<div class="item"><b>${esc(formatDateTimeTR(x.loginAt))}</b><div class="small muted">Çıkış: ${esc(formatDateTimeTR(x.logoutAt))} · Süre: ${x.durationMinutes!=null?esc(String(x.durationMinutes))+' dk':'Devam ediyor'}</div></div>`).join('')
+  : '<p class="muted">Henüz kayıtlı oturum yok.</p>';
+}
+
+
+function renderPortalWeeklyProgram(studentId){
+ const el=document.getElementById('portalWeeklyProgramGrid'); if(!el)return;
+ const s=(db.students||[]).find(x=>String(x.id)===String(studentId))||student();
+ if(!s){el.innerHTML='';return;}
+ const arr=(db.programs||[]).filter(x=>String(x.student)===String(s.id));
+ const days=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+ const subjectClass=(subject)=>{
+  const v=String(subject||'').toLowerCase();
+  if(v.includes('matematik'))return 'math';
+  if(v.includes('geometri'))return 'geometry';
+  if(v.includes('türkçe')||v.includes('edebiyat'))return 'turkish';
+  if(v.includes('tarih')||v.includes('coğrafya')||v.includes('din')||v.includes('felsefe'))return 'social';
+  if(v.includes('fizik')||v.includes('kimya')||v.includes('biyoloji'))return 'science';
+  if(v.includes('ingilizce')||v.includes('ydt')||v.includes('dil'))return 'language';
+  return '';
+ };
+ el.innerHTML=days.map(day=>{
+   const items=arr.filter(x=>x.day===day);
+   return `<div class="day-column">
+    <div class="day-head">${day}</div>
+    <div class="day-items">
+     ${items.length?items.map(x=>`
+      <div class="program-chip ${subjectClass(x.subject)} ${x.done?'completed':''}">
+       <b>${esc(x.subject)}</b>
+       <div class="small">${esc(x.topic)}</div>
+       <div class="small muted">${esc(String(x.questions))} soru · ${esc(String(x.duration))} dk</div>
+       <button class="secondary program-done-btn" onclick="portalToggleProgram('${x.id}', '${String(s.id).replace(/'/g,"\\'")}')">${x.done?'✓ Tamamlandı':'Tamamlandı'}</button>
+      </div>`).join(''):'<div class="small muted" style="padding:8px;text-align:center">Bu gün için program yok.</div>'}
+    </div>
+   </div>`;
+ }).join('');
+}
+
+function portalToggleProgram(programId,studentId){
+ const item=(db.programs||[]).find(x=>String(x.id)===String(programId));
+ if(!item || String(item.student)!==String(studentId))return;
+ item.done=!item.done;item.completedAt=item.done?new Date().toISOString():'';
+ save();
+ renderPortalWeeklyProgram(studentId);
+ renderChallenge(studentId);maybeShowChallengeReward(studentId);
+ renderStudentProgramProgress();
+ renderCoachProgramProgress();
+ renderParentProgramProgress();
+}
+const dailyMotivations=[
+ 'Pazartesi: Yeni bir hafta, yeni bir başlangıç. Bugün attığın küçük adım, yarının büyük sonucuna dönüşür.',
+ 'Salı: Kendine güven. Her çözdüğün soru, hedefindeki sana biraz daha yaklaştırıyor.',
+ 'Çarşamba: Yolun ortasındasın; durmak için değil, ne kadar ilerlediğini görmek için.',
+ 'Perşembe: Bugün mükemmel olmak zorunda değilsin. Dünden biraz daha iyi olman yeter.',
+ 'Cuma: Emeğin görünmese bile birikiyor. Devam et; sen çalıştıkça hedefin sana yaklaşıyor.',
+ 'Cumartesi: Bugün kendin için yaptığın çalışma, gelecekteki haline bırakacağın en güzel hediyelerden biri.',
+ 'Pazar: Bir haftayı daha tamamladın. Kendinle gurur duy ve yeni haftaya güçlü bir niyetle hazırlan.'
+];
+
+function renderPortalMotivation(){
+ const el=document.getElementById('portalMotivation');
+ if(!el)return;
+ const day=new Date().getDay(); // 0=Pazar ... 6=Cumartesi
+ const index=day===0?6:day-1;
+ el.innerHTML=`<b>Bugünün Mesajı</b><br><span>${esc(dailyMotivations[index])}</span>`;
+}
+
+function renderExams(){let s=student(),a=db.exams.filter(x=>!s||x.student===s.id),last=a[0];let vals=last?Object.values(last.nets):[0];document.getElementById('barChart').innerHTML=vals.map((v,i)=>`<div class="bar" style="height:${Math.max(8,Math.min(100,(v/40)*100))}%"><span>${v}</span><small>${['Türkçe','Mat','Fen','Sosyal'][i]}</small></div>`).join('');let errors=a.flatMap(x=>x.errors||[]);document.getElementById('weaknessList').innerHTML=errors.length?errors.map(e=>`<div class="item"><b>${esc(e.subject)} — ${esc(e.topic)}</b><div class="tag">${esc(e.type)}</div><div class="small muted">${esc(e.note)}</div></div>`).join(''):'<p class="muted">Konu bazlı eksik girilmedi.</p>';document.getElementById('examList').innerHTML=a.map(x=>`<div class="item"><b>${esc(x.name)}</b> <span class="small muted">${x.date}</span><div class="small">Türkçe ${x.nets.Türkçe} · Matematik ${x.nets.Matematik} · Fen ${x.nets.Fen} · Sosyal ${x.nets.Sosyal}</div></div>`).join('')||'<p class="muted">Deneme yok.</p>'}
+function updateShareLinks(){
+ let id=document.getElementById('shareStudent')?.value||selectedStudent;
+ let s=db.students.find(x=>x.id===id);if(!s)return;
+ selectedStudent=id;
+ let r=document.getElementById('shareRole')?.value||'student';
+ let base='https://asliafsaregitim.com.tr/';
+ document.getElementById('fixedPortalLink').value=base+'#portal-login';
+ document.getElementById('shareLink').value=base+'#portal-login';
+}
+function copyShare(){let e=document.getElementById('shareLink');e.select();navigator.clipboard?.writeText(e.value);alert('Sabit portal adresi kopyalandı.')}
+function copyFixedPortal(){let e=document.getElementById('fixedPortalLink');e.select();navigator.clipboard?.writeText(e.value);alert('Sabit portal adresi kopyalandı.')}
+async function portalLogin(){
+ await loadCloud();
+ const r=document.getElementById('portalLoginRole').value,p=document.getElementById('portalLoginPin').value.trim(),err=document.getElementById('portalLoginError'),sel=document.getElementById('portalStudentChoice');
+ err.textContent='';
+ if(!db.students.length){err.textContent='Henüz öğrenci kaydı bulunamadı. Önce koç panelinden öğrenci ekleyin.';return;}
+ const matches=db.students.filter(s=>p===String(r==='parent'?s.parentPin:s.studentPin));
+ if(!matches.length){err.textContent=(r==='parent'?'Veli':'Öğrenci')+' PIN hatalı.';return;}
+ if(matches.length===1){enterPortal(r,matches[0].id);return;}
+ sel.innerHTML=matches.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+ err.textContent='Bu PIN birden fazla öğrenciyle eşleşiyor. Öğrenciyi seçin.';
+}
+function enterSelectedPortal(){
+  const id=document.getElementById('portalStudentChoice').value;
+  if(!id)return;
+  enterPortal(window.pendingPortalRole||'student',id);
+}
+
+function loadPortal(){
+ let h=location.hash;if(!h.startsWith('#portal?'))return false;
+ let q=new URLSearchParams(h.slice(8));
+ try{
+  let p=JSON.parse(decodeURIComponent(escape(atob(q.get('data')))));
+  document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('app').classList.add('portal-user-layout');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('portal').classList.add('active');document.getElementById('nav').classList.add('hidden');startPortalSlogan();
+  document.getElementById('pageTitle').textContent=q.get('role')==='parent'?'Veli Portalı':'Öğrenci Portalı';document.getElementById('portalTitle').textContent=q.get('role')==='parent'?'Veli — '+p.student.name:p.student.name+' — Öğrenci Portalı';
+  let pr=p.student.profile||{};document.getElementById('portalProfile').innerHTML=`<div class=\"grid\"><div class=\"kpi\"><span class=\"muted\">Sınıf</span><br><b>${esc(p.student.grade)}</b></div><div class=\"kpi\"><span class=\"muted\">Alan</span><br><b>${esc(p.student.area)}</b></div><div class=\"kpi\"><span class=\"muted\">Hedef</span><br><b>${esc(pr.goal||'Belirtilmedi')}</b></div><div class=\"kpi\"><span class=\"muted\">Üniversite</span><br><b>${esc(pr.university||'Belirtilmedi')}</b></div></div>`;
+  document.getElementById('portalProgram').innerHTML=(p.programs||[]).map(x=>`<div class=\"item ${x.done?'done':''}\"><b>${esc(x.day)} — ${esc(x.subject)}</b><div class=\"small\">${esc(x.topic)} · ${x.duration} dk · ${x.questions} soru · ${x.done?'Tamamlandı ✓':'Bekliyor'}</div></div>`).join('')||'<p class=\"muted\">Program yok.</p>';
+  document.getElementById('portalTasks').innerHTML=(p.tasks||[]).map(x=>`<div class=\"item ${x.done?'done':''}\"><b>${esc(x.title)}</b><div class=\"small muted\">${esc(x.description||'')}${x.dueDate?' · Son tarih: '+esc(x.dueDate):''}</div></div>`).join('')||'<p class=\"muted\">Atanan görev yok.</p>';
+  let e=(p.exams||[])[0];document.getElementById('portalExam').innerHTML=e?`<b>${esc(e.name)}</b><div class=\"small\">${e.date} · Türkçe ${e.nets.Türkçe} · Matematik ${e.nets.Matematik} · Fen ${e.nets.Fen} · Sosyal ${e.nets.Sosyal}</div>`:'<p class=\"muted\">Deneme yok.</p>';
+  if(p.student&&p.student.id){renderPortalArchive(p.student.id);renderPortalWeeklyProgram(p.student.id);}
+  return true;
+ }catch(e){return false}
+}
+function esc(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function boot(){
+ await loadCloud();
+ // Her açılışta rol otomatik açılmaz; böylece öğrenci/veli linki koç paneline düşmez.
+ if(location.hash==='#portal-login'){
+  role=''; selectedStudent='';
+  localStorage.removeItem('v18role'); localStorage.removeItem('v18student');
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('pinBox').classList.add('hidden');
+  document.querySelector('#login .muted').textContent='Öğrenci ve veli kendi portalına PIN ile giriş yapar.';
+ }else if(!loadPortal()){
+  role=''; selectedStudent='';
+  localStorage.removeItem('v18role'); localStorage.removeItem('v18student');
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+ }
+}
+boot();
+</script>
+
+<script>
+(function(){
+  const phrases=[
+    ['Hayatını','planla.','Geleceğini','kur.'],
+    ['Hedefini','belirle.','Adımını','at.'],
+    ['Bugününü','yönet.','Yarınına','yön','ver.']
+  ];
+  let p=0;
+  function showPhrase(){
+    const el=document.getElementById('loginTagline');
+    if(!el)return;
+    el.innerHTML=phrases[p].map((w,i)=>`<span class="tag-word" style="display:inline-block;opacity:0;transform:translateY(9px);margin-right:${i===phrases[p].length-1?0:'.22em'}">${w}</span>`).join('');
+    el.querySelectorAll('.tag-word').forEach((x,i)=>{
+      setTimeout(()=>{x.style.transition='opacity .35s ease,transform .35s ease';x.style.opacity='1';x.style.transform='translateY(0)'},i*260);
+    });
+    p=(p+1)%phrases.length;
+    setTimeout(showPhrase,4200);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',showPhrase);
+  else showPhrase();
+})();
+</script>
+
+</body>
+</html>
