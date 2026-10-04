@@ -305,11 +305,284 @@ body.login-bright::after{
 .delete-student-panel .small{margin-top:4px;color:#7f1d1d;line-height:1.4}
 button.delete-student-prominent{display:inline-flex!important;align-items:center;justify-content:center;visibility:visible!important;opacity:1!important;background:#b91c1c!important;color:#fff!important;border:2px solid #7f1d1d!important;min-height:46px;white-space:normal}
 @media(max-width:600px){.delete-student-panel{align-items:stretch;flex-direction:column}.delete-student-prominent{width:100%}}
+
+/* V21 PUBLIC WEBSITE — original Aslı Afşar landing layer. Existing portal/auth remains intact. */
+body.public-site-mode{background:#fff;overflow-x:hidden}
+#publicSite{min-height:100vh;background:#fff;position:relative;z-index:500;overflow:hidden;color:#24324a}
+#publicSite::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 8% 10%,rgba(154,221,255,.34),transparent 27%),radial-gradient(circle at 92% 16%,rgba(255,226,124,.32),transparent 25%),radial-gradient(circle at 78% 78%,rgba(255,190,218,.28),transparent 27%);animation:publicColorShift 10s ease-in-out infinite alternate}
+@keyframes publicColorShift{0%{filter:hue-rotate(0deg);opacity:.9}100%{filter:hue-rotate(16deg);opacity:1}}
+.public-wrap{width:min(1160px,calc(100% - 34px));margin:0 auto;position:relative;z-index:2}
+.public-nav{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 0;border-bottom:1px solid rgba(76,101,130,.10)}
+.public-brand{font-size:clamp(21px,3vw,31px);font-weight:950;letter-spacing:-.04em;color:#315c9b}.public-brand span{color:#e69a28}
+.public-menu{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.public-menu button{background:rgba(255,255,255,.8);color:#46617f;border:1px solid rgba(72,104,138,.12);box-shadow:none;padding:9px 12px;border-radius:12px}.public-menu button:hover{transform:translateY(-1px)}
+.public-hero{display:grid;grid-template-columns:1.12fr .88fr;gap:28px;align-items:center;padding:68px 0 48px}.public-eyebrow{display:inline-flex;padding:7px 11px;border-radius:999px;background:#eaf7ff;color:#3573a8;font-weight:850;font-size:12px}.public-hero h1{font-size:clamp(40px,6vw,72px);line-height:.98;letter-spacing:-.06em;margin:16px 0;color:#29486d}.public-hero h1 em{font-style:normal;color:#e29a22}.public-hero p{font-size:18px;line-height:1.65;color:#60718a;max-width:650px}.public-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.public-primary{background:linear-gradient(135deg,#5ca9e8,#79c9e8)!important;color:#fff!important;box-shadow:0 10px 25px rgba(83,164,224,.20)!important}.public-secondary{background:#fff5c9!important;color:#705b13!important;box-shadow:none!important}
+.public-hero-card{background:rgba(255,255,255,.86);border:1px solid rgba(74,117,156,.12);border-radius:30px;padding:25px;box-shadow:0 22px 65px rgba(79,120,158,.13)}.public-orbit{display:grid;grid-template-columns:1fr 1fr;gap:12px}.public-orbit-card{padding:18px;border-radius:20px;min-height:118px}.public-orbit-card.blue{background:#eaf7ff}.public-orbit-card.yellow{background:#fff5c9}.public-orbit-card.pink{background:#ffeaf3}.public-orbit-card.mint{background:#e8f8f1}.public-orbit-card b{display:block;font-size:19px;margin-bottom:7px}.public-orbit-card span{font-size:13px;color:#65758a;line-height:1.4}
+.public-section{padding:55px 0}.public-section h2{font-size:clamp(29px,4vw,44px);letter-spacing:-.04em;color:#29486d;margin:0 0 10px}.public-section-lead{color:#6b7b91;line-height:1.65;max-width:760px}.public-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:24px}.public-card{background:#fff;border:1px solid rgba(74,117,156,.11);border-radius:22px;padding:22px;box-shadow:0 10px 30px rgba(79,120,158,.07)}.public-card:nth-child(3n+1){background:#f5fbff}.public-card:nth-child(3n+2){background:#fffdf2}.public-card:nth-child(3n){background:#fff6fa}.public-card h3{margin:0 0 8px;color:#315c80}.public-card p{margin:0;color:#69798e;line-height:1.6}.public-story{position:relative}.public-story::before{content:'“';font-size:54px;line-height:1;color:#f0c85a;font-weight:900}.public-story .story-name{font-weight:900;color:#315c80;margin-top:8px}.public-quote{background:linear-gradient(135deg,#eaf7ff,#fff5c9,#ffeaf3);border-radius:28px;padding:35px;text-align:center;border:1px solid rgba(74,117,156,.10)}.public-quote blockquote{font-size:clamp(22px,3vw,34px);line-height:1.35;margin:10px auto;max-width:820px;color:#36516e;font-weight:800}.public-quote cite{color:#68788c;font-style:normal}.public-footer{padding:35px 0 42px;color:#78879a;border-top:1px solid rgba(76,101,130,.10);display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.public-page{display:none}.public-page.active{display:block}.public-back{margin-bottom:18px;background:#fff;color:#48627d;border:1px solid rgba(72,104,138,.12);box-shadow:none}.public-review-note{margin-top:16px;padding:14px;border-radius:16px;background:#eef9ff;color:#52718d;font-size:13px;line-height:1.5}
+#login.public-hidden{display:none!important}
+@media(max-width:820px){.public-nav{align-items:flex-start;flex-direction:column}.public-menu{justify-content:flex-start}.public-hero{grid-template-columns:1fr;padding-top:42px}.public-grid{grid-template-columns:1fr}.public-wrap{width:min(100% - 22px,700px)}.public-hero-card{padding:18px}.public-section{padding:38px 0}.public-menu button{font-size:12px;padding:8px 10px}}
+
+/* V22 PUBLIC DESIGN OVERRIDES — original pastel palette; no dark/navy blue */
+.public-site-v22-note{font-size:12px;color:#8b8190}
+.public-section h2,.public-card h3,.public-orbit-card b,.public-story .story-name{color:#687084!important}
+.public-nav .public-brand{color:#6f7483!important}.public-nav .public-brand span{color:#a5a9b5!important}
+.public-menu button{color:#707789!important}.public-menu .public-primary{color:#fff!important;background:#c7aee8!important}
+.public-primary{background:#c7aee8!important;color:#fff!important}.public-secondary{background:#f8e9a8!important;color:#706b52!important}
+.public-hero-card{border-color:rgba(196,174,220,.24)!important;box-shadow:0 22px 65px rgba(170,150,190,.10)!important}
+.public-orbit-card.blue{background:#edf8fb!important}.public-orbit-card.yellow{background:#fff5c9!important}.public-orbit-card.pink{background:#fbeaf2!important}.public-orbit-card.mint{background:#eaf7f0!important}
+.public-card{border-color:rgba(183,170,196,.15)!important;box-shadow:0 10px 30px rgba(170,155,175,.06)!important}
+.public-card:nth-child(3n+1){background:#f1fafb!important}.public-card:nth-child(3n+2){background:#fffaf0!important}.public-card:nth-child(3n){background:#fff1f6!important}
+.public-quote{background:linear-gradient(135deg,#eef9fb,#fff6d2,#fcecf4)!important;border-color:rgba(190,175,195,.15)!important}.public-quote blockquote{color:#6c7180!important}
+.v22-inspiration{margin:10px 0 8px;padding:32px;border-radius:30px;background:linear-gradient(135deg,#fffdf4 0%,#eef9fb 48%,#fcecf4 100%);border:1px solid rgba(190,175,195,.16);box-shadow:0 18px 45px rgba(170,155,175,.07)}
+.v22-kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#9b8b65;font-weight:800;margin-bottom:8px}.v22-inspiration h2{margin-bottom:6px!important}.v22-fact{font-size:21px;line-height:1.55;color:#707486;margin:8px 0 10px;font-weight:750}.v22-detail{color:#8a8e9c;line-height:1.6;margin:0;max-width:850px}.v22-day{font-size:12px;color:#aaa0aa;margin-top:13px}
+.v22-careers{padding-top:20px}.v22-career-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}.v22-career-head h2{margin-bottom:5px!important}.v22-career-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}.v22-career{padding:20px;border-radius:22px;border:1px solid rgba(185,174,195,.15);background:#fff;box-shadow:0 9px 28px rgba(170,155,175,.06);min-height:220px}.v22-career:nth-child(4n+1){background:#f3fafb}.v22-career:nth-child(4n+2){background:#fff9ed}.v22-career:nth-child(4n+3){background:#fff1f6}.v22-career:nth-child(4n){background:#f4f0fb}.v22-career h3{margin:0 0 4px;color:#6f7484!important;font-size:19px}.v22-career .v22-sub{font-size:12px;color:#9b9eaa;margin-bottom:14px}.v22-stat{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid rgba(160,150,165,.12);font-size:13px;color:#8a8d99}.v22-stat strong{color:#686d7d}.v22-source{font-size:11px;color:#a1a1aa;margin-top:12px;line-height:1.45}.v22-career-note{margin-top:18px;padding:13px 16px;border-radius:16px;background:#faf7fb;color:#8b8793;font-size:12px;line-height:1.5}
+@media(max-width:1000px){.v22-career-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.v22-career-grid{grid-template-columns:1fr}.v22-inspiration{padding:24px}.v22-fact{font-size:18px}}
+
+.v25-thinker-section{padding-top:0}.v25-thinker-card{position:relative;overflow:hidden;border-radius:26px;padding:20px 22px;background:linear-gradient(135deg,#fff7c7 0%,#ffe6ef 48%,#dff8ff 100%);border:2px solid rgba(255,166,0,.18);box-shadow:0 16px 40px rgba(255,155,0,.10)}.v25-thinker-card:after{content:'✦';position:absolute;right:16px;bottom:-20px;font-size:120px;color:rgba(255,170,0,.14)}.v25-thinker-title{display:flex;justify-content:space-between;align-items:center}.v25-thinker-symbol{font-size:28px}.v25-thinker-main{display:flex;align-items:center;gap:12px;margin:10px 0}.v25-thinker-medal{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:23px;font-weight:900;background:linear-gradient(135deg,#ffcc33,#ff7b54);color:#fff;box-shadow:0 8px 20px rgba(255,123,84,.22)}.v25-thinker-card h3{margin:0;color:#1769d3;font-size:23px}.v25-thinker-card blockquote{margin:10px 0 6px;font-size:18px;font-weight:800;line-height:1.45;color:#253b5a}.v25-thinker-note{font-size:12px;color:#64748b;position:relative;z-index:1}.v25-owner-note{font-size:11px;color:#64748b;margin-top:7px}
+
+.owner-only-control{align-items:center;gap:10px;flex-wrap:wrap}
+.owner-only-control span{font-size:12px;color:#667085}
+#ownerAboutEditWrap{margin-top:14px}
 </style>
+
+<style id="v23-vivid-style">
+/* V23: vivid, cheerful, original palette — deliberately no navy/dark-blue. */
+#publicSite{color:#243044!important;background:#fff!important}
+#publicSite::before{background:radial-gradient(circle at 8% 8%,rgba(45,185,255,.28),transparent 28%),radial-gradient(circle at 91% 12%,rgba(255,190,35,.30),transparent 25%),radial-gradient(circle at 80% 82%,rgba(255,83,156,.20),transparent 28%),radial-gradient(circle at 18% 78%,rgba(75,220,164,.20),transparent 25%)!important;animation:publicColorShift 10s ease-in-out infinite alternate}
+.public-brand{color:#1769d3!important}.public-brand span{color:#f39b19!important}
+.public-menu button{color:#1769d3!important;background:#fff!important;border-color:rgba(23,105,211,.16)!important}
+.public-hero h1{color:#1769d3!important}.public-hero h1 em{color:#f29a18!important}
+.public-eyebrow{background:#dff5ff!important;color:#0878bf!important}
+.public-primary{background:linear-gradient(135deg,#168cff,#28c7e8)!important;color:#fff!important;box-shadow:0 12px 28px rgba(22,140,255,.25)!important}
+.public-secondary{background:#ffd84d!important;color:#684900!important}
+.public-hero-card{background:rgba(255,255,255,.94)!important;border-color:rgba(23,140,220,.16)!important;box-shadow:0 24px 70px rgba(23,105,211,.15)!important}
+.public-orbit-card.blue{background:#d9f2ff!important}.public-orbit-card.yellow{background:#ffe77a!important}.public-orbit-card.pink{background:#ffd8eb!important}.public-orbit-card.mint{background:#c9f7df!important}
+.public-orbit-card b{color:#31445e!important}.public-orbit-card span{color:#596a82!important}
+.public-section h2{color:#1769d3!important}.public-section-lead{color:#53647b!important}
+.public-card{border-color:rgba(23,105,211,.12)!important;box-shadow:0 12px 32px rgba(23,105,211,.08)!important}
+.public-card:nth-child(3n+1){background:#e5f7ff!important}.public-card:nth-child(3n+2){background:#fff1a8!important}.public-card:nth-child(3n){background:#ffddea!important}
+.public-card h3{color:#24518a!important}.public-card p{color:#56677d!important}
+.public-quote{background:linear-gradient(135deg,#d9f2ff,#ffe77a,#ffd8eb)!important}.public-quote blockquote{color:#254f80!important}
+/* compact daily inspiration + daily career card */
+.v23-daily-wrap{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);gap:18px;align-items:stretch}
+.v23-daily-card,.v23-career-card{position:relative;overflow:hidden;border-radius:26px;border:2px solid rgba(23,105,211,.10);box-shadow:0 16px 40px rgba(23,105,211,.10)}
+.v23-daily-card{background:linear-gradient(135deg,#ffffff 0%,#e2f6ff 58%,#fff0a5 100%);padding:20px 22px;min-height:190px}
+.v23-daily-card::after{content:'✦';position:absolute;right:17px;bottom:-13px;font-size:105px;line-height:1;color:rgba(255,181,22,.18);transform:rotate(18deg)}
+.v23-person{display:flex;align-items:center;gap:15px;position:relative;z-index:2}.v23-person img{width:72px;height:72px;border-radius:20px;object-fit:cover;border:4px solid #fff;box-shadow:0 8px 20px rgba(23,105,211,.16);background:#eef7ff}.v23-person-text{min-width:0}.v23-person-name{font-weight:950;color:#1769d3;font-size:19px}.v23-person-role{font-size:12px;color:#6c7890;margin-top:2px}.v23-fact{font-size:17px;line-height:1.45;font-weight:850;color:#263b57;margin:15px 0 7px;position:relative;z-index:2}.v23-detail{font-size:12px;line-height:1.5;color:#607087;margin:0;position:relative;z-index:2}.v23-day{font-size:11px;color:#f08b11;font-weight:850;margin-top:9px;position:relative;z-index:2}
+.v23-feather{position:absolute;right:68px;top:10px;font-size:33px;transform:rotate(22deg);opacity:.75}.v23-spark{position:absolute;right:16px;top:13px;font-size:26px;color:#ffae00}
+.v23-career-card{background:linear-gradient(135deg,#fff0f7 0%,#e4f8ff 100%);padding:22px}.v23-career-card .v23-kicker{color:#ec6a3a}.v23-career-card h3{font-size:25px;color:#1769d3!important;margin:4px 0 3px}.v23-career-meta{font-size:12px;color:#65748a;margin-bottom:14px}.v23-rank-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v23-rank{background:#fff;border-radius:16px;padding:12px;border:1px solid rgba(23,105,211,.10)}.v23-rank small{display:block;color:#75839a;font-size:11px;margin-bottom:5px}.v23-rank strong{display:block;color:#243b5b;font-size:18px;line-height:1.25}.v23-rank span{display:block;color:#64748b;font-size:11px;margin-top:4px;line-height:1.35}.v23-career-source{margin-top:12px;font-size:10px;color:#7c8798;line-height:1.45}.v23-week{font-size:11px;color:#ef6f37;font-weight:850;margin-bottom:2px}.v23-section-title{margin-bottom:12px!important}.v23-small-note{font-size:12px;color:#66758b;margin-top:10px}
+@media(max-width:820px){.v23-daily-wrap{grid-template-columns:1fr}.v23-daily-card,.v23-career-card{min-height:0}.v23-person img{width:64px;height:64px}}
+
+/* V24: personal introduction + student story workflow */
+.v24-intro-head,.v24-story-head{display:flex;justify-content:space-between;gap:22px;align-items:center;margin-bottom:24px}.v24-intro-badge{background:linear-gradient(135deg,#ffe16b,#ff8bbd);border-radius:24px;padding:18px 22px;color:#173b72;font-weight:800;box-shadow:0 12px 30px rgba(255,139,189,.18)}.v24-about-grid{display:grid;grid-template-columns:1.25fr .9fr;gap:18px}.v24-about-main{padding:28px}.v24-about-main h3{font-size:30px;color:#1769d3;margin:5px 0 12px}.v24-mini-label{font-size:11px;font-weight:900;color:#ff6b3d;letter-spacing:.12em}.v24-placeholder{background:#fff8df;border-radius:14px;padding:12px;color:#68758a;font-size:13px}.v24-about-points{display:grid;grid-template-columns:1fr 1fr;gap:12px}.v24-about-points .public-card{display:flex;flex-direction:column;gap:7px}.v24-about-points b{color:#1769d3}.v24-about-points span{font-size:12px;color:#68758a}.v24-story-mark{font-size:86px;line-height:.7;color:#ff79a9;font-weight:900}.v24-story-admin{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:18px;background:linear-gradient(135deg,#e5f7ff,#fff1b8)}.v24-story-admin p{margin:6px 0 0;color:#68758a;font-size:13px;max-width:650px}.v24-story-editor{margin-bottom:18px;border:2px solid rgba(23,105,211,.12)}.v24-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.v24-story-editor label{display:block;font-size:12px;font-weight:800;margin:10px 0 5px;color:#38506e}.v24-story-editor input,.v24-story-editor textarea{width:100%;box-sizing:border-box;border:1px solid #d9e4f0;border-radius:13px;padding:11px;font:inherit;background:#fff}.v24-editor-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.v24-preview-card{margin-top:14px;background:#fff;border-radius:18px;padding:18px;border-left:6px solid #ffcf3f;box-shadow:0 8px 24px rgba(34,70,120,.08)}.v24-preview-card .story-name{font-weight:900;color:#1769d3}.v24-preview-card p{color:#5e6d82;line-height:1.6}.v24-preview-card small{color:#8995a6}@media(max-width:820px){.v24-intro-head,.v24-story-head,.v24-story-admin{display:block}.v24-intro-badge{margin-top:15px;display:inline-block}.v24-about-grid{grid-template-columns:1fr}.v24-form-grid{grid-template-columns:1fr}.v24-story-admin button{margin-top:12px}}
+</style>
+
+<style id="v27-vivid-cards">
+/* V27: vivid card palette matching the original Plan/Takip/Gelişim/Motivasyon concept. */
+.public-orbit-card.blue{background:#5BC0EB!important;color:#17324d}.public-orbit-card.yellow{background:#FFD166!important;color:#4a3a00}.public-orbit-card.pink{background:#FF7AA2!important;color:#4d1830}.public-orbit-card.mint{background:#63D6A2!important;color:#103d2c}
+.public-card:nth-child(6n+1){background:#DDF5FF!important}.public-card:nth-child(6n+2){background:#FFF0A8!important}.public-card:nth-child(6n+3){background:#FFD6E4!important}.public-card:nth-child(6n+4){background:#D6F7E8!important}.public-card:nth-child(6n+5){background:#E4D9FF!important}.public-card:nth-child(6n){background:#FFE0C7!important}
+.v24-about-points .public-card:nth-child(4n+1){background:#5BC0EB!important;color:#17324d}.v24-about-points .public-card:nth-child(4n+2){background:#FFD166!important;color:#4a3a00}.v24-about-points .public-card:nth-child(4n+3){background:#FF7AA2!important;color:#4d1830}.v24-about-points .public-card:nth-child(4n){background:#63D6A2!important;color:#103d2c}
+.v24-about-points .public-card b,.v24-about-points .public-card span{color:inherit!important}
+.v27-owner-editor{display:none;margin-top:20px;padding:22px;border-radius:24px;background:linear-gradient(135deg,#DDF5FF,#FFF0A8,#FFD6E4);border:2px solid rgba(36,94,160,.12);box-shadow:0 12px 32px rgba(36,94,160,.10)}
+.v27-owner-editor h3{margin:0 0 6px;color:#1769d3}.v27-owner-editor p{margin:0 0 14px;color:#53657a}.v27-owner-editor textarea,.v27-owner-editor input{width:100%;box-sizing:border-box;border:2px solid rgba(36,105,170,.15);border-radius:14px;padding:12px;background:#fff;font:inherit;resize:vertical}.v27-owner-editor textarea:focus,.v27-owner-editor input:focus{outline:none;border-color:#28a9e8;box-shadow:0 0 0 4px rgba(40,169,232,.12)}
+.v27-owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.v27-owner-field{display:flex;flex-direction:column;gap:6px}.v27-owner-field label{font-weight:800;color:#234}.v27-owner-save{background:linear-gradient(135deg,#168cff,#18b7d9)!important;color:#fff!important;border:0!important}
+@media(max-width:700px){.v27-owner-grid{grid-template-columns:1fr}}
+</style>
+
+<style id="v28-public-fix">
+.v28-feature-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:22px}
+.v28-feature-card{position:relative;min-height:190px;padding:24px!important;border-radius:24px!important;border:2px solid rgba(23,105,211,.10)!important;box-shadow:0 14px 32px rgba(40,80,120,.10)!important;transition:transform .2s ease,box-shadow .2s ease}
+.v28-feature-card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(40,80,120,.16)!important}
+.v28-feature-card:nth-child(1){background:#5BC0EB!important}.v28-feature-card:nth-child(2){background:#FFD166!important}.v28-feature-card:nth-child(3){background:#FF7AA2!important}.v28-feature-card:nth-child(4){background:#63D6A2!important}.v28-feature-card:nth-child(5){background:#B89CFF!important}.v28-feature-card:nth-child(6){background:#FFB86B!important}
+.v28-feature-card h3{font-size:20px!important;color:#17324d!important;margin:0 0 10px!important}.v28-feature-card p{color:#17324d!important;font-weight:600;line-height:1.55!important}.v28-feature-icon{font-size:30px;display:block;margin-bottom:10px}
+.v28-how-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}.v28-how-card{padding:24px!important;border-radius:22px!important;background:#fff!important;border:2px solid rgba(23,105,211,.10)!important;box-shadow:0 12px 28px rgba(40,80,120,.10)!important}.v28-how-card h3{color:#1769d3!important}.v28-how-icon{font-size:30px;margin-bottom:8px;display:block}
+.v28-owner-button{display:inline-flex!important;align-items:center;gap:7px;margin-top:14px;padding:11px 16px!important;border-radius:14px!important;background:#1769d3!important;color:#fff!important;font-weight:850!important;border:0!important;cursor:pointer!important}
+.v28-owner-note{font-size:12px;color:#5b6b80;margin-left:8px}
+.v28-story-admin{border:2px solid #1769d3!important;background:linear-gradient(135deg,#e5f5ff,#fff4d0)!important}
+.v28-owner-editor{border:3px solid #1769d3!important;background:#fff!important;box-shadow:0 18px 50px rgba(23,105,211,.16)!important}
+@media(max-width:820px){.v28-feature-grid,.v28-how-grid{grid-template-columns:1fr!important}}
+
+.v29-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}.v29-content-card{margin-top:18px;min-height:130px}.v28-owner-button{border:0;border-radius:14px;padding:12px 18px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#168df5,#6c5ce7);color:#fff;box-shadow:0 8px 20px rgba(30,100,220,.18)}.v28-owner-button:hover{transform:translateY(-1px)}
+</style>
+
 </head>
 <body class="login-bright">
 
 <div class="login-login-orb one"></div><div class="login-login-orb two"></div>
+
+<div id="publicSite">
+  <div class="public-wrap">
+    <nav class="public-nav">
+      <div class="public-brand">Aslı Afşar <span>Eğitim Koçluğu</span></div>
+      <div class="public-menu">
+        <button onclick="publicPage('home')">Ana Sayfa</button>
+        <button onclick="publicPage('about')">Hakkımda</button>
+        <button onclick="publicPage('coaching')">Eğitim Koçluğu</button>
+        <button onclick="publicPage('how')">Nasıl Çalışıyoruz?</button>
+        <button onclick="publicPage('stories')">Başarı Hikâyeleri</button>
+        <button onclick="publicPage('inspiration')">İlham</button>
+        <button onclick="publicPage('contact')">İletişim</button>
+        <button id="ownerNavEdit" class="owner-only-control" style="display:none" onclick="openCoachWebEditor()">🔒 İçerik Düzenle</button>
+        <button class="public-primary" onclick="showPortalLogin()">Portal Girişi</button>
+      </div>
+    </nav>
+
+    <div id="public-home" class="public-page active">
+      <section class="public-hero">
+        <div>
+          <span class="public-eyebrow">Kişiye özel eğitim koçluğu</span>
+          <h1>Hedefini belirle.<br><em>Bu yolda birlikte ilerleyelim.</em></h1>
+          <p>Öğrencinin yalnızca derslerini değil; hedefini, planını, motivasyonunu ve gelişimini birlikte ele alan, bu yolda ona eşlik eden bir eğitim koçluğu sistemi.</p>
+          <div class="public-actions"><button class="public-primary" onclick="showPortalLogin()">Portal Girişi</button><button class="public-secondary" onclick="publicPage('about')">Beni Tanıyın</button></div>
+        </div>
+        <div class="public-hero-card">
+          <div class="public-orbit">
+            <div class="public-orbit-card blue"><b>Plan</b><span>Öğrencinin hedeflerine göre kişisel çalışma düzeni.</span></div>
+            <div class="public-orbit-card yellow"><b>Takip</b><span>Program, görev, soru ve deneme takibinin tek yerde toplanması.</span></div>
+            <div class="public-orbit-card pink"><b>Gelişim</b><span>Eksik alanların ve ilerlemenin düzenli olarak görülmesi.</span></div>
+            <div class="public-orbit-card mint"><b>Motivasyon</b><span>Öğrencinin sürece bağlı kalmasını destekleyen koçluk yaklaşımı.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="public-section"><h2>Koçluk sürecinin merkezinde öğrenci var.</h2><p class="public-section-lead">Amaç yalnızca bir program hazırlamak değil; öğrencinin kendi çalışma düzenini oluşturmasına, hedefini takip etmesine ve gelişimini fark etmesine yardımcı olmak.</p>
+        <div class="v28-feature-grid">
+          <div class="public-card v28-feature-card"><span class="v28-feature-icon">📅</span><h3>Haftalık Kişisel Program</h3><p>Öğrencinin hedeflerine ve çalışma temposuna göre haftalık programını ben oluşturuyor, ders ve çalışma düzenini adım adım planlıyorum.</p></div>
+          <div class="public-card v28-feature-card"><span class="v28-feature-icon">🧭</span><h3>SWOT ve Eksik Haritası</h3><p>Güçlü ve geliştirilmesi gereken yönleri belirliyor; eksik konuları görünür hâle getirerek çalışma önceliğini netleştiriyorum.</p></div>
+          <div class="public-card v28-feature-card"><span class="v28-feature-icon">📝</span><h3>Deneme & Soru Takibi</h3><p>Deneme sonuçlarını, soru sayılarını ve konu çalışmalarını düzenli takip ederek öğrencinin çalışma sürecini somut verilerle izliyorum.</p></div>
+          <div class="public-card v28-feature-card"><span class="v28-feature-icon">📈</span><h3>Gelişim Takibi</h3><p>Öğrencinin zaman içindeki değişimini, tamamladığı çalışmaları ve ilerlemesini düzenli olarak takip ediyorum.</p></div>
+          <div class="public-card v28-feature-card"><span class="v28-feature-icon">👀</span><h3>Yakın Öğrenci Takibi</h3><p>Programın uygulanmasını, görevlerin tamamlanmasını ve öğrencinin çalışma sürecini yakından takip ediyorum.</p></div>
+          <div class="public-card v28-feature-card"><span class="v28-feature-icon">🤝</span><h3>Öğrenci – Veli – Koç</h3><p>Öğrenci, veli ve koçun kendi erişim alanlarından süreci takip edebildiği düzenli ve güvenli bir sistem.</p></div>
+        </div>
+      </section>
+
+      <section class="public-section v23-daily-section">
+        <div class="v23-daily-wrap">
+          <article class="v23-daily-card">
+            <span class="v23-kicker">Günün İlhamı</span>
+            <span class="v23-feather">🪶</span><span class="v23-spark">✦</span>
+            <div class="v23-person">
+              <img id="v23PersonImage" alt="Günün ilham kişisi">
+              <div class="v23-person-text"><div id="v23PersonName" class="v23-person-name"></div><div id="v23PersonRole" class="v23-person-role"></div></div>
+            </div>
+            <div id="v23InspirationFact" class="v23-fact"></div>
+            <p id="v23InspirationDetail" class="v23-detail"></p>
+            <div id="v23InspirationDay" class="v23-day"></div>
+          </article>
+
+          <article class="v23-career-card">
+            <div class="v23-week">2026 YKS · BUGÜNÜN MESLEĞİ</div>
+            <h3 id="v23CareerTitle"></h3>
+            <div id="v23CareerMeta" class="v23-career-meta"></div>
+            <div class="v23-rank-grid">
+              <div class="v23-rank"><small>En yüksek sıralamayla kapanış</small><strong id="v23CareerBestRank"></strong><span id="v23CareerBestUni"></span></div>
+              <div class="v23-rank"><small>En son sıralamayla kapanış</small><strong id="v23CareerLastRank"></strong><span id="v23CareerLastUni"></span></div>
+            </div>
+            <div id="v23CareerSource" class="v23-career-source"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="public-section v25-thinker-section">
+        <div class="v25-thinker-card">
+          <div class="v25-thinker-title"><span class="v23-kicker">Günün Düşünürü</span><span class="v25-thinker-symbol">☀️</span></div>
+          <div class="v25-thinker-main">
+            <div class="v25-thinker-medal" id="v25ThinkerMedal">S</div>
+            <div><h3 id="v25ThinkerName">Sokrates</h3><div id="v25ThinkerRole" class="v23-person-role"></div></div>
+          </div>
+          <blockquote id="v25ThinkerQuote"></blockquote>
+          <div id="v25ThinkerNote" class="v25-thinker-note"></div>
+        </div>
+      </section>
+
+      <section class="public-section"><div class="public-quote"><blockquote>“Başarı, her gün tekrarlanan küçük çabaların toplamıdır.”</blockquote><cite>Robert Collier'e atfedilen söz</cite></div></section>
+    </div>
+
+    <div id="public-about" class="public-page">
+<section class="public-section">
+<button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button>
+<div class="v24-intro-head">
+  <div>
+    <span class="public-eyebrow">Aslı Afşar Eğitim Koçluğu</span>
+    <h2>Ben Kimim?</h2>
+    <p class="public-section-lead">Öğrencinin yalnızca ders başarısına değil; hedeflerine, çalışma düzenine, motivasyonuna ve gelişimine birlikte odaklanan bir eğitim koçluğu anlayışı.</p>
+  </div>
+  <div class="v24-intro-badge">Seni tanıyın.<br><b>Nasıl çalıştığımı görün.</b></div>
+</div>
+<div class="v24-about-grid">
+  <div class="public-card v24-about-main">
+    <div class="v24-mini-label">HAKKIMDA</div>
+    <h3>Aslı Afşar</h3>
+    <p id="publicOwnerBio">Burada senin kendi hikâyen yer alacak: eğitim geçmişin, aldığın eğitimler ve sertifikalar, deneyimin, öğrencilerle çalışma yaklaşımın ve seni farklılaştıran yönlerin.</p>
+    <p class="v24-placeholder" id="publicOwnerExperienceText">Kendini tanıttığında bu alan, senin belirlediğin bilgilerle otomatik güncellenecek.</p>
+    <div id="ownerAboutEditWrap" class="owner-only-control" style="display:none"><button class="public-primary" type="button" onclick="openCoachWebEditor()">✎ Kendimi Tanıt / Düzenle</button><span>Bu buton yalnızca Koç girişi yaptıktan sonra görünür.</span></div>
+  </div>
+  <div class="v24-about-points">
+    <div class="public-card"><b>🎓 Eğitim</b><span id="publicOwnerEducation">Lisans / eğitim bilgileri</span></div>
+    <div class="public-card"><b>📚 Eğitimler</b><span id="publicOwnerTrainings">Koçluk ve mesleki eğitimler</span></div>
+    <div class="public-card"><b>🏅 Deneyim</b><span id="publicOwnerExperience">Çalışma yılı ve öğrenci deneyimi</span></div>
+    <div class="public-card"><b>🎯 Çalışma Alanım</b><span id="publicOwnerAreas">YKS • TYT • AYT • Ara sınıflar</span></div>
+  </div>
+</div>
+<div id="ownerAboutAdminButton" class="owner-only-control" style="display:none;gap:10px;align-items:center;flex-wrap:wrap"><button class="v28-owner-button" type="button" onclick="openCoachWebEditor()">✍️ Ben Kimim? Yazımı Düzenle</button><span class="v28-owner-note">Bu buton yalnızca Koç girişi yapıldığında görünür.</span></div>
+<div id="publicOwnerEditor" class="v27-owner-editor owner-only-control">
+  <div><h3>✎ Kendimi Tanıtıyorum</h3><p>Bu alan yalnızca sen Koç olarak giriş yaptığında açılır. Buraya yazdığın bilgiler “Ben Kimim?” bölümünde yayınlanır.</p></div>
+  <div class="v27-owner-grid">
+    <div class="v27-owner-field"><label>Ad Soyad</label><input id="publicOwnerNameEdit" placeholder="Aslı Afşar"></div>
+    <div class="v27-owner-field"><label>Meslek / Ünvan</label><input id="publicOwnerTitleEdit" placeholder="Eğitim Koçu"></div>
+    <div class="v27-owner-field" style="grid-column:1/-1"><label>Kendimi Tanıtıyorum</label><textarea id="publicOwnerBioEdit" rows="8" placeholder="Kendini, eğitim geçmişini, çalışma yaklaşımını ve öğrencilerle nasıl çalıştığını burada yaz..."></textarea></div>
+    <div class="v27-owner-field"><label>Eğitim</label><textarea id="publicOwnerEducationEdit" rows="5" placeholder="Lisans / bölüm / üniversite..."></textarea></div>
+    <div class="v27-owner-field"><label>Eğitimler / Sertifikalar</label><textarea id="publicOwnerTrainingsEdit" rows="5" placeholder="Aldığın eğitimler ve sertifikalar..."></textarea></div>
+    <div class="v27-owner-field"><label>Deneyim</label><textarea id="publicOwnerExperienceEdit" rows="5" placeholder="Çalışma deneyimin..."></textarea></div>
+    <div class="v27-owner-field"><label>Çalışma Alanlarım</label><textarea id="publicOwnerAreasEdit" rows="5" placeholder="YKS, TYT, AYT, ara sınıflar..."></textarea></div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px"><button class="v27-owner-save" type="button" onclick="savePublicOwnerEditor()">TANITIMI KAYDET</button><span id="publicOwnerSaveMsg" class="small muted"></span></div>
+</div>
+</section></div>
+<div id="public-coaching" class="public-page"><section class="public-section"><button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button><div class="v29-page-head"><div><h2>🎓 Eğitim Koçluğu Nedir?</h2><p class="public-section-lead">Öğrenci ve velinin, eğitim koçluğunun ne olduğunu ilk bakışta anlayacağı sade ve anlaşılır anlatım.</p></div><div id="coachingOwnerEdit" class="owner-only-control" style="display:none"><button class="v28-owner-button" type="button" onclick="openCoachWebEditor()">✍️ Bu Bölümü Düzenle</button></div></div><div class="public-card v29-content-card"><p id="publicCoachingText">Bu bölümde senin kendi eğitim koçluğu yaklaşımın yer alacak. Metni Koç girişi yaptıktan sonra içerik yönetim alanından düzenleyebilirsin.</p></div></section></div>
+    <div id="public-how" class="public-page"><section class="public-section"><button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button><h2>Nasıl Çalışıyoruz?</h2><div class="v28-how-grid"><div class="public-card v28-how-card"><span class="v28-how-icon">🎯</span><h3>1. Hedef</h3><p>Öğrencinin mevcut durumunu ve ulaşmak istediği hedefi birlikte netleştiriyoruz.</p></div><div class="public-card v28-how-card"><span class="v28-how-icon">📋</span><h3>2. Plan</h3><p>Hedefe uygun kişisel çalışma planını oluşturuyor ve haftalık süreci yapılandırıyoruz.</p></div><div class="public-card v28-how-card"><span class="v28-how-icon">👁️</span><h3>3. Takip</h3><p>Programı, görevleri, denemeleri ve gelişimi düzenli olarak takip ediyoruz.</p></div></div></section></div>
+    <div id="public-stories" class="public-page">
+<section class="public-section">
+<button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button>
+<div class="v24-story-head">
+  <div>
+    <span class="public-eyebrow">Öğrencilerimin gözünden</span>
+    <h2>Başarı Hikâyeleri</h2>
+    <p class="public-section-lead">Öğrenciler çalışma deneyimlerini kendi cümleleriyle paylaşır. Yayına alınacak görüşleri önce sen kontrol edersin.</p>
+  </div>
+  <div class="v24-story-mark">“</div>
+</div>
+<div id="storyOwnerAdmin" class="v24-story-admin public-card owner-only-control" style="display:none">
+  <div>
+    <b>Yeni öğrenci görüşü</b>
+    <p>Öğrencinin sana gönderdiği metni burada öğrencinin adı ve alanıyla birlikte hazırlayabilirsin. Sen yayınladıktan sonra Başarı Hikâyeleri bölümünde görünür.</p>
+  </div>
+  <button class="v28-owner-button" type="button" onclick="v24OpenStoryEditor()">✍️ Öğrenci Görüşü Yaz / Ekle</button>
+</div>
+<div id="v24StoryEditor" class="public-card v24-story-editor" style="display:none">
+  <h3>Öğrenci Görüşü Ekle</h3>
+  <div class="v24-form-grid">
+    <div><label>Öğrenci adı</label><input id="v24StoryName" placeholder="Örn. Belemir"></div>
+    <div><label>Alan</label><select id="v24StoryField"><option value="">Alan seç</option><option>Eşit Ağırlık</option><option>Sayısal</option><option>Sözel</option><option>Dil</option></select></div>
+  </div>
+  <label>Öğrencinin kendi cümleleri</label>
+  <textarea id="v24StoryText" rows="5" placeholder="Öğrencinin sana gönderdiği görüşü buraya yaz..."></textarea>
+  <div class="v24-editor-actions"><button class="public-secondary" onclick="v24CloseStoryEditor()">Vazgeç</button><button class="public-primary" onclick="v24PreviewStory()">Kartı Önizle</button></div>
+  <div id="v24StoryPreview"></div>
+</div>
+<div id="v24StoryCards" class="public-grid">
+  <div class="public-card public-story"><div class="story-name">İlk öğrenci görüşünü burada yayınlayacağız.</div><p>Bir öğrenci görüşü onaylandığında bu alanda renkli bir başarı hikâyesi kartı olarak görünecek.</p></div>
+</div>
+<div class="public-review-note">Not: Bu ekrandaki “Öğrenci Görüşü Ekle” bölümü içerik hazırlama/önizleme alanıdır. Canlı yayına alınacak görüşleri senin onayından geçirerek yayınlayacağız.</div>
+<div class="public-review-note owner-only-control" id="storyOwnerNote" style="display:none">Koç olarak giriş yaptığınızda burada öğrenci görüşlerini hazırlayıp kontrol edebilirsiniz. Dışarıdan ziyaretçiler bu yönetim alanını göremez.</div>
+</section></div>
+<div id="public-inspiration" class="public-page"><section class="public-section"><button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button><h2>İlham</h2><div class="public-quote"><blockquote>“Gelecek, bugünden ona hazırlananlara aittir.”</blockquote><cite>Malcolm X</cite></div></section></div>
+    <div id="public-contact" class="public-page"><section class="public-section"><button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button><h2>İletişim</h2><p class="public-section-lead">İletişim bilgilerini burada senin belirlediğin şekilde yayınlayacağız.</p><div class="public-grid"><div class="public-card"><h3>Aslı Afşar Eğitim Koçluğu</h3><p>Online eğitim koçluğu ve öğrenci takip hizmetleri.</p></div><div class="public-card"><h3>Portal</h3><p>Mevcut öğrenciler için güvenli portal erişimi.</p><button class="public-primary" onclick="showPortalLogin()">Portal Girişi</button></div></div></section></div>
+
+    <footer class="public-footer"><span>© 2026 Aslı Afşar Eğitim Koçluğu</span><span>Plan • Takip • Gelişim • Başarı</span></footer>
+  </div>
+</div>
+
 <div id="login" class="login login-bright-card">
  <div class="brand">Aslı Afşar Eğitim Koçluğu</div>
  <p class="muted">Güvenli portal giriş sistemi · Öğrenci, veli ve koç erişimi ayrı tutulur</p>
@@ -323,8 +596,42 @@ button.delete-student-prominent{display:inline-flex!important;align-items:center
   <label id="pinLabel">Giriş Kodu</label><input id="pin" type="password" inputmode="numeric" placeholder="Giriş Kodu" onkeydown="if(event.key==='Enter')login()">
   <button style="width:100%" onclick="login()">Giriş Yap</button><p id="loginError" class="dangerText small"></p>
  </div>
- <p class="small muted">Koç, öğrenci ve veli için ayrı giriş adresleri kullanılır. Aynı cihazda aynı anda yalnızca bir portal oturumu aktif olabilir.</p><div class="login-footer">PLAN • TAKİP • GELİŞİM • BAŞARI</div>
+ <p class="small muted">Koç, öğrenci ve veli için ayrı giriş adresleri kullanılır. Aynı cihazda aynı anda yalnızca bir portal oturumu aktif olabilir.</p><div class="login-footer">PLAN • TAKİP • GELİŞİM • BAŞARI</div><button type="button" class="public-back" style="width:100%;margin-top:12px" onclick="showPublicSite()">← Tanıtım Sayfasına Dön</button>
 </div>
+
+
+<script>
+(function(){
+  document.body.classList.add('public-site-mode');
+  var login=document.getElementById('login');
+  if(login) login.classList.add('public-hidden');
+  window.publicPage=function(name){
+    if(name==='about' && typeof window.loadPublicOwnerEditor==='function') window.loadPublicOwnerEditor();
+    document.querySelectorAll('.public-page').forEach(function(x){x.classList.remove('active')});
+    var el=document.getElementById('public-'+name);
+    if(el) el.classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+  window.showPortalLogin=function(){
+    var site=document.getElementById('publicSite');
+    var login=document.getElementById('login');
+    if(site) site.style.display='none';
+    if(login) login.classList.remove('public-hidden');
+    window.scrollTo(0,0);
+  };
+  window.showPublicSite=function(){
+    var site=document.getElementById('publicSite');
+    var login=document.getElementById('login');
+    var app=document.getElementById('app');
+    if(app && !app.classList.contains('hidden')) return;
+    if(login) login.classList.add('public-hidden');
+    if(site) site.style.display='block';
+    window.publicPage('home');
+  };
+  var h=String(location.hash||'').toLowerCase();
+  if(h==='#coach-login'||h==='#coach'||h==='#student-login'||h==='#student'||h==='#parent-login'||h==='#parent') window.showPortalLogin();
+})();
+</script>
 
 <div id="app" class="app hidden">
 <aside class="side">
@@ -345,6 +652,7 @@ button.delete-student-prominent{display:inline-flex!important;align-items:center
   <button data-v="reports" onclick="show('reports')">Veli Raporu</button>
   <button data-v="archive" onclick="show('archive')">Arşiv & Gelişim</button>
   <button data-v="share" onclick="show('share')">Öğrenci / Veli Portalı</button>
+  <button data-v="webContent" onclick="openCoachWebEditor()">🔒 Web Sitesi İçerik Yönetimi</button>
  </nav>
  <button class="secondary" style="width:100%;margin-top:18px" onclick="logout()">Çıkış Yap</button>
 </aside>
@@ -777,6 +1085,46 @@ button.delete-student-prominent{display:inline-flex!important;align-items:center
  </section>
 
 
+ <section id="webContent" class="view">
+  <div class="card">
+   <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+    <div><h3>🔒 Web Sitesi İçerik Yönetimi</h3><p class="muted small">Bu alan yalnızca Koç oturumu açıkken görünür. Dışarıdan ziyaretçilere gösterilmez.</p></div>
+    <span class="tag">SADECE KOÇ</span>
+   </div>
+   <div class="notice small">Buradan kendi tanıtım metnini, eğitim bilgilerini ve çalışma yaklaşımını hazırlayabilirsin. Şimdilik taslak bu cihazda saklanır; canlı siteye yayınlama bağlantısını ayrıca kuracağız.</div>
+   <div class="grid">
+    <div><label>Ad Soyad</label><input id="ownerName" value="Aslı Afşar"></div>
+    <div><label>Meslek / Ünvan</label><input id="ownerTitle" value="Eğitim Koçu"></div>
+   </div>
+   <label>Kendimi Tanıtıyorum</label><textarea id="ownerBio" rows="7" placeholder="Kendini anlatacağın metni buraya yaz..."></textarea>
+   <div class="grid">
+    <div><label>Eğitim</label><textarea id="ownerEducation" rows="4" placeholder="Lisans, bölüm, üniversite..."></textarea></div>
+    <div><label>Aldığım Eğitimler / Sertifikalar</label><textarea id="ownerTrainings" rows="4" placeholder="Eğitim koçluğu, sınav stratejileri..."></textarea></div>
+    <div><label>Deneyim</label><textarea id="ownerExperience" rows="4" placeholder="Deneyim ve çalışma yılı..."></textarea></div>
+    <div><label>Çalışma Alanlarım</label><textarea id="ownerAreas" rows="4" placeholder="YKS, TYT, AYT, ara sınıflar..."></textarea></div>
+   </div>
+   <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px"><button onclick="saveOwnerWebContent()">TANITIMI KAYDET</button><button class="secondary" onclick="show('home')">Koç Ana Sayfasına Dön</button></div>
+   <div id="ownerSaveMsg" class="small muted" style="margin-top:8px"></div>
+
+   <div class="card" style="margin-top:18px;border:2px solid #f0c94b;background:#fffdf4">
+    <h3>⭐ Başarı Hikâyeleri — Öğrenci Görüşü Ekle</h3>
+    <p class="muted small">Öğrencinin sana gönderdiği görüşü buradan ekle. Yayınladığında Başarı Hikâyeleri bölümünde görünür.</p>
+    <div class="grid">
+      <div><label>Öğrenci adı</label><input id="coachStoryName" placeholder="Örn. Belemir"></div>
+      <div><label>Alan</label><select id="coachStoryField"><option value="">Alan seç</option><option>Eşit Ağırlık</option><option>Sayısal</option><option>Sözel</option><option>Dil</option></select></div>
+    </div>
+    <label>Öğrencinin görüşü</label>
+    <textarea id="coachStoryText" rows="6" placeholder="Öğrencinin sana gönderdiği metni buraya yaz..."></textarea>
+    <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button onclick="publishCoachStory()">⭐ GÖRÜŞÜ YAYINLA</button>
+      <button class="secondary" onclick="clearCoachStoryForm()">Temizle</button>
+    </div>
+    <div id="coachStorySaveMsg" class="small muted" style="margin-top:8px"></div>
+    <div id="coachStoryList" style="margin-top:12px"></div>
+   </div>
+  </div>
+ </section>
+
  <section id="portalLogin" class="view">
   <div class="card" style="max-width:520px;margin:auto">
    <h3>Öğrenci / Veli Portalı</h3>
@@ -1189,6 +1537,7 @@ async function login(){
   if(authRole==='coach'){
    localStorage.removeItem('v18student');
    await loadCloud();
+   if(typeof window.updateOwnerOnlyControls==='function')window.updateOwnerOnlyControls();
    start();
    return;
   }
@@ -1235,6 +1584,7 @@ function scopePortalDBForStudent(studentId){
  return true;
 }
 function enterPortal(portalRole,studentId){
+ if(typeof window.updateOwnerOnlyControls==='function')window.updateOwnerOnlyControls();
  if(!scopePortalDBForStudent(studentId)){
   clearPortalSession();
   alert('Öğrenci verileri güvenli biçimde ayrıştırılamadı. Lütfen yeniden giriş yapın.');
@@ -1342,6 +1692,7 @@ async function submitAssignedExam(){
  }catch(e){alert('Deneme teslim edilemedi: '+e.message);}
 }
 function show(id){
+ if(id==='webContent' && role!=='coach'){alert('Bu alan yalnızca Koç içindir.');return;}
  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');
  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.v===id));
  if(id==='mockExams'){refreshMockSubjects();renderMockExams();
@@ -1352,7 +1703,7 @@ function show(id){
  if(id==='questionTracking'){refreshQuestionStudents();const d=document.getElementById('questionDate');if(d&&!d.value)d.value=todayISO();refreshQuestionSubjects();renderQuestionTracking();}
  if(id==='branchExams'){show('exams');return;}
  if(id==='exams'){refreshSelectors();renderExamWorkflow();}
- const names={home:'Ana Sayfa',students:'Öğrenciler',student360:'Öğrenci 360°',profile:'Öğrenci Bilgileri',program:'Haftalık Program',tasks:'Görevler',topicTracking:'Konu Takibi',questionTracking:'Soru Takibi',exams:'Denemeler & Analiz',sources:'Kaynak / Kitap Takibi',curriculum:'Müfredat & Konular',share:'Öğrenci / Veli Portalı',portal:'Portal',branchExams:'Denemeler & Analiz',mockExams:'Denemeler & Analiz'};
+ const names={webContent:'Web Sitesi İçerik Yönetimi',home:'Ana Sayfa',students:'Öğrenciler',student360:'Öğrenci 360°',profile:'Öğrenci Bilgileri',program:'Haftalık Program',tasks:'Görevler',topicTracking:'Konu Takibi',questionTracking:'Soru Takibi',exams:'Denemeler & Analiz',sources:'Kaynak / Kitap Takibi',curriculum:'Müfredat & Konular',share:'Öğrenci / Veli Portalı',portal:'Portal',branchExams:'Denemeler & Analiz',mockExams:'Denemeler & Analiz'};
  document.getElementById('pageTitle').textContent=names[id]||'Portal';renderAll();
 }
 
@@ -3229,5 +3580,218 @@ setTimeout(()=>{try{renderMembershipManager();}catch(_){ }},50);
 </script>
 
 <!-- SAFE BUILD: based directly on verified live ; role/PIN/auth logic preserved. -->
+
+<script>
+(function(){
+  const items=[
+    {day:'Pazartesi',fact:'Biliyor musun? Fatih Sultan Mehmet Han ilk kez 12 yaşında tahta çıktı.',detail:'1444’te, çocuk yaşta Osmanlı padişahı oldu. Bu ilk saltanat dönemi kısa sürse de tarihindeki büyük dönüşümün başlangıçlarından biri oldu.'},
+    {day:'Salı',fact:'Biliyor musun? Büyük İskender 20 yaşında kral oldu.',detail:'Babası II. Filip’in ölümünün ardından 20 yaşında Makedonya kralı oldu ve kısa sürede tarihin en büyük fetihlerinden birini gerçekleştirdi.'},
+    {day:'Çarşamba',fact:'Biliyor musun? Mustafa Kemal Atatürk 19 Mayıs 1919’da Samsun’a çıkarak Millî Mücadele’nin yeni dönemini başlattı.',detail:'Zorlu koşullara rağmen başlayan bu süreç, 29 Ekim 1923’te Türkiye Cumhuriyeti’nin ilanına uzandı.'},
+    {day:'Perşembe',fact:'Biliyor musun? Marie Curie iki farklı bilim dalında Nobel Ödülü alan ilk kişiydi.',detail:'1903’te Fizik, 1911’de Kimya Nobel Ödülü’nü aldı. Bilimsel merakın ve uzun soluklu çalışmanın güçlü örneklerinden biridir.'},
+    {day:'Cuma',fact:'Biliyor musun? Beethoven, işitme kaybına rağmen beste yapmayı sürdürdü.',detail:'İşitme sorunları ilerledikçe müziği bırakmadı; bugün başyapıt kabul edilen eserlerinin önemli bir bölümünü bu dönemde üretti.'},
+    {day:'Cumartesi',fact:'Biliyor musun? Aristoteles, genç Büyük İskender’in öğretmenlerinden biriydi.',detail:'Bilim, felsefe ve düşünce tarihinin önemli isimlerinden biri olan Aristoteles, öğrenmenin bir insanın yönünü nasıl etkileyebileceğinin güçlü örneklerinden biridir.'},
+    {day:'Pazar',fact:'Biliyor musun? İbn Sina’nın El-Kanun fi’t-Tıbb adlı eseri yüzyıllar boyunca tıp eğitiminde temel kaynaklardan biri olarak kullanıldı.',detail:'Eser farklı dillere çevrildi ve Avrupa’daki tıp eğitiminde de uzun süre etkili oldu.'}
+  ];
+  function render(){
+    const d=new Date().getDay();
+    const idx=d===0?6:d-1;
+    const x=items[idx];
+    const f=document.getElementById('v22InspirationFact'),detail=document.getElementById('v22InspirationDetail'),day=document.getElementById('v22InspirationDay');
+    if(f)f.textContent=x.fact;if(detail)detail.textContent=x.detail;if(day)day.textContent=x.day+' • Her gün yeni bir bilgi';
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render);else render();
+})();
+</script>
+
+<script id="v23-daily-data">
+(function(){
+  const people=[
+    {name:'Fatih Sultan Mehmed Han',role:'Osmanlı hükümdarı · tarih',img:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Fatih_II._Mehmet.jpg',fact:'Biliyor musun? Fatih Sultan Mehmed Han, ikinci saltanatına 19 yaşında başladı ve İstanbul’un fethine 21 yaşında ulaştı.',detail:'Çocuk yaşta başlayan hükümdarlık deneyimi, yıllar süren hazırlık ve stratejiyle birleşti.'},
+    {name:'Mustafa Kemal Atatürk',role:'Türkiye Cumhuriyeti’nin kurucusu',img:'https://commons.wikimedia.org/wiki/Special:Redirect/file/MustafaKemalAtaturk_oval.png',fact:'Biliyor musun? Türkiye Cumhuriyeti 29 Ekim 1923’te ilan edildi.',detail:'Büyük dönüşümler; uzun hazırlık, kararlılık ve zor koşullarda atılan küçük ama sürekli adımlarla şekillendi.'},
+    {name:'İbn Sina',role:'Hekim · filozof · bilim insanı',img:'https://commons.wikimedia.org/wiki/Special:Redirect/file/IbnSina.jpg',fact:'Biliyor musun? İbn Sina’nın El-Kanun fi’t-Tıb adlı eseri yüzyıllar boyunca tıp eğitiminde kullanılan temel eserlerden biri oldu.',detail:'Bilgi üretmek kadar, bilgiyi sistemleştirip gelecek kuşaklara aktarmak da kalıcı bir başarıdır.'},
+    {name:'Büyük İskender',role:'Makedonya kralı · tarih',img:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Alexander_the_Great_IAM_inv1138T_n4.jpg',fact:'Biliyor musun? Büyük İskender 20 yaşında Makedonya kralı oldu.',detail:'Genç yaşta başlayan liderlik yolculuğu, kısa sürede çok geniş bir coğrafyaya yayılan bir imparatorluğa dönüştü.'},
+    {name:'Napolyon Bonapart',role:'Fransız asker · devlet adamı',img:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Portrait_de_Napoléon_Bonaparte_(1769-1821),_général,_S872_(02_of_13).jpg',fact:'Biliyor musun? Napolyon Bonapart 35 yaşında Fransa İmparatoru olarak taç giydi.',detail:'Başarı hikâyelerinin arkasında yalnızca sonuç değil; yıllar süren çalışma, disiplin ve strateji bulunur.'},
+    {name:'Marie Curie',role:'Fizikçi · kimyager · Nobel ödüllü bilim insanı',img:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Marie_Curie,_portrait,_1900.jpg',fact:'Biliyor musun? Marie Curie iki farklı bilim dalında Nobel Ödülü kazanan ilk kişiydi.',detail:'Bilimde kalıcı ilerleme; merak, sabır, tekrar ve yıllarca sürdürülen araştırmaların sonucudur.'},
+    {name:'Julius Caesar',role:'Roma devlet adamı · asker',img:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Bust_Julius_Caesar.jpg',fact:'Biliyor musun? Julius Caesar MÖ 49’da Rubicon Nehri’ni geçerek Roma tarihinde dönüm noktası olan bir adım attı.',detail:'Tarihte iz bırakan kararların çoğu, kritik bir anda alınan cesur ama sonuçları hesaplanmış seçimlerle başlar.'}
+  ];
+  const careers=[
+    {day:'Pazartesi',title:'Tıp',meta:'SAY · 6 yıl',best:'1',bestUni:'İstanbul Medipol Üniversitesi · Tıp (İngilizce) (Burslu)',last:'49.111',lastUni:'Yeditepe Üniversitesi · Tıp (İngilizce) (Ücretli)',source:'2026 yerleştirme verileri · YÖK Atlas / ÖSYM'},
+    {day:'Salı',title:'Hukuk',meta:'EA · 4 yıl',best:'105',bestUni:'Koç Üniversitesi · Hukuk (Burslu)',last:'99.505',lastUni:'Nuh Naci Yazgan Üniversitesi · Hukuk (%25 İndirimli)',source:'2026 yerleştirme verileri · YÖK Atlas / ÖSYM'},
+    {day:'Çarşamba',title:'Diş Hekimliği',meta:'SAY · 5 yıl',best:'10.708',bestUni:'Yeditepe Üniversitesi · Diş Hekimliği (İngilizce) (Burslu)',last:'79.895',lastUni:'Kapadokya Üniversitesi · Diş Hekimliği (Ücretli)',source:'2026 yerleştirme verileri · YÖK Atlas / ÖSYM'},
+    {day:'Perşembe',title:'Matematik Öğretmenliği',meta:'SAY · 4 yıl',best:'41.235',bestUni:'Boğaziçi Üniversitesi · Matematik Öğretmenliği',last:'201.092',lastUni:'Dicle Üniversitesi · Matematik Öğretmenliği',source:'2026 yerleştirme verileri · YÖK Atlas / ÖSYM'},
+    {day:'Cuma',title:'Bilgisayar Mühendisliği',meta:'SAY · 4 yıl',best:'520',bestUni:'Koç Üniversitesi · Bilgisayar Mühendisliği (İngilizce) (Burslu)',last:'298.425',lastUni:'Atılım Üniversitesi · Bilgisayar Mühendisliği (İngilizce) (%50 İndirimli)',source:'2026 yerleştirme verileri · YÖK Atlas / ÖSYM'},
+    {day:'Cumartesi',title:'Psikoloji',meta:'EA · 4 yıl',best:'329',bestUni:'Koç Üniversitesi · Psikoloji (İngilizce) (Burslu)',last:'1.402.765',lastUni:'İstanbul Kültür Üniversitesi · Psikoloji (Ücretli)',source:'2026 yerleştirme verileri · YÖK Atlas / ÖSYM'},
+    {day:'Pazar',title:'Eczacılık',meta:'SAY · 5 yıl',best:'26.717',bestUni:'Acıbadem Mehmet Ali Aydınlar Üniversitesi · Eczacılık (İngilizce) (Burslu)',last:'96.719',lastUni:'Girne Amerikan Üniversitesi · Eczacılık (İngilizce) (%50 İndirimli)',source:'2026 yerleştirme verileri · YÖK Atlas / ÖSYM'}
+  ];
+  function paint(){
+    const d=new Date(); const idx=d.getDay()===0?6:d.getDay()-1;
+    const person=people[idx], career=careers[idx];
+    const $=id=>document.getElementById(id);
+    if($('v23PersonImage'))$('v23PersonImage').src=person.img;
+    if($('v23PersonName'))$('v23PersonName').textContent=person.name;
+    if($('v23PersonRole'))$('v23PersonRole').textContent=person.role;
+    if($('v23InspirationFact'))$('v23InspirationFact').textContent=person.fact;
+    if($('v23InspirationDetail'))$('v23InspirationDetail').textContent=person.detail;
+    if($('v23InspirationDay'))$('v23InspirationDay').textContent=career.day+' · İlham kartı';
+    if($('v23CareerTitle'))$('v23CareerTitle').textContent=career.title;
+    if($('v23CareerMeta'))$('v23CareerMeta').textContent=career.meta;
+    if($('v23CareerBestRank'))$('v23CareerBestRank').textContent=career.best;
+    if($('v23CareerBestUni'))$('v23CareerBestUni').textContent=career.bestUni;
+    if($('v23CareerLastRank'))$('v23CareerLastRank').textContent=career.last;
+    if($('v23CareerLastUni'))$('v23CareerLastUni').textContent=career.lastUni;
+    if($('v23CareerSource'))$('v23CareerSource').textContent=career.source+' · Sıralama küçük oldukça daha seçici programı gösterir.';
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',paint); else paint();
+})();
+</script>
+
+<script>
+(function(){
+  function v24Esc(v){return String(v??'').replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+  function getStories(){try{return JSON.parse(localStorage.getItem('asliSuccessStories')||'[]');}catch(e){return [];}}
+  function renderStories(){
+    const stories=getStories();
+    const cards=document.getElementById('v24StoryCards');
+    if(cards){
+      cards.innerHTML=stories.length?stories.map(function(x){return '<div class="public-card public-story"><div class="story-name">'+v24Esc(x.name)+'</div><small>'+v24Esc(x.field||'Öğrenci')+'</small><p>“'+v24Esc(x.text)+'”</p></div>';}).join(''):'<div class="public-card public-story"><div class="story-name">Henüz yayınlanmış öğrenci görüşü yok.</div><p>İlk öğrenci görüşü burada görünecek.</p></div>';
+    }
+    const list=document.getElementById('coachStoryList');
+    if(list){
+      list.innerHTML=stories.length?'<b>Yayınlanan görüşler</b>'+stories.map(function(x,i){return '<div class="public-card" style="margin-top:8px"><b>'+v24Esc(x.name)+'</b> · '+v24Esc(x.field||'')+'<p style="margin:6px 0">'+v24Esc(x.text)+'</p><button class="secondary" type="button" onclick="deleteCoachStory('+i+')">Sil</button></div>';}).join(''):'<span class="muted">Henüz yayınlanan görüş yok.</span>';
+    }
+  }
+  window.publishCoachStory=function(){
+    if(typeof role==='undefined'||role!=='coach'){alert('Bu alan yalnızca Koç içindir.');return;}
+    const n=(document.getElementById('coachStoryName')?.value||'').trim();
+    const f=(document.getElementById('coachStoryField')?.value||'').trim();
+    const t=(document.getElementById('coachStoryText')?.value||'').trim();
+    if(!n||!f||!t){alert('Öğrenci adı, alan ve görüş metnini doldur.');return;}
+    const stories=getStories(); stories.unshift({name:n,field:f,text:t,createdAt:new Date().toISOString()});
+    localStorage.setItem('asliSuccessStories',JSON.stringify(stories));
+    clearCoachStoryForm();
+    const m=document.getElementById('coachStorySaveMsg');if(m)m.textContent='Görüş yayınlandı. Başarı Hikâyeleri bölümünde görünüyor.';
+    renderStories();
+  };
+  window.deleteCoachStory=function(i){
+    if(typeof role==='undefined'||role!=='coach')return;
+    const stories=getStories();stories.splice(i,1);localStorage.setItem('asliSuccessStories',JSON.stringify(stories));renderStories();
+  };
+  window.clearCoachStoryForm=function(){['coachStoryName','coachStoryText'].forEach(function(id){const e=document.getElementById(id);if(e)e.value='';});const f=document.getElementById('coachStoryField');if(f)f.value='';};
+  window.v24OpenStoryEditor=function(){if(typeof role==='undefined'||role!=='coach'){alert('Bu alan yalnızca Koç içindir.');return;}var x=document.getElementById('v24StoryEditor');if(x)x.style.display='block';};
+  window.v24CloseStoryEditor=function(){var x=document.getElementById('v24StoryEditor');if(x)x.style.display='none';};
+  window.v24PreviewStory=function(){
+    var n=(document.getElementById('v24StoryName')||{}).value||'';
+    var f=(document.getElementById('v24StoryField')||{}).value||'';
+    var t=(document.getElementById('v24StoryText')||{}).value||'';
+    n=n.trim();f=f.trim();t=t.trim();
+    if(!n||!f||!t){alert('Öğrenci adını, alanı ve görüş metnini gir.');return;}
+    var el=document.getElementById('v24StoryPreview');
+    if(el)el.innerHTML='<div class="v24-preview-card"><div class="story-name">'+v24Esc(n)+'</div><small>'+v24Esc(f)+'</small><p>“'+v24Esc(t)+'”</p></div>';
+  };
+  window.renderSuccessStories=renderStories;
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderStories);else renderStories();
+})();
+</script>
+<script id="v25-owner-and-thinkers">
+(function(){
+  const historical=[
+    ['Fatih Sultan Mehmed Han','Osmanlı hükümdarı','İstanbul’un fethi sırasında 21 yaşındaydı.','F'],
+    ['Mustafa Kemal Atatürk','devlet adamı · asker','Türkiye Cumhuriyeti 29 Ekim 1923’te ilan edildi.','A'],
+    ['İbn Sina','hekim · filozof · bilim insanı','El-Kanun fi’t-Tıb adlı eseri yüzyıllar boyunca tıp eğitiminde kullanıldı.','İ'],
+    ['Büyük İskender','Makedonya kralı','20 yaşında Makedonya kralı oldu.','İ'],
+    ['Napolyon Bonapart','asker · devlet adamı','1804’te, 35 yaşındayken Fransa İmparatoru oldu.','N'],
+    ['Marie Curie','fizikçi · kimyager','İki farklı bilim dalında Nobel alan ilk kişiydi.','C'],
+    ['Julius Caesar','Roma devlet adamı','MÖ 49’da Rubicon’u geçmesi Roma tarihinde dönüm noktası oldu.','C'],
+    ['Leonardo da Vinci','sanatçı · bilim insanı','Not defterlerinde anatomi, mühendislik ve doğa üzerine binlerce gözlem bıraktı.','L'],
+    ['Galileo Galilei','astronom · fizikçi','Teleskobik gözlemleri gökyüzüne ilişkin anlayışı değiştirdi.','G'],
+    ['Isaac Newton','fizikçi · matematikçi','Principia adlı eseri 1687’de yayımlandı ve klasik mekaniğin temellerinden biri oldu.','N'],
+    ['Albert Einstein','fizikçi','1905’te özel görelilik ve fotoelektrik etki dahil önemli çalışmalar yayımladı.','E'],
+    ['Ada Lovelace','matematikçi','Analitik Makine için yayımladığı notlarda bir algoritma tarif etti.','A'],
+    ['Alan Turing','matematikçi · bilgisayar bilimcisi','Modern bilgisayar biliminin kurucu isimlerinden biri kabul edilir.','T'],
+    ['Nikola Tesla','mucit · mühendis','Alternatif akım sistemlerinin geliştirilmesinde önemli rol oynadı.','T'],
+    ['Charles Darwin','doğa bilimci','Türlerin Kökeni 1859’da yayımlandı.','D'],
+    ['Florence Nightingale','hemşire · istatistikçi','Hemşirelikte modern eğitim ve hastane istatistiklerinin gelişimine öncülük etti.','N'],
+    ['Mimar Sinan','mimar','Osmanlı’nın başmimarı olarak çok sayıda önemli eser tasarladı.','S'],
+    ['El-Biruni','bilim insanı','Dünya’nın yarıçapını ölçmeye yönelik geometrik yöntemler kullandı.','B'],
+    ['El-Harezmi','matematikçi','Cebir alanındaki çalışmaları modern cebir terminolojisinin gelişimine katkı sağladı.','H'],
+    ['İbnü’l-Heysem','bilim insanı','Optik üzerine deneysel çalışmalarıyla tanınır.','H'],
+    ['Hypatia','filozof · matematikçi','İskenderiye’de matematik ve felsefe dersleri verdi.','H'],
+    ['Johannes Gutenberg','matbaacı','Avrupa’da hareketli metal harfli matbaanın yaygınlaşmasında öncü oldu.','G'],
+    ['William Shakespeare','yazar · oyun yazarı','Eserleri dünya tiyatrosunun en etkili metinleri arasında yer alır.','S'],
+    ['Johann Sebastian Bach','besteci','Barok müziğin en etkili bestecilerinden biri olarak kabul edilir.','B'],
+    ['Ludwig van Beethoven','besteci','İşitme kaybına rağmen üretmeye devam ederek çok sayıda önemli eser verdi.','B'],
+    ['Wright Kardeşler','mucit · havacılık öncüleri','1903’te motorlu ve kontrollü uçuşla havacılık tarihinde dönüm noktası yarattılar.','W'],
+    ['Rosa Parks','sivil haklar öncüsü','1955’teki tutumu ABD sivil haklar hareketinin sembollerinden biri oldu.','R'],
+    ['Nelson Mandela','devlet adamı · aktivist','1994’te Güney Afrika’nın demokratik seçimle seçilen ilk siyah devlet başkanı oldu.','M'],
+    ['Amelia Earhart','havacı','Atlantik Okyanusu’nu tek başına uçakla geçen ilk kadın oldu.','E'],
+    ['Mahatma Gandhi','bağımsızlık lideri','Şiddetsiz direniş anlayışı Hindistan’ın bağımsızlık hareketinde önemli rol oynadı.','G']
+  ];
+  const thinkers=[
+    ['Sokrates','Antik Yunan filozofu','“Sorgulanmamış hayat yaşamaya değmez.”','Felsefi kaynaklarda yer alan sözün yaygın Türkçe çevirisi.','S'],
+    ['Platon','filozof','“Başlangıç, işin en önemli kısmıdır.”','Devlet adlı eserindeki düşünceyle ilişkilendirilen yaygın çeviri.','P'],
+    ['Aristoteles','filozof','“Eğitimli zihin, düşünceyi kanıt kabul etmeden kabul edebilendir.”','Aristoteles’e atfedilen yaygın bir çeviri; kaynaklandırma baskıya göre değişebilir.','A'],
+    ['Epiktetos','Stoacı filozof','“Seni rahatsız eden şey olaylar değil, onlar hakkındaki yargılarındır.”','Stoacı düşüncenin temel yaklaşımını özetleyen yaygın çeviri.','E'],
+    ['Marcus Aurelius','Stoacı filozof','“Zihnin üzerinde gücün vardır; dış olaylar üzerinde değil.”','Meditations/Marcus Aurelius düşüncesinin yaygın Türkçe çevirisi.','M'],
+    ['Seneca','Stoacı filozof','“Zorluklar zihni güçlendirir; emek bedeni yaptığı gibi.”','Seneca’ya atfedilen yaygın çeviri.','S'],
+    ['Konfüçyüs','filozof · öğretmen','“Nereye gittiğini biliyorsan, ne kadar yavaş gittiğinin önemi yoktur.”','Yaygın olarak Konfüçyüs’e atfedilir.','K'],
+    ['Laozi','filozof','“Bin millik yolculuk tek bir adımla başlar.”','Tao Te Ching ile ilişkilendirilen yaygın çeviri.','L'],
+    ['Zerdüşt','düşünür · dinî filozof','“İyi düşünceler, iyi sözler, iyi eylemler.”','Zerdüşt geleneğinin temel ilkelerinden biri olarak bilinir.','Z'],
+    ['İbn Rüşd','filozof · hekim','Akıl yürütme ile inanç arasında düşünsel bir uyum aradı.','Onun felsefesini özetleyen kısa bilgi.','R'],
+    ['Farabi','filozof · bilim insanı','Bilginin düzenlenmesi ve akıl yürütme üzerine kapsamlı çalışmalar yaptı.','Başarıyı sistemli öğrenmeyle ilişkilendiren düşünce geleneğinin önemli ismidir.','F'],
+    ['Descartes','filozof · matematikçi','“Düşünüyorum, öyleyse varım.”','Yaygın Türkçe çeviri.','D'],
+    ['Spinoza','filozof','Özgürlüğü, zorunluluğu anlamak ve tutkuları akılla değerlendirmek üzerinden ele aldı.','Etik adlı eseriyle tanınır.','S'],
+    ['John Locke','filozof','İnsan zihninin deneyimle şekillendiğini savunan görüşleri eğitim düşüncesini etkiledi.','Bilgi felsefesinin önemli isimlerinden.','L'],
+    ['David Hume','filozof','Bilginin deneyim ve gözlemle ilişkisini sorguladı.','Eleştirel düşüncenin gelişiminde etkili oldu.','H'],
+    ['Immanuel Kant','filozof','“Sapere aude: Kendi aklını kullanma cesaretini göster.”','Aydınlanma üzerine metninden yaygın çeviri.','K'],
+    ['Hegel','filozof','Düşüncenin ve tarihin değişim içindeki gelişimini sistemli biçimde inceledi.','Diyalektik düşüncenin en etkili isimlerinden.','H'],
+    ['Nietzsche','filozof','“Yaşamak için bir nedeni olan kişi, neredeyse her nasıl’a katlanabilir.”','Nietzsche’nin eserlerinde yer alan düşüncenin yaygın Türkçe çevirisi.','N'],
+    ['Kierkegaard','filozof','Bireyin seçimi, sorumluluğu ve iç dünyası üzerine yoğunlaştı.','Varoluşçu düşüncenin öncüllerinden.','K'],
+    ['Jean-Paul Sartre','filozof · yazar','“İnsan özgürlüğe mahkûmdur.”','Varoluşçuluğunun temel önermelerinden biri.','S'],
+    ['Simone de Beauvoir','filozof · yazar','Özgürlük, sorumluluk ve insanın kendini kurması üzerine yazdı.','Varoluşçu düşüncenin önemli isimlerinden.','B'],
+    ['Bertrand Russell','filozof · matematikçi','Eleştirel düşünme, mantık ve açık ifade üzerine çalıştı.','Analitik felsefenin önemli isimlerinden.','R'],
+    ['William James','psikolog · filozof','İnanç, deneyim ve insanın eylem dünyası arasındaki ilişkiyi inceledi.','Pragmatizmin önde gelen temsilcilerinden.','J'],
+    ['Carl Gustav Jung','psikiyatrist · düşünür','İnsan psikolojisindeki bilinç ve bilinçdışı süreçleri inceledi.','Analitik psikolojinin kurucusu.','J'],
+    ['Sigmund Freud','psikanalist','İnsan davranışında bilinçdışı süreçlerin rolünü sistemli biçimde ele aldı.','Psikanalizin kurucusu olarak bilinir.','F'],
+    ['Carl Rogers','psikolog','İnsanın gelişiminde kabul, empati ve güvenli ilişkinin önemini vurguladı.','Hümanistik psikolojinin önemli isimlerinden.','R'],
+    ['Viktor Frankl','psikiyatrist · düşünür','İnsan yaşamında anlam arayışını merkeze alan yaklaşımıyla tanındı.','İnsanın zor koşullarda bile anlam arayabileceğini savundu.','F'],
+    ['Abraham Maslow','psikolog','İnsan ihtiyaçlarını ve kendini gerçekleştirme kavramını hiyerarşik bir modelle ele aldı.','Hümanistik psikolojinin önemli isimlerinden.','M'],
+    ['Daniel Kahneman','psikolog · ekonomist','İnsan kararlarının sezgisel ve analitik süreçlerini araştırdı.','Davranışsal ekonomi çalışmalarının öncü isimlerinden.','K'],
+    ['Erich Fromm','psikolog · filozof','Özgürlük, sevgi ve insanın kendini gerçekleştirmesi üzerine yazdı.','İnsancıl psikanalizin önemli isimlerinden.','F']
+  ];
+  function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function updateOwnerOnlyControls(){
+    const isCoach=(typeof role!=='undefined' && role==='coach');
+    ['ownerAboutEditWrap','ownerAboutAdminButton','storyOwnerAdmin','storyOwnerNote','ownerNavEdit'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=isCoach?'flex':'none';});
+    const pe=document.getElementById('publicOwnerEditor'); if(pe) pe.style.display=isCoach?'block':'none';
+    const editor=document.getElementById('v24StoryEditor');
+    if(!isCoach && editor) editor.style.display='none';
+  }
+  window.updateOwnerOnlyControls=updateOwnerOnlyControls;
+  function loadOwner(){
+    try{const d=JSON.parse(localStorage.getItem('asliOwnerWebContent')||'{}');
+      ['ownerName','ownerTitle','ownerBio','ownerEducation','ownerTrainings','ownerExperience','ownerAreas'].forEach(id=>{const e=document.getElementById(id);const k=id.replace(/^owner/,'').toLowerCase();if(e&&d[k]!=null)e.value=d[k];});
+      const set=(id,v)=>{const e=document.getElementById(id);if(e&&v)e.textContent=v;};
+      set('publicOwnerBio',d.bio);set('publicOwnerEducation',d.education);set('publicOwnerTrainings',d.trainings);set('publicOwnerExperience',d.experience);set('publicOwnerAreas',d.areas);set('publicOwnerExperienceText',d.bio?d.bio:'Kendini tanıttığında bu alan, senin belirlediğin bilgilerle otomatik güncellenecek.');
+    }catch(e){}
+  }
+  window.loadPublicOwnerEditor=function(){
+    loadOwner();
+    const d=JSON.parse(localStorage.getItem('asliOwnerWebContent')||'{}');
+    const map={publicOwnerNameEdit:d.name||'Aslı Afşar',publicOwnerTitleEdit:d.title||'Eğitim Koçu',publicOwnerBioEdit:d.bio||'',publicOwnerEducationEdit:d.education||'',publicOwnerTrainingsEdit:d.trainings||'',publicOwnerExperienceEdit:d.experience||'',publicOwnerAreasEdit:d.areas||''};
+    Object.keys(map).forEach(id=>{const e=document.getElementById(id);if(e)e.value=map[id];});
+  };
+  window.savePublicOwnerEditor=function(){
+    if(typeof role==='undefined'||role!=='coach'){alert('Bu alan yalnızca Koç içindir.');return;}
+    const d={name:document.getElementById('publicOwnerNameEdit')?.value.trim()||'Aslı Afşar',title:document.getElementById('publicOwnerTitleEdit')?.value.trim()||'Eğitim Koçu',bio:document.getElementById('publicOwnerBioEdit')?.value.trim()||'',education:document.getElementById('publicOwnerEducationEdit')?.value.trim()||'',trainings:document.getElementById('publicOwnerTrainingsEdit')?.value.trim()||'',experience:document.getElementById('publicOwnerExperienceEdit')?.value.trim()||'',areas:document.getElementById('publicOwnerAreasEdit')?.value.trim()||''};
+    localStorage.setItem('asliOwnerWebContent',JSON.stringify(d)); loadOwner(); loadPublicOwnerEditor(); updateOwnerOnlyControls();
+    const m=document.getElementById('publicOwnerSaveMsg'); if(m)m.textContent='Tanıtım bilgilerin kaydedildi.';
+  };
+  window.openCoachWebEditor=function(){if(typeof role==='undefined'||role!=='coach'){alert('Bu alan yalnızca Koç içindir.');return;}loadOwner();show('webContent');};
+  window.saveOwnerWebContent=function(){if(typeof role==='undefined'||role!=='coach'){alert('Yetkiniz yok.');return;}const d={name:document.getElementById('ownerName')?.value.trim()||'Aslı Afşar',title:document.getElementById('ownerTitle')?.value.trim()||'Eğitim Koçu',bio:document.getElementById('ownerBio')?.value.trim()||'',education:document.getElementById('ownerEducation')?.value.trim()||'',trainings:document.getElementById('ownerTrainings')?.value.trim()||'',experience:document.getElementById('ownerExperience')?.value.trim()||'',areas:document.getElementById('ownerAreas')?.value.trim()||''};localStorage.setItem('asliOwnerWebContent',JSON.stringify(d));loadOwner();const m=document.getElementById('ownerSaveMsg');if(m)m.textContent='Taslak bu cihazda kaydedildi.';};
+  function dailyIndex(){const start=new Date(2026,0,1);const now=new Date();return Math.floor((new Date(now.getFullYear(),now.getMonth(),now.getDate())-start)/86400000)%30;}
+  function render25(){const i=dailyIndex(),h=historical[i],t=thinkers[i];const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set('v23PersonName',h[0]);set('v23PersonRole',h[1]);set('v23InspirationFact','Biliyor musun? '+h[2]);set('v23InspirationDetail','Her gün farklı bir isim, farklı bir fikir ve farklı bir öğrenme kıvılcımı.');set('v23InspirationDay','Günün tarihi kişisi · '+(i+1)+'/30');set('v25ThinkerName',t[0]);set('v25ThinkerRole',t[1]);set('v25ThinkerQuote',t[2]);set('v25ThinkerNote',t[3]);set('v25ThinkerMedal',t[4]);const img=document.getElementById('v23PersonImage');if(img){if(i<7){img.style.display='block';img.src=['https://commons.wikimedia.org/wiki/Special:Redirect/file/Fatih_II._Mehmet.jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/MustafaKemalAtaturk_oval.png','https://commons.wikimedia.org/wiki/Special:Redirect/file/IbnSina.jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/Alexander_the_Great_IAM_inv1138T_n4.jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/Portrait_de_Napoléon_Bonaparte_(1769-1821),_général,_S872_(02_of_13).jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/Marie_Curie,_portrait,_1900.jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/Bust_Julius_Caesar.jpg'][i];}else img.style.display='none';}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{loadOwner();render25();updateOwnerOnlyControls()});else{loadOwner();render25();updateOwnerOnlyControls()}
+})();
+</script>
 </body>
 </html>
