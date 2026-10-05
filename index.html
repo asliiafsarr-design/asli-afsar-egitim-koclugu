@@ -421,6 +421,7 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
         <button onclick="publicPage('how')">Nasıl Çalışıyoruz?</button>
         <button onclick="publicPage('stories')">Başarı Hikâyeleri</button>
         <button onclick="publicPage('inspiration')">İlham</button>
+        <button onclick="publicPage('videos')">Videolar</button>
         <button onclick="publicPage('contact')">İletişim</button>
         <button id="ownerNavEdit" class="owner-only-control" style="display:none" onclick="openCoachWebEditor()">🔒 İçerik Düzenle</button>
         <button class="public-primary" onclick="showPortalLogin()">Portal Girişi</button>
@@ -577,7 +578,8 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
 <div class="public-review-note owner-only-control" id="storyOwnerNote" style="display:none">Koç olarak giriş yaptığınızda burada öğrenci görüşlerini hazırlayıp kontrol edebilirsiniz. Dışarıdan ziyaretçiler bu yönetim alanını göremez.</div>
 </section></div>
 <div id="public-inspiration" class="public-page"><section class="public-section"><button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button><h2>İlham</h2><div class="public-quote"><blockquote>“Gelecek, bugünden ona hazırlananlara aittir.”</blockquote><cite>Malcolm X</cite></div></section></div>
-    <div id="public-contact" class="public-page"><section class="public-section"><button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button><h2>İletişim</h2><p class="public-section-lead">İletişim bilgilerini burada senin belirlediğin şekilde yayınlayacağız.</p><div class="public-grid"><div class="public-card"><h3>Aslı Afşar Eğitim Koçluğu</h3><p>Online eğitim koçluğu ve öğrenci takip hizmetleri.</p></div><div class="public-card"><h3>Portal</h3><p>Mevcut öğrenciler için güvenli portal erişimi.</p><button class="public-primary" onclick="showPortalLogin()">Portal Girişi</button></div></div></section></div>
+    <div id="public-contact" class="public-page"><section class="public-section"><button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button><h2>İletişim</h2><p class="public-section-lead">Aslı Afşar Eğitim Koçluğu ile iletişime geçebilirsiniz.</p><div class="public-grid"><div class="public-card"><h3>Aslı Afşar Eğitim Koçluğu</h3><p>Online eğitim koçluğu ve öğrenci takip hizmetleri.</p><div id="publicContactPhoneWrap" style="margin-top:12px"><b>📞 Telefon</b><div><a id="publicContactPhone" href="#">Telefon bilgisi eklenmedi.</a></div></div><div id="publicContactInstagramWrap" style="margin-top:12px"><b>📸 Instagram</b><div><a id="publicContactInstagram" href="#" target="_blank" rel="noopener">Instagram bilgisi eklenmedi.</a></div></div></div><div class="public-card"><h3>Portal</h3><p>Mevcut öğrenciler için güvenli portal erişimi.</p><button class="public-primary" onclick="showPortalLogin()">Portal Girişi</button></div></div></section></div>
+    <div id="public-videos" class="public-page"><section class="public-section"><button class="public-back" onclick="publicPage('home')">← Ana Sayfaya Dön</button><div class="v24-story-head"><div><span class="public-eyebrow">Öğretmenlerden kısa içerikler</span><h2>Videolar</h2><p class="public-section-lead">Matematik, edebiyat ve diğer derslerde nasıl çalışılacağına dair kısa, faydalı videolar.</p></div><div class="v24-story-mark">▶</div></div><div id="publicVideoList" class="public-grid"></div></section></div>
 
     <footer class="public-footer"><span>© 2026 Aslı Afşar Eğitim Koçluğu</span><span>Plan • Takip • Gelişim • Başarı</span></footer>
   </div>
@@ -610,6 +612,7 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
     document.querySelectorAll('.public-page').forEach(function(x){x.classList.remove('active')});
     var el=document.getElementById('public-'+name);
     if(el) el.classList.add('active');
+    if(name==='contact'||name==='videos') loadPublicContactAndVideos();
     window.scrollTo({top:0,behavior:'smooth'});
   };
   window.showPortalLogin=function(){
@@ -861,7 +864,7 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
     <div><label>Süre (dk)</label><input id="examDuration" type="number" value="165"></div>
     <div><label>Deneme dosyası (PDF / görsel)</label><input id="examFile" type="file" accept=".pdf,image/*"></div>
    </div>
-   <div class="small muted">Dosya öğrencinin portalında açılır. Deneme dosyası için 50 MB sınırı vardır.</div>
+   <div class="small muted">Dosya öğrencinin portalında açılır. Deneme ve branş dosyalarında hedef sınır 100 MB'tır.</div>
    <button onclick="uploadAndAssignExam()">Denemeyi Öğrenciye Gönder</button>
   </div>
   <div class="card"><h3>Deneme Takibi</h3><div class="grid"><div><label>Durum</label><select id="examFilter" onchange="renderExamWorkflow()"><option value="all">Tümü</option><option value="assigned">Öğrencide</option><option value="submitted">Teslim Edildi</option><option value="analyzed">Analiz Yayında</option></select></div></div><div id="examWorkflowList" class="list"></div></div>
@@ -1102,6 +1105,18 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
     <div><label>Aldığım Eğitimler / Sertifikalar</label><textarea id="ownerTrainings" rows="4" placeholder="Eğitim koçluğu, sınav stratejileri..."></textarea></div>
     <div><label>Deneyim</label><textarea id="ownerExperience" rows="4" placeholder="Deneyim ve çalışma yılı..."></textarea></div>
     <div><label>Çalışma Alanlarım</label><textarea id="ownerAreas" rows="4" placeholder="YKS, TYT, AYT, ara sınıflar..."></textarea></div>
+   </div>
+   <div class="card" style="margin-top:18px;border:2px solid #8dd8c0;background:#f5fffb">
+    <h3>📞 İletişim Bilgileri</h3>
+    <div class="grid"><div><label>Telefon</label><input id="ownerPhone" type="tel" placeholder="05xx xxx xx xx"></div><div><label>Instagram</label><input id="ownerInstagram" placeholder="https://instagram.com/kullaniciadi"></div></div>
+   </div>
+   <div class="card" style="margin-top:18px;border:2px solid #9b8cff;background:#faf8ff">
+    <h3>🎥 Video İçerik Yönetimi</h3><p class="muted small">1–2 dakikalık öğretmen videolarını buradan ekleyebilirsin. Video HTML dosyasının içine gömülmez; ayrı depolanır.</p>
+    <div class="grid"><div><label>Video başlığı</label><input id="webVideoTitle" placeholder="Örn. Matematikte nasıl yol alınır?"></div><div><label>Branş</label><select id="webVideoSubject"><option>Matematik</option><option>Türkçe</option><option>Edebiyat</option><option>Tarih</option><option>Coğrafya</option><option>Fizik</option><option>Kimya</option><option>Biyoloji</option><option>Genel</option></select></div></div>
+    <label>Kısa açıklama</label><textarea id="webVideoDescription" rows="3" placeholder="Videoda öğrencinin ne öğreneceğini yaz..."></textarea>
+    <div class="grid"><div><label>Video bağlantısı (YouTube / Vimeo vb.)</label><input id="webVideoUrl" type="url" placeholder="https://..."></div><div><label>veya video dosyası</label><input id="webVideoFile" type="file" accept="video/mp4,video/webm,video/quicktime,video/*"></div></div>
+    <div class="small muted">Video dosyaları 100 MB'a kadar bulut depolamaya yüklenir; HTML dosyasını büyütmez.</div>
+    <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px"><button onclick="addWebVideo()">🎥 VİDEOYU YAYINLA</button></div><div id="webVideoMsg" class="small muted" style="margin-top:8px"></div><div id="webVideoAdminList" style="margin-top:12px"></div>
    </div>
    <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px"><button onclick="saveOwnerWebContent()">TANITIMI KAYDET</button><button class="secondary" onclick="show('home')">Koç Ana Sayfasına Dön</button></div>
    <div id="ownerSaveMsg" class="small muted" style="margin-top:8px"></div>
@@ -2070,7 +2085,7 @@ function fillSubjects(id){
 
 function refreshSelectors(){
  const students=db.students||[];
- ['profileStudent','programStudent','taskStudent','examStudent','shareStudent','homeStudentLogin','invStudent','reportStudent'].forEach(id=>{
+ ['profileStudent','programStudent','taskStudent','examStudent','shareStudent','homeStudentLogin','invStudent','reportStudent','sourceStudent'].forEach(id=>{
   const e=document.getElementById(id);if(!e)return;
   e.innerHTML=students.length?students.map(s=>{const nm=String(s.name||s.profile?.name||'İsimsiz Öğrenci');const gr=String(s.grade||'');const ar=String(s.area||'');return `<option value="${esc(s.id)}">${esc(nm)}${gr?' — '+esc(gr):''}${ar?' / '+esc(ar):''}</option>`}).join(''):'<option value="">Öğrenci bulunamadı</option>';
   if(selectedStudent&&students.some(s=>String(s.id)===String(selectedStudent)))e.value=selectedStudent;
@@ -2603,18 +2618,29 @@ async function uploadPortalFile(file,folder,id){
  if(!file)return null;
  const safeName=String(file.name||'dosya').replace(/[^a-zA-Z0-9._-]+/g,'_');
  const path=folder+'/'+String(id)+'-'+Date.now()+'-'+safeName;
- // Önce kalıcı Storage'ı dene. Storage erişimi herhangi bir nedenle başarısızsa
- // dosyayı Supabase exams.notes içinde veri URL'si olarak sakla; böylece başka
- // cihazda da dosya açılabilir.
  try{
    const {error}=await supa.storage.from('exam-files').upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'});
-   if(!error){
-     const {data}=supa.storage.from('exam-files').getPublicUrl(path);
-     if(data?.publicUrl)return {url:data.publicUrl,data:'',path:path};
-   }
- }catch(e){console.warn('Storage yüklemesi başarısız, bulut veri URL yedeği kullanılacak:',e?.message||e);}
- const data=await fileToDataUrl(file);
- return {url:'',data,path:''};
+   if(error)throw error;
+   const {data}=supa.storage.from('exam-files').getPublicUrl(path);
+   if(data?.publicUrl)return {url:data.publicUrl,data:'',path:path};
+   throw new Error('Dosya için erişilebilir bağlantı oluşturulamadı.');
+ }catch(e){
+   // Büyük dosyaları asla HTML/localStorage içine veri URL'si olarak koyma.
+   // Böylece PDF/video yüklemeleri portalı şişirmez veya giriş sistemini etkilemez.
+   throw new Error('Dosya bulut depolamaya yüklenemedi: '+(e?.message||e));
+ }
+}
+async function uploadWebVideoFile(file,id){
+ if(!file)return null;
+ if(file.size>100*1024*1024)throw new Error("Video 100 MB'dan küçük olmalı.");
+ if(!supa)throw new Error('Bulut bağlantısı hazır değil.');
+ const safeName=String(file.name||'video').replace(/[^a-zA-Z0-9._-]+/g,'_');
+ const path='web-videos/'+String(id)+'-'+Date.now()+'-'+safeName;
+ const {error}=await supa.storage.from('exam-files').upload(path,file,{upsert:false,contentType:file.type||'video/mp4'});
+ if(error)throw error;
+ const {data}=supa.storage.from('exam-files').getPublicUrl(path);
+ if(!data?.publicUrl)throw new Error('Video için erişilebilir bağlantı oluşturulamadı.');
+ return {url:data.publicUrl,path};
 }
 
 const EXAM_BRANCHES={
@@ -2642,7 +2668,7 @@ function updateExamBranchOptions(){
 async function uploadAndAssignExam(){
  const sid=document.getElementById('examStudent').value,name=document.getElementById('examName').value.trim(),file=document.getElementById('examFile').files[0];
  if(!sid)return alert('Öğrenci seçin.');if(!name)return alert('Deneme adı girin.');if(!file)return alert('Deneme dosyasını seçin.');
- if(file.size>50 * 1024 * 1024)return alert('Dosya 50 MB\'dan küçük olmalı.');
+ if(file.size>100 * 1024 * 1024)return alert('Dosya 100 MB\'dan küçük olmalı.');
  try{
   if(!supa)throw new Error('Bulut bağlantısı hazır değil.');
   const sidStr=String(sid),studentObj=(db.students||[]).find(s=>String(s.id)===sidStr),studentName=studentObj?.name||'';
@@ -3168,7 +3194,7 @@ async function addBranchExam(){
  const name=document.getElementById('branchAddName').value.trim()||`${level} ${subject} Branş Denemesi`;
  const date=document.getElementById('branchAddDate').value||new Date().toISOString().slice(0,10);
  const file=document.getElementById('branchAddPdf').files[0];
- if(file&&file.size>50 * 1024 * 1024)return alert('Dosya 50 MB\'dan küçük olmalı.');
+ if(file&&file.size>100 * 1024 * 1024)return alert('Dosya 100 MB\'dan küçük olmalı.');
  try{
   const id=uuid();let fileUrl='';
   if(file)fileUrl=await uploadPortalFile(file,'branch-exams',id);
@@ -3769,7 +3795,7 @@ setTimeout(()=>{try{renderMembershipManager();}catch(_){ }},50);
   window.updateOwnerOnlyControls=updateOwnerOnlyControls;
   function loadOwner(){
     try{const d=JSON.parse(localStorage.getItem('asliOwnerWebContent')||'{}');
-      ['ownerName','ownerTitle','ownerBio','ownerEducation','ownerTrainings','ownerExperience','ownerAreas'].forEach(id=>{const e=document.getElementById(id);const k=id.replace(/^owner/,'').toLowerCase();if(e&&d[k]!=null)e.value=d[k];});
+      ['ownerName','ownerTitle','ownerBio','ownerEducation','ownerTrainings','ownerExperience','ownerAreas','ownerPhone','ownerInstagram'].forEach(id=>{const e=document.getElementById(id);const k=id.replace(/^owner/,'').toLowerCase();if(e&&d[k]!=null)e.value=d[k];});
       const set=(id,v)=>{const e=document.getElementById(id);if(e&&v)e.textContent=v;};
       set('publicOwnerBio',d.bio);set('publicOwnerEducation',d.education);set('publicOwnerTrainings',d.trainings);set('publicOwnerExperience',d.experience);set('publicOwnerAreas',d.areas);set('publicOwnerExperienceText',d.bio?d.bio:'Kendini tanıttığında bu alan, senin belirlediğin bilgilerle otomatik güncellenecek.');
     }catch(e){}
@@ -3786,11 +3812,35 @@ setTimeout(()=>{try{renderMembershipManager();}catch(_){ }},50);
     localStorage.setItem('asliOwnerWebContent',JSON.stringify(d)); loadOwner(); loadPublicOwnerEditor(); updateOwnerOnlyControls();
     const m=document.getElementById('publicOwnerSaveMsg'); if(m)m.textContent='Tanıtım bilgilerin kaydedildi.';
   };
-  window.openCoachWebEditor=function(){if(typeof role==='undefined'||role!=='coach'){alert('Bu alan yalnızca Koç içindir.');return;}loadOwner();show('webContent');};
-  window.saveOwnerWebContent=function(){if(typeof role==='undefined'||role!=='coach'){alert('Yetkiniz yok.');return;}const d={name:document.getElementById('ownerName')?.value.trim()||'Aslı Afşar',title:document.getElementById('ownerTitle')?.value.trim()||'Eğitim Koçu',bio:document.getElementById('ownerBio')?.value.trim()||'',education:document.getElementById('ownerEducation')?.value.trim()||'',trainings:document.getElementById('ownerTrainings')?.value.trim()||'',experience:document.getElementById('ownerExperience')?.value.trim()||'',areas:document.getElementById('ownerAreas')?.value.trim()||''};localStorage.setItem('asliOwnerWebContent',JSON.stringify(d));loadOwner();const m=document.getElementById('ownerSaveMsg');if(m)m.textContent='Taslak bu cihazda kaydedildi.';};
+  function loadPublicContactAndVideos(){
+    try{
+      const d=JSON.parse(localStorage.getItem('asliOwnerWebContent')||'{}');
+      const ph=document.getElementById('publicContactPhone'),ig=document.getElementById('publicContactInstagram');
+      if(ph&&d.phone){ph.textContent=d.phone;ph.href='tel:'+d.phone.replace(/[^0-9+]/g,'');}
+      if(ig&&d.instagram){let u=d.instagram.trim();if(!/^https?:\/\//i.test(u))u='https://instagram.com/'+u.replace(/^@/,'');ig.textContent=d.instagram;ig.href=u;}
+      const box=document.getElementById('publicVideoList');if(!box)return;
+      const vids=JSON.parse(localStorage.getItem('asliWebVideos')||'[]');
+      box.innerHTML=vids.length?vids.map(v=>`<div class="public-card"><div style="font-size:34px">▶️</div><h3>${esc(v.title)}</h3><div class="small muted">${esc(v.subject||'Genel')}</div><p>${esc(v.description||'')}</p>${v.url?`<a class="public-primary" href="${esc(v.url)}" target="_blank" rel="noopener">Videoyu İzle</a>`:v.fileUrl?`<video controls preload="metadata" style="width:100%;border-radius:14px;margin-top:10px" src="${esc(v.fileUrl)}"></video>`:''}</div>`).join(''):'<div class="notice">Henüz video yayınlanmadı.</div>';
+    }catch(e){console.warn('Web içerikleri:',e.message)}
+  }
+  window.addWebVideo=async function(){
+    if(typeof role==='undefined'||role!=='coach'){alert('Bu alan yalnızca Koç içindir.');return;}
+    const title=document.getElementById('webVideoTitle')?.value.trim();const subject=document.getElementById('webVideoSubject')?.value||'Genel';const description=document.getElementById('webVideoDescription')?.value.trim()||'';const url=document.getElementById('webVideoUrl')?.value.trim()||'';const file=document.getElementById('webVideoFile')?.files?.[0];
+    if(!title)return alert('Video başlığı girin.');if(!url&&!file)return alert('Video bağlantısı girin veya video dosyası seçin.');if(file&&file.size>100*1024*1024)return alert('Video 100 MB\'dan küçük olmalı.');
+    try{let fileUrl='';if(file){const up=await uploadWebVideoFile(file,uuid());fileUrl=up?.url||'';if(!fileUrl)throw new Error('Video buluta yüklenemedi.');}
+      const arr=JSON.parse(localStorage.getItem('asliWebVideos')||'[]');arr.unshift({id:uuid(),title,subject,description,url,fileUrl,createdAt:new Date().toISOString()});localStorage.setItem('asliWebVideos',JSON.stringify(arr));
+      ['webVideoTitle','webVideoDescription','webVideoUrl'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});const f=document.getElementById('webVideoFile');if(f)f.value='';
+      renderWebVideoAdminList();loadPublicContactAndVideos();const m=document.getElementById('webVideoMsg');if(m)m.textContent='Video yayınlandı.';
+    }catch(e){alert('Video eklenemedi: '+e.message)}
+  };
+  function renderWebVideoAdminList(){const box=document.getElementById('webVideoAdminList');if(!box)return;const arr=JSON.parse(localStorage.getItem('asliWebVideos')||'[]');box.innerHTML=arr.map(v=>`<div class="item"><b>${esc(v.title)}</b><div class="small muted">${esc(v.subject||'Genel')}</div><button class="danger" onclick="deleteWebVideo('${v.id}')">Sil</button></div>`).join('')||'<p class="muted small">Henüz video eklenmedi.</p>';}
+  window.deleteWebVideo=function(id){const arr=JSON.parse(localStorage.getItem('asliWebVideos')||'[]').filter(v=>String(v.id)!==String(id));localStorage.setItem('asliWebVideos',JSON.stringify(arr));renderWebVideoAdminList();loadPublicContactAndVideos();};
+  window.openCoachWebEditor=function(){if(typeof role==='undefined'||role!=='coach'){alert('Bu alan yalnızca Koç içindir.');return;}loadOwner();renderWebVideoAdminList();show('webContent');};
+
+  window.saveOwnerWebContent=function(){if(typeof role==='undefined'||role!=='coach'){alert('Yetkiniz yok.');return;}const d={name:document.getElementById('ownerName')?.value.trim()||'Aslı Afşar',title:document.getElementById('ownerTitle')?.value.trim()||'Eğitim Koçu',bio:document.getElementById('ownerBio')?.value.trim()||'',education:document.getElementById('ownerEducation')?.value.trim()||'',trainings:document.getElementById('ownerTrainings')?.value.trim()||'',experience:document.getElementById('ownerExperience')?.value.trim()||'',areas:document.getElementById('ownerAreas')?.value.trim()||'',phone:document.getElementById('ownerPhone')?.value.trim()||'',instagram:document.getElementById('ownerInstagram')?.value.trim()||''};localStorage.setItem('asliOwnerWebContent',JSON.stringify(d));loadOwner();loadPublicContactAndVideos();const m=document.getElementById('ownerSaveMsg');if(m)m.textContent='Taslak bu cihazda kaydedildi.';};
   function dailyIndex(){const start=new Date(2026,0,1);const now=new Date();return Math.floor((new Date(now.getFullYear(),now.getMonth(),now.getDate())-start)/86400000)%30;}
   function render25(){const i=dailyIndex(),h=historical[i],t=thinkers[i];const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set('v23PersonName',h[0]);set('v23PersonRole',h[1]);set('v23InspirationFact','Biliyor musun? '+h[2]);set('v23InspirationDetail','Her gün farklı bir isim, farklı bir fikir ve farklı bir öğrenme kıvılcımı.');set('v23InspirationDay','Günün tarihi kişisi · '+(i+1)+'/30');set('v25ThinkerName',t[0]);set('v25ThinkerRole',t[1]);set('v25ThinkerQuote',t[2]);set('v25ThinkerNote',t[3]);set('v25ThinkerMedal',t[4]);const img=document.getElementById('v23PersonImage');if(img){if(i<7){img.style.display='block';img.src=['https://commons.wikimedia.org/wiki/Special:Redirect/file/Fatih_II._Mehmet.jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/MustafaKemalAtaturk_oval.png','https://commons.wikimedia.org/wiki/Special:Redirect/file/IbnSina.jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/Alexander_the_Great_IAM_inv1138T_n4.jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/Portrait_de_Napoléon_Bonaparte_(1769-1821),_général,_S872_(02_of_13).jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/Marie_Curie,_portrait,_1900.jpg','https://commons.wikimedia.org/wiki/Special:Redirect/file/Bust_Julius_Caesar.jpg'][i];}else img.style.display='none';}}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{loadOwner();render25();updateOwnerOnlyControls()});else{loadOwner();render25();updateOwnerOnlyControls()}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{loadOwner();loadPublicContactAndVideos();render25();updateOwnerOnlyControls()});else{loadOwner();render25();updateOwnerOnlyControls()}
 })();
 </script>
 </body>
