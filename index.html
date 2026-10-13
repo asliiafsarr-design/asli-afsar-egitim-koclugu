@@ -736,9 +736,11 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
    <div class="row" style="gap:14px;flex-wrap:wrap;align-items:stretch">
     <div style="flex:1;min-width:280px">
      <h3>Program Tarihi</h3>
-     <p class="muted small">Haftaları sistem belirlemez. Takvimden program yapmak istediğin tarihi sen seçersin. Seçtiğin tarih, Cumartesi başlayan haftalık programa bağlanır. Yeni program dönemi her Cumartesi otomatik açılır.</p>
-     <label>Takvimden tarih seç</label>
-     <input id="programCalendarDate" type="date" min="2026-01-01" max="2027-06-30" onchange="selectProgramDate(this.value)" style="font-size:16px">
+     <p class="muted small">Her öğrenci için program başlangıç tarihini seç. Bitiş tarihi otomatik olarak 6 gün sonrası olur; program dönemi tam 7 gündür. Eski haftaların kayıtları korunur.</p>
+     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+      <div><label>Başlangıç tarihi</label><input id="programCalendarDate" type="date" min="2026-01-01" max="2027-06-30" onchange="selectProgramDate(this.value)" style="font-size:16px"></div>
+      <div><label>Bitiş tarihi (otomatik)</label><input id="programEndDate" type="date" readonly disabled style="font-size:16px;opacity:.85"></div>
+     </div>
      <div id="programWeekLabel" class="notice small" style="margin-top:10px"></div>
     </div>
     <div style="min-width:220px;max-width:300px;display:flex;align-items:center">
@@ -3160,7 +3162,16 @@ async function saveStudentPortalAssessment(sid){const v=document.getElementById(
 
 let selectedProgramWeekKey = currentProgramCycleKey();
 function weekRangeLabel(key){return programCycleLabel(key);}
-function selectProgramDate(dateStr){selectedProgramWeekKey=programCycleStartISO(new Date((dateStr||todayISO())+'T12:00:00'));const cal=document.getElementById('programCalendarDate');if(cal)cal.value=dateStr||todayISO();const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Seçtiğin tarih: '+(dateStr||todayISO())+' · Program haftası: '+weekRangeLabel(selectedProgramWeekKey);const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=weekRangeLabel(selectedProgramWeekKey);renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();}
+function selectProgramDate(dateStr){
+ const chosen=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
+ selectedProgramWeekKey=chosen;
+ const end=new Date(chosen+'T12:00:00');end.setDate(end.getDate()+6);const endISO=localISODate(end);
+ const cal=document.getElementById('programCalendarDate');if(cal)cal.value=chosen;
+ const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=endISO;
+ const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Program dönemi: '+weekRangeLabel(selectedProgramWeekKey)+' (7 gün)';
+ const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=weekRangeLabel(selectedProgramWeekKey);
+ renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();
+}
 function renderProgramWeekSelector(){selectProgramDate(selectedProgramWeekKey||todayISO());}
 function selectProgramWeek(key){selectProgramDate(key||todayISO());}
 function changeProgramWeek(offset){const d=new Date((selectedProgramWeekKey||currentProgramCycleKey())+'T12:00:00');d.setDate(d.getDate()+Number(offset||0)*7);selectProgramDate(localISODate(d));}
@@ -3388,13 +3399,14 @@ function renderPortalWeeklyProgram(studentId){
  const el=document.getElementById('portalWeeklyProgramGrid'); if(!el)return;
  const s=(db.students||[]).find(x=>String(x.id)===String(studentId));
  if(!s){el.innerHTML='';return;}
- const currentWeek=activePortalProgramWeekKey();
- const studentPrograms=(db.programs||[]).filter(x=>String(x.student)===String(s.id)&&String(x.weekKey||''));
- const currentRows=studentPrograms.filter(x=>String(x.weekKey)===String(currentWeek));
- const upcomingWeeks=[...new Set(studentPrograms.map(x=>String(x.weekKey||'')).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)&&k>currentWeek))].sort();
- const activeWeek=currentRows.length?currentWeek:(upcomingWeeks[0]||currentWeek);
- const info=document.getElementById('portalProgramWeekInfo');if(info)info.textContent=(activeWeek===currentWeek?'Aktif program haftası: ':'Sıradaki planlanan program haftası: ')+programCycleLabel(activeWeek)+' · Önceki haftalar arşivde korunur.';
- const arr=currentRows.length?currentRows:studentPrograms.filter(x=>String(x.weekKey||'')===String(activeWeek));
+ const today=todayISO();
+ const studentPrograms=(db.programs||[]).filter(x=>String(x.student)===String(s.id)&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
+ const weekKeys=[...new Set(studentPrograms.map(x=>String(x.weekKey)))].sort();
+ const currentKey=weekKeys.find(k=>k<=today&&today<=programCycleRange(k).end);
+ const nextKey=weekKeys.find(k=>k>today);
+ const activeWeek=currentKey||nextKey||'';
+ const arr=activeWeek?studentPrograms.filter(x=>String(x.weekKey)===activeWeek):[];
+ const info=document.getElementById('portalProgramWeekInfo');if(info)info.textContent=activeWeek?(currentKey?'Aktif program dönemi: ':'Sıradaki program dönemi: ')+programCycleLabel(activeWeek)+' · Önceki haftaların kayıtları korunur.':'Henüz bu öğrenci için tarihli bir program atanmadı.';
  // Öğrenci ekranı koç ekranındaki kayıt sırasını aynen korur; saat kullanılmaz.
  const orderedArr=arr.slice().sort(programSort);
  const days=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
