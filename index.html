@@ -2810,8 +2810,15 @@ function challengeDateKey(d){return localISODate(d);}
 function challengeDateDayName(dateKey){const d=new Date(dateKey+'T12:00:00');return challengeDayNames()[d.getDay()];}
 function isChallengeDayComplete(studentId,dateKey){
  const day=challengeDateDayName(dateKey);
- const wk=programCycleStartISO(new Date(dateKey+'T12:00:00'));
- const items=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&String(x.weekKey||'')===String(wk)&&x.day===day);
+ const target=new Date(String(dateKey)+'T12:00:00');
+ const items=(db.programs||[]).filter(x=>{
+  if(String(x.student)!==String(studentId)||x.day!==day)return false;
+  const start=String(x.weekKey||'').slice(0,10);
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(start))return false;
+  const from=new Date(start+'T12:00:00');
+  const to=new Date(from);to.setDate(to.getDate()+6);
+  return target>=from&&target<=to;
+ });
  if(!items.length)return false;
  return items.every(x=>studentProgramCompleted(x.id,studentId));
 }
