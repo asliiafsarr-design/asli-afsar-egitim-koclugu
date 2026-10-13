@@ -3391,7 +3391,7 @@ function renderPortalWeeklyProgram(studentId){
  const currentWeek=activePortalProgramWeekKey();
  const studentPrograms=(db.programs||[]).filter(x=>String(x.student)===String(s.id)&&String(x.weekKey||''));
  const currentRows=studentPrograms.filter(x=>String(x.weekKey)===String(currentWeek));
- const upcomingWeeks=[...new Set(studentPrograms.map(x=>String(x.weekKey||'')).filter(k=>/^\\d{4}-\\d{2}-\\d{2}$/.test(k)&&k>currentWeek))].sort();
+ const upcomingWeeks=[...new Set(studentPrograms.map(x=>String(x.weekKey||'')).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)&&k>currentWeek))].sort();
  const activeWeek=currentRows.length?currentWeek:(upcomingWeeks[0]||currentWeek);
  const info=document.getElementById('portalProgramWeekInfo');if(info)info.textContent=(activeWeek===currentWeek?'Aktif program haftası: ':'Sıradaki planlanan program haftası: ')+programCycleLabel(activeWeek)+' · Önceki haftalar arşivde korunur.';
  const arr=currentRows.length?currentRows:studentPrograms.filter(x=>String(x.weekKey||'')===String(activeWeek));
