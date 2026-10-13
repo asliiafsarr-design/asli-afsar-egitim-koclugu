@@ -2814,7 +2814,7 @@ function isChallengeDayComplete(studentId,dateKey){
  const items=(db.programs||[]).filter(x=>{
   if(String(x.student)!==String(studentId)||x.day!==day)return false;
   const start=String(x.weekKey||'').slice(0,10);
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(start))return false;
+  if(start.length!==10||start[4]!=='-'||start[7]!=='-')return false;
   const from=new Date(start+'T12:00:00');
   const to=new Date(from);to.setDate(to.getDate()+6);
   return target>=from&&target<=to;
