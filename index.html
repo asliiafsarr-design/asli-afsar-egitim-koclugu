@@ -2585,11 +2585,34 @@ async function setCoachTaskDone(id){
 }
 async function setStudentTaskDone(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
- const st=ensureTaskStatus(task);st.studentDone=!st.studentDone;st.updatedAt=new Date().toISOString();st.student=task.student;
+ const existing=(db.taskStatuses||[]).find(v=>String(v.taskId)===String(task.id));
+ const previous=existing?{...existing}:null;
+ const st=ensureTaskStatus(task);
+ st.studentDone=!st.studentDone;
+ st.updatedAt=new Date().toISOString();
+ st.student=task.student;
  persistLocalDB();
- renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');
- const ok=await syncCloud();
- if(!ok){st.studentDone=!st.studentDone;st.updatedAt=new Date().toISOString();persistLocalDB();renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');alert('Görev durumu kaydedilemedi. Eski durum geri yüklendi.');}
+ renderPortalForStudent('student',task.student);
+ renderPortalFeatureCards(task.student);
+ renderTodayTaskAndAlerts(task.student,'todayPlanCard');
+ try{
+  if(!supa)throw new Error('Bulut bağlantısı hazır değil.');
+  const row={id:st.id,student_id:task.student,report_type:'task_status',content:JSON.stringify({taskId:task.id,student:task.student,studentDone:!!st.studentDone,coachDone:!!st.coachDone,updatedAt:st.updatedAt})};
+  const result=await supa.from('reports').upsert(row,{onConflict:'id'});
+  if(result?.error)throw result.error;
+ }catch(e){
+  if(previous){
+   Object.assign(st,previous);
+  }else{
+   db.taskStatuses=db.taskStatuses.filter(v=>String(v.taskId)!==String(task.id));
+  }
+  persistLocalDB();
+  renderPortalForStudent('student',task.student);
+  renderPortalFeatureCards(task.student);
+  renderTodayTaskAndAlerts(task.student,'todayPlanCard');
+  alert('Görev durumu buluta kaydedilemedi. Eski durum korundu. Bağlantı veya yetki hatası olabilir.');
+  console.warn('Öğrenci görev durumu kaydı:',e?.message||e);
+ }
 }
 async function deleteTask(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
