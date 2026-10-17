@@ -2350,21 +2350,11 @@ async function saveWeeklyProgram(){
  const weekRows=db.programs.filter(x=>String(x.student)===String(student)&&String(x.weekKey)===String(wk));
  if(!weekRows.length)return alert('Bu hafta için kaydedilecek program yok. Önce Programa Ekle ile çalışmaları oluştur.');
  try{
-  // Bulutu seçili haftanın yerel programıyla BİREBİR eşitle.
-  // Önceden Supabase'de kalmış eski/test kayıtları da temizle; yalnızca upsert yapmak
-  // eski satırları bırakıp öğrenci portalında görünmelerine neden oluyordu.
-  const remote=await supa.from('programs').select('id,notes').eq('student_id',student);
-  if(remote?.error)throw remote.error;
-  const keepIds=new Set(weekRows.map(x=>String(x.id)));
-  const stale=(remote.data||[]).filter(row=>{
-    const m=parseProgramMeta(row.notes);
-    // Any legacy program row without V20 metadata is stale for the new authoritative weekly save.
-    return (!String(m.weekKey||'') || String(m.weekKey||'')===String(wk)) && !keepIds.has(String(row.id));
-  }).map(row=>String(row.id));
-  if(stale.length){
-    const del=await supa.from('programs').delete().in('id',stale);
-    if(del?.error)throw del.error;
-  }
+  // Güvenli kayıt: yalnızca seçili öğrencinin seçili haftadaki satırlarını ekle/güncelle.
+  // Diğer haftalar, eski kayıtlar ve başka programlar silinmez.
+  const validWeek=/^\d{4}-\d{2}-\d{2}$/.test(String(wk))&&!isNaN(new Date(wk+'T12:00:00'));
+  if(!validWeek)throw new Error('Geçersiz program hafta tarihi: '+wk);
+  if(weekRows.some(x=>String(x.student)!==String(student)||String(x.weekKey)!==String(wk)))throw new Error('Öğrenci veya hafta eşleşmesi doğrulanamadı.');
   const r=await supa.from('programs').upsert(weekRows.map(programCloudRow),{onConflict:'id'});
   if(r?.error)throw r.error;
   renderProgram();
@@ -3170,7 +3160,9 @@ async function saveStudentPortalAssessment(sid){const v=document.getElementById(
 let selectedProgramWeekKey = currentProgramCycleKey();
 function weekRangeLabel(key){return programCycleLabel(key);}
 function selectProgramDate(dateStr){
- const chosen=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
+ const raw=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
+ const parsed=new Date(raw+'T12:00:00');
+ const chosen=isNaN(parsed)?currentProgramCycleKey():programCycleStartISO(parsed);
  selectedProgramWeekKey=chosen;
  const end=new Date(chosen+'T12:00:00');end.setDate(end.getDate()+6);const endISO=localISODate(end);
  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=chosen;
