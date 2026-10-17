@@ -1577,7 +1577,7 @@ function renderPortalArchive(studentId,source){
  const src=source||{};const allPro=source?(src.programs||[]):(db.programs||[]).filter(x=>String(x.student)===String(studentId));
  const ex=source?(src.exams||[]):(db.exams||[]).filter(x=>String(x.student)===String(studentId));
  const reps=source?(src.reports||[]):(db.reportArchive||[]).filter(x=>String(x.student)===String(studentId));
- const active=activePortalProgramWeekKey(),prev=programCycleStartISO(new Date(active+'T12:00:00'),-1);
+ const active=activePortalProgramWeekKey(studentId),prev=programCycleStartISO(new Date(active+'T12:00:00'),-1);
  const cur=allPro.filter(x=>String(x.weekKey||'')===String(active));
  const old=allPro.filter(x=>String(x.weekKey||'')===String(prev));
  const doneOld=old.filter(x=>studentProgramCompleted(x.id,studentId));
@@ -1645,7 +1645,7 @@ function renderPortalForStudent(portalRole,studentId){
  document.getElementById('portalTitle').textContent=(portalRole==='parent'?'Veli — ':'Öğrenci — ')+s.name;
  document.getElementById('portalProfile').innerHTML='<div class="grid"><div class="kpi"><span class="muted">Sınıf</span><br><b>'+esc(s.grade)+'</b></div><div class="kpi"><span class="muted">Alan</span><br><b>'+esc(s.area)+'</b></div><div class="kpi"><span class="muted">Hedef</span><br><b>'+esc(pinfo.goal||'Belirtilmedi')+'</b></div><div class="kpi"><span class="muted">Üniversite</span><br><b>'+esc(pinfo.university||'Belirtilmedi')+'</b></div></div>';
  renderPortalMembership(studentId);
- const sid=String(s.id),activeWeek=activePortalProgramWeekKey(),pro=(db.programs||[]).filter(x=>String(x.student)===sid&&String(x.weekKey||'')===String(activeWeek)),tasks=(db.tasks||[]).filter(x=>String(x.student)===sid),ex=(db.exams||[]).filter(x=>String(x.student)===sid),src=(db.sources||[]).filter(x=>String(x.student)===sid);
+ const sid=String(s.id),activeWeek=activePortalProgramWeekKey(s.id),pro=(db.programs||[]).filter(x=>String(x.student)===sid&&String(x.weekKey||'')===String(activeWeek)),tasks=(db.tasks||[]).filter(x=>String(x.student)===sid),ex=(db.exams||[]).filter(x=>String(x.student)===sid),src=(db.sources||[]).filter(x=>String(x.student)===sid);
  document.getElementById('portalProgram').innerHTML=pro.length?pro.map(x=>'<div class="item '+(x.done?'done':'')+'"><b>'+esc(x.day)+' — '+esc(x.subject)+'</b><div class="small">'+esc(x.topic)+' · '+x.duration+' dk · '+x.questions+' soru · '+(x.done?'Tamamlandı ✓':'Bekliyor')+'</div></div>').join(''):'<p class="muted">Program yok.</p>';
  renderPortalTopicTracking(s.id);
  renderPortalQuestionAndSwot(s.id);
@@ -1832,7 +1832,7 @@ async function deleteInventory(id){
  try{const r=await supa.from('inventories').delete().eq('id',id);if(r?.error)throw r.error;renderPortalQuestionAndSwot(x.student);}
  catch(e){db.inventories.splice(Math.min(i,db.inventories.length),0,x);persistLocalDB();renderInventoryResults();alert('Test buluttan silinemedi; kayıt geri yüklendi.');console.warn('Test kaydı silme:',e?.message||e);}
 }
-function weekRangeFromDate(dateStr,studentId){const d=new Date((dateStr||todayISO())+'T12:00:00');if(isNaN(d))return programCycleRange(currentProgramCycleKey());d.setHours(12,0,0,0);const iso=x=>localISODate(x);const sid=studentId==null?'':String(studentId);const keys=[...new Set((db.programs||[]).filter(x=>(!sid||String(x.student)===sid)&&String(x.weekKey||'').length===10&&String(x.weekKey||'')[4]==='-'&&String(x.weekKey||'')[7]==='-').map(x=>String(x.weekKey)))].sort();let anchor='';for(const key of keys){if(key<=iso(d))anchor=key;else break;}if(anchor){const a=new Date(anchor+'T12:00:00');const weeks=Math.floor((d.getTime()-a.getTime())/(7*86400000));a.setDate(a.getDate()+Math.max(0,weeks)*7);const end=new Date(a);end.setDate(a.getDate()+6);return {start:iso(a),end:iso(end),key:iso(a)};}const start=new Date(d);start.setDate(start.getDate()-((start.getDay()+1)%7));const end=new Date(start);end.setDate(start.getDate()+6);return {start:iso(start),end:iso(end),key:iso(start)};}
+function weekRangeFromDate(dateStr,studentId){const d=new Date((dateStr||todayISO())+'T12:00:00');if(isNaN(d))return programCycleRange(currentProgramCycleKey());d.setHours(12,0,0,0);const iso=x=>localISODate(x);if(iso(d)>='2026-10-19'){const start=new Date(d);start.setDate(start.getDate()-((start.getDay()+6)%7));const end=new Date(start);end.setDate(end.getDate()+6);return {start:iso(start),end:iso(end),key:iso(start)};}const sid=studentId==null?'':String(studentId);const keys=[...new Set((db.programs||[]).filter(x=>(!sid||String(x.student)===sid)&&String(x.weekKey||'').length===10&&String(x.weekKey||'')[4]==='-'&&String(x.weekKey||'')[7]==='-').map(x=>String(x.weekKey)))].sort();let anchor='';for(const key of keys){if(key<=iso(d))anchor=key;else break;}if(anchor){const a=new Date(anchor+'T12:00:00');const weeks=Math.floor((d.getTime()-a.getTime())/(7*86400000));a.setDate(a.getDate()+Math.max(0,weeks)*7);const end=new Date(a);end.setDate(a.getDate()+6);return {start:iso(a),end:iso(end),key:iso(a)};}const start=new Date(d);start.setDate(start.getDate()-((start.getDay()+1)%7));const end=new Date(start);end.setDate(start.getDate()+6);return {start:iso(start),end:iso(end),key:iso(start)};}
 function minutesLabel(min){min=Math.max(0,Math.round(Number(min)||0));return Math.floor(min/60)+' saat '+(min%60)+' dakika';}
 function weeklyReportData(sid,dateStr){const wr=weekRangeFromDate(dateStr,sid);const same=x=>String(x.student)===String(sid);const pro=(db.programs||[]).filter(x=>same(x)&&String(x.weekKey||'')===wr.key);const done=pro.filter(x=>studentProgramCompleted(x.id,sid)).length;const q=(db.questionTracking||[]).filter(x=>same(x)&&String(x.date||'')>=wr.start&&String(x.date||'')<=wr.end);const qsum=q.reduce((a,x)=>{a.count+=Number(x.questionCount||0);a.c+=Number(x.correct||0);a.w+=Number(x.wrong||0);a.b+=Number(x.blank||0);a.net+=Number(x.net||0);const sub=x.subject||'Diğer';a.subjects[sub]=(a.subjects[sub]||0)+Number(x.questionCount||0);return a},{count:0,c:0,w:0,b:0,net:0,subjects:{}});const topicDate=x=>String(x.updatedAt||x.createdAt||x.date||'').slice(0,10);const topics=(db.topicTracking||[]).filter(x=>same(x)&&topicDate(x)>=wr.start&&topicDate(x)<=wr.end);const topicDone=topics.filter(x=>x.status==='Tamamlandı').map(x=>x.topic).filter(Boolean),topicMissing=topics.filter(x=>x.status!=='Tamamlandı').map(x=>x.topic).filter(Boolean),topicRepeat=topics.filter(x=>x.status==='Tekrar Gerekiyor'||x.mastery==='Tekrar gerekli'||x.mastery==='Zayıf').map(x=>x.topic).filter(Boolean);const exams=(db.exams||[]).filter(x=>same(x)&&String(x.date||'')>=wr.start&&String(x.date||'')<=wr.end).sort((a,b)=>String(a.date).localeCompare(String(b.date)));const allEx=(db.exams||[]).filter(x=>same(x)&&String(x.date||'')<=wr.end).sort((a,b)=>String(a.date).localeCompare(String(b.date)));const last=exams[exams.length-1],prev=last&&allEx.length>1?allEx[allEx.length-2]:null;const sessions=studentSessionSummary(sid),weekSessions=sessions.arr.filter(x=>String(x.loginAt||'').slice(0,10)>=wr.start&&String(x.loginAt||'').slice(0,10)<=wr.end&&x.logoutAt);const portalMin=weekSessions.reduce((a,x)=>a+Number(x.durationMinutes||0),0);const taskDate=x=>String(x.dueDate||x.updatedAt||x.createdAt||'').slice(0,10);const tasks=(db.tasks||[]).filter(x=>same(x)&&taskDate(x)>=wr.start&&taskDate(x)<=wr.end);const taskDone=tasks.filter(x=>getTaskStatus(x).studentDone).length;const activeWorkMin=pro.filter(x=>{const c=programCompletionRecord(x.id,sid);return c?.completed&&String(c.completedAt||'').slice(0,10)>=wr.start&&String(c.completedAt||'').slice(0,10)<=wr.end}).reduce((a,x)=>a+Number(x.duration||0),0);return {wr,pro,done,q,qsum,topics,topicDone,topicMissing,topicRepeat,exams,last,prev,portalMin,tasks,taskDone,activeWorkMin};}
 
@@ -2386,7 +2386,7 @@ function programCompletionRecord(programId,studentId){const rows=(db.programComp
 function studentProgramCompleted(programId,studentId){const r=programCompletionRecord(programId,studentId);return !!r?.completed;}
 function programStudentStats(studentId,weekKey){const arr=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&(!weekKey||x.weekKey===weekKey));const done=arr.filter(x=>studentProgramCompleted(x.id,studentId)).length,total=arr.length;return {arr,total,done,pct:total?Math.round(done/total*100):0};}
 function programStats(studentId,weekKey){return programStudentStats(studentId,weekKey);}
-function renderStudentProgramProgress(){const el=document.getElementById('studentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey():(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);el.innerHTML=`<div class="card" style="margin-top:12px"><h3>Program İlerlemesi</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div></div>`;}
+function renderStudentProgramProgress(){const el=document.getElementById('studentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey(s.id):(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);el.innerHTML=`<div class="card" style="margin-top:12px"><h3>Program İlerlemesi</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div></div>`;}
 let programCompletionRefreshInFlight=false;
 function renderCoachProgramProgress(skipCloudRefresh=false){
  const el=document.getElementById('coachWeeklyProgramProgress');if(!el)return;
@@ -2418,7 +2418,7 @@ function renderCoachProgramProgress(skipCloudRefresh=false){
  el.innerHTML=`<h3>Haftalık Program Tamamlama — ${esc(s.name||'Öğrenci')}</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı · ${esc(weekRangeLabel(wk))}</div></div>${rows||'<p class="muted">Seçilen hafta için program kaydı yok.</p>'}`;
 }
 
-function renderParentProgramProgress(){const el=document.getElementById('parentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey():(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);const rows=p.arr.map(x=>{const c=programCompletionRecord(x.id,s.id),done=!!c?.completed;return `<div class="item"><b>${esc(x.subject||'Ders')}</b><div class="small">${esc(x.topic||x.content||'')} · ${done?'TAMAMLANDI':'AKTİF / TAMAMLANMADI'}</div>${done?`<div class="small muted">Tamamlanma: ${esc(formatDateTimeTR(c.completedAt))}</div>`:''}</div>`}).join('');el.innerHTML=`<h3>Program Tamamlama Durumu</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div>${rows}`;}
+function renderParentProgramProgress(){const el=document.getElementById('parentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey(s.id):(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);const rows=p.arr.map(x=>{const c=programCompletionRecord(x.id,s.id),done=!!c?.completed;return `<div class="item"><b>${esc(x.subject||'Ders')}</b><div class="small">${esc(x.topic||x.content||'')} · ${done?'TAMAMLANDI':'AKTİF / TAMAMLANMADI'}</div>${done?`<div class="small muted">Tamamlanma: ${esc(formatDateTimeTR(c.completedAt))}</div>`:''}</div>`}).join('');el.innerHTML=`<h3>Program Tamamlama Durumu</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div>${rows}`;}
 
 function renderWeeklyProgramGrid(){
  const el=document.getElementById('weeklyProgramGrid'); if(!el)return;
@@ -2798,7 +2798,7 @@ function storedProgramWeekDisplayKey(key){
 function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date(),offset);}
 function programCycleRange(key){const d=new Date(storedProgramWeekDisplayKey(key)+'T12:00:00');const end=new Date(d);end.setDate(d.getDate()+7);return {start:localISODate(d),end:localISODate(end),key:localISODate(d)};}
 function programCycleLabel(key){const r=programCycleRange(key);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(r.start)+' – '+fmt(r.end);}
-function activePortalProgramWeekKey(){return currentProgramCycleKey(0);}
+function activePortalProgramWeekKey(studentId){const monday=currentProgramCycleKey(0);if(!studentId)return monday;const sid=String(studentId),today=todayISO();const rows=(db.programs||[]).filter(x=>String(x.student)===sid);if(rows.some(x=>String(x.weekKey||'')===monday))return monday;const legacy=rows.filter(x=>{const key=String(x.weekKey||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(key)||key>today)return false;const d=new Date(key+'T12:00:00');if(isNaN(d)||d.getDay()!==6)return false;d.setDate(d.getDate()+2);return today<localISODate(d);}).sort((a,b)=>String(b.weekKey).localeCompare(String(a.weekKey)));return legacy.length?String(legacy[0].weekKey):monday;}
 function migrateLegacyProgramWeekKeys(){
  // Legacy rows without V20 metadata cannot be assigned a reliable week from created_at alone.
  // Keep them unassigned instead of accidentally making an old program appear as this week's program.
@@ -2900,7 +2900,7 @@ function renderCoachGrowthSummary(){const el=document.getElementById('coachGrowt
 function renderPortalDashboardProgramCard(studentId){
  const el=document.getElementById('portalArchive'); if(!el)return;
  const s=(db.students||[]).find(x=>String(x.id)===String(studentId));
- const wk=activePortalProgramWeekKey();
+ const wk=activePortalProgramWeekKey(studentId);
  const arr=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&String(x.weekKey||'')===String(wk));
  const done=arr.filter(x=>x.done).length,total=arr.length,questions=arr.reduce((n,x)=>n+Number(x.questions||0),0);
  const all=(db.programs||[]).filter(x=>String(x.student)===String(studentId));
@@ -2909,7 +2909,7 @@ function renderPortalDashboardProgramCard(studentId){
 }
 function renderPortalTodayCard(studentId){
  const el=document.getElementById('portalTodayPlan'); if(!el)return;
- const html=featureTodayPlan(studentId,activePortalProgramWeekKey());
+ const html=featureTodayPlan(studentId,activePortalProgramWeekKey(studentId));
  el.innerHTML=html&&html.includes('atanmış program yok')?'<div class="notice"><b>Bugün için program</b><div class="small" style="margin-top:5px">Bugün için henüz kayıtlı çalışma yok. Yeni haftalık program kaydedildiğinde burada görünecek.</div></div>':html;
 }
 function renderPortalGoalCard(studentId){
@@ -2928,7 +2928,7 @@ function renderPortalJourneyCard(studentId){
  journey.innerHTML=`<div class="small" style="margin-bottom:8px"><b>${esc(p.goal||p.faculty||'YKS hedefi')}</b></div>`+steps.map((x,i)=>`<div class="journey-step ${i<idx?'done':''} ${i===idx?'active':''}"><div class="journey-dot">${i<idx?'✓':i+1}</div><div><b>${esc(x[0])}</b><div class="small muted">${esc(x[1])}</div></div></div>`).join('');
 }
 function renderPortalFeatureCards(studentId){
- renderWeeklyProgressCard(studentId,'portalWeeklyProgress',activePortalProgramWeekKey());
+ renderWeeklyProgressCard(studentId,'portalWeeklyProgress',activePortalProgramWeekKey(studentId));
  renderPortalTaskTracker(studentId);
  renderPortalGrowthChart(studentId);
  renderPortalGoalCard(studentId);
