@@ -2768,13 +2768,21 @@ function localISODate(d){const x=new Date(d);if(isNaN(x))return todayISO();retur
 function programCycleStartISO(inputDate=new Date(), offsetWeeks=0){
  const d=new Date(inputDate); if(isNaN(d)) return todayISO();
  const day=d.getDay();
- const diff=(day===0?1:0); // Pazar -> önceki Cumartesi
  d.setHours(12,0,0,0);
- d.setDate(d.getDate()-((day+1)%7)+(Number(offsetWeeks||0)*7));
+ // Haftalık program pazartesi başlar.
+ d.setDate(d.getDate()-(day===0?6:day-1)+(Number(offsetWeeks||0)*7));
+ return localISODate(d);
+}
+function storedProgramWeekDisplayKey(key){
+ const raw=String(key||'');
+ if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(raw))return currentProgramCycleKey();
+ const d=new Date(raw+'T12:00:00');if(isNaN(d))return currentProgramCycleKey();
+ // Eski sürümlerde hafta anahtarı cumartesiydi; kayıt anahtarını koruyarak tarih aralığını pazartesiye çevir.
+ if(d.getDay()===6)d.setDate(d.getDate()-5);
  return localISODate(d);
 }
 function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date(),offset);}
-function programCycleRange(key){const d=new Date((key||currentProgramCycleKey())+'T12:00:00');const end=new Date(d);end.setDate(d.getDate()+6);return {start:localISODate(d),end:localISODate(end),key:localISODate(d)};}
+function programCycleRange(key){const d=new Date(storedProgramWeekDisplayKey(key)+'T12:00:00');const end=new Date(d);end.setDate(d.getDate()+6);return {start:localISODate(d),end:localISODate(end),key:localISODate(d)};}
 function programCycleLabel(key){const r=programCycleRange(key);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(r.start)+' – '+fmt(r.end);}
 function activePortalProgramWeekKey(){return currentProgramCycleKey(0);}
 function migrateLegacyProgramWeekKeys(){
@@ -2943,16 +2951,22 @@ function renderArchive(){
  const ids={archiveProgramCount:pro.length,archiveExamCount:ex.length,archiveReportCount:reps.length,archiveTaskCount:tasks.length};Object.entries(ids).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
  renderGoalSummary(s);
  const eh=document.getElementById('archiveExamHistory'); eh.innerHTML=ex.length?ex.map((x,i)=>`<div class="item"><b>${esc(x.name||'Deneme')}</b><div class="small muted">${esc(x.date||'')} · Toplam net: <b>${totalNet(x).toFixed(1)}</b>${i<ex.length-1?' · Önceki karşılaştırma mevcut':''}</div></div>`).join(''):'<p class="muted">Henüz deneme yok.</p>';
- const weeks={};pro.forEach(x=>{const k=x.weekKey||'Arşivsiz';(weeks[k]??=[]).push(x)}); const ph=document.getElementById('archiveProgramHistory');ph.innerHTML=Object.keys(weeks).sort().reverse().map(k=>{const a=weeks[k],d=a.filter(x=>studentProgramCompleted(x.id,sid)).length,pct=a.length?Math.round(d/a.length*100):0;return `<div class="item"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b>Hafta: ${esc(k)}</b><div class="small muted">${d}/${a.length} çalışma tamamlandı · %${pct}</div><div class="small muted">${[...new Set(a.map(x=>x.subject).filter(Boolean))].join(', ')||'Program kaydı'}</div></div><div class="row" style="gap:6px"><button class="secondary" onclick="openProgramArchiveWeek('${esc(k)}')">HAFTAYI AÇ</button><button class="danger" onclick="deleteProgramArchiveWeek('${esc(k)}')">SİL</button></div></div></div>`}).join('')||'<p class="muted">Program arşivi yok.</p>';
+ const weeks={};pro.forEach(x=>{const k=x.weekKey||'Arşivsiz';(weeks[k]??=[]).push(x)}); const ph=document.getElementById('archiveProgramHistory');ph.innerHTML=Object.keys(weeks).sort((a,b)=>storedProgramWeekDisplayKey(b).localeCompare(storedProgramWeekDisplayKey(a))).map(k=>{const a=weeks[k],d=a.filter(x=>studentProgramCompleted(x.id,sid)).length,pct=a.length?Math.round(d*100/a.length):0;return `<div class="item"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b>Hafta: ${k==='Arşivsiz'?'Tarihi belirlenmemiş':esc(weekRangeLabel(k))}</b><div class="small muted">${d}/${a.length} çalışma tamamlandı · %${pct}</div><div class="small muted">${[...new Set(a.map(x=>x.subject).filter(Boolean))].join(', ')||'Program kaydı'}</div></div><div class="row" style="gap:6px"><button class="secondary" onclick="openProgramArchiveWeek('${esc(k)}')">HAFTAYI AÇ</button><button class="danger" onclick="deleteProgramArchiveWeek('${esc(k)}')">SİL</button></div></div></div>`}).join('')||'<p class="muted">Program arşivi yok.</p>';
  const rh=document.getElementById('archiveReportHistory');rh.innerHTML=reps.length?reps.map(r=>`<div class="item"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><div><b>${esc(r.title||'Veli raporu')}</b><div class="small muted">${esc(r.date||'')}</div><div class="small">${esc(r.summary||'')}</div></div><button class="danger" onclick="deleteReportArchive('${r.id}')">SİL</button></div></div>`).join(''):'<p class="muted">Arşivlenmiş rapor yok.</p>';
 }
 function openProgramArchiveWeek(weekKey){
  const sid=selectedStudent||student()?.id||'';
  if(!weekKey||weekKey==='Arşivsiz')return alert('Bu kayıt için açılabilir bir hafta bilgisi yok.');
+ // Arşiv satırlarının eski hafta anahtarını aynen koru ki program filtre dışında kalmasın.
  selectedProgramWeekKey=String(weekKey);
  const sel=document.getElementById('programStudent');if(sel&&sid)sel.value=sid;
  show('program');
- selectProgramDate(String(weekKey).slice(0,10));
+ const displayKey=storedProgramWeekDisplayKey(weekKey),range=programCycleRange(displayKey);
+ const cal=document.getElementById('programCalendarDate');if(cal)cal.value=displayKey;
+ const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=range.end;
+ const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Arşiv program dönemi: '+weekRangeLabel(weekKey)+' (7 gün)';
+ const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=weekRangeLabel(weekKey);
+ renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();
 }
 async function deleteProgramArchiveWeek(weekKey){
  const s=student();if(!s)return;
