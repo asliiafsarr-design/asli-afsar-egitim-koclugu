@@ -2778,7 +2778,7 @@ function programCycleStartISO(inputDate=new Date(), offsetWeeks=0){
 }
 function storedProgramWeekDisplayKey(key){
  const raw=String(key||'');
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(raw))return currentProgramCycleKey();
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(raw))return currentProgramCycleKey();
  const d=new Date(raw+'T12:00:00');if(isNaN(d))return currentProgramCycleKey();
  // Eski sürümlerde hafta anahtarı cumartesiydi; kayıt anahtarını koruyarak tarih aralığını pazartesiye çevir.
  if(d.getDay()===6)d.setDate(d.getDate()-5);
