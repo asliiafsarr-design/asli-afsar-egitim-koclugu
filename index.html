@@ -3219,7 +3219,7 @@ function selectProgramDate(dateStr){
  const parsed=new Date(raw+'T12:00:00');
  const chosen=isNaN(parsed)?currentProgramCycleKey():programCycleStartISO(parsed);
  selectedProgramWeekKey=chosen;
- const end=new Date(chosen+'T12:00:00');end.setDate(end.getDate()+6);const endISO=localISODate(end);
+ const end=new Date(chosen+'T12:00:00');end.setDate(end.getDate()+7);const endISO=localISODate(end);
  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=chosen;
  const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=endISO;
  const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Program dönemi: '+weekRangeLabel(selectedProgramWeekKey)+' (7 gün)';
