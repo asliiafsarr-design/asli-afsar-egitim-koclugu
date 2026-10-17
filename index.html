@@ -2338,6 +2338,7 @@ function calculatedDuration(a,b,f){if(a&&b){const p=a.split(':').map(Number),q=b
 async function saveWeeklyProgram(){
  const wk=selectedProgramWeekKey||currentWeekKey();
  const student=document.getElementById('programStudent')?.value||selectedStudent;
+ if((db.programs||[]).some(x=>String(x.student)===String(student)&&String(x.weekKey)===String(wk)&&new Date(String(x.weekKey)+'T12:00:00').getDay()===6))return alert('Geçmiş hafta arşivini görüntülüyorsunuz. Yeni program için takvimden istediğiniz haftanın bir tarihini seçin.');
  const drafts=programDrafts.filter(x=>String(x.student)===String(student)&&String(x.weekKey)===String(wk));
  const originals=db.programs.slice();
  const ids=new Set(drafts.map(x=>String(x.id)));
