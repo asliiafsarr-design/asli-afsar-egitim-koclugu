@@ -2796,7 +2796,7 @@ function storedProgramWeekDisplayKey(key){
  return localISODate(d);
 }
 function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date(),offset);}
-function programCycleRange(key){const d=new Date(storedProgramWeekDisplayKey(key)+'T12:00:00');const end=new Date(d);end.setDate(d.getDate()+6);return {start:localISODate(d),end:localISODate(end),key:localISODate(d)};}
+function programCycleRange(key){const d=new Date(storedProgramWeekDisplayKey(key)+'T12:00:00');const end=new Date(d);end.setDate(d.getDate()+7);return {start:localISODate(d),end:localISODate(end),key:localISODate(d)};}
 function programCycleLabel(key){const r=programCycleRange(key);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(r.start)+' – '+fmt(r.end);}
 function activePortalProgramWeekKey(){return currentProgramCycleKey(0);}
 function migrateLegacyProgramWeekKeys(){
