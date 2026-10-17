@@ -1062,8 +1062,10 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
  </section>
 
  <section id="archive" class="view">
-  <div class="card"><h3>Arşiv & Gelişim Merkezi</h3><p class="muted small">Eski haftalık programlar, denemeler, raporlar ve öğrencinin gelişim özeti burada tarih sırasıyla tutulur.</p>
-   <div class="grid"><div class="kpi"><b id="archiveProgramCount">0</b><div class="small muted">Program kaydı</div></div><div class="kpi"><b id="archiveExamCount">0</b><div class="small muted">Deneme</div></div><div class="kpi"><b id="archiveReportCount">0</b><div class="small muted">Arşiv raporu</div></div><div class="kpi"><b id="archiveTaskCount">0</b><div class="small muted">Görev</div></div></div>
+  <div class="card"><h3>Arşiv & Gelişim Merkezi</h3><p class="muted small">Öğrenciyi veya tarihi seçerek o haftanın programını açabilirsin. Geçmiş programlar haftalık olarak korunur.</p>
+   <div class="grid"><div><label>Öğrenci</label><select id="archiveStudent" onchange="renderArchive()"></select></div><div><label>Program haftasından bir tarih</label><input id="archiveDate" type="date" onchange="renderArchive()"></div></div>
+   <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px"><button class="secondary" onclick="openArchiveSelectedWeek()">SEÇİLİ TARİHİN PROGRAMINI AÇ</button><button class="secondary" onclick="clearArchiveDateFilter()">TÜM HAFTALARI GÖSTER</button></div>
+   <div class="grid" style="margin-top:12px"><div class="kpi"><b id="archiveProgramCount">0</b><div class="small muted">Program kaydı</div></div><div class="kpi"><b id="archiveExamCount">0</b><div class="small muted">Deneme</div></div><div class="kpi"><b id="archiveReportCount">0</b><div class="small muted">Arşiv raporu</div></div><div class="kpi"><b id="archiveTaskCount">0</b><div class="small muted">Görev</div></div></div>
   </div>
   <div class="card"><h3>Hedef & Mevcut Durum</h3><div id="archiveGoalSummary"></div></div>
   <div class="card"><h3>Deneme Geçmişi</h3><div id="archiveExamHistory"></div></div>
@@ -2947,14 +2949,41 @@ function renderGoalSummary(studentId,targetId='archiveGoalSummary'){
  el.innerHTML=`<div class="grid"><div class="kpi"><span class="muted">Hedef</span><br><b>${esc(p.goal||'Belirlenmedi')}</b><div class="small">${esc(p.university||'')} ${p.faculty?'· '+esc(p.faculty):''}</div></div><div class="kpi"><span class="muted">Son toplam net</span><br><b>${net===null?'—':net.toFixed(1)}</b><div class="small">${last?esc(last.date):'Henüz deneme yok'}</div></div></div>`;
 }
 function renderArchive(){
- ensureArchives(); const s=student(); if(!s)return; const sid=s.id;
- const pro=(db.programs||[]).filter(x=>String(x.student)===String(sid)), ex=(db.exams||[]).filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), reps=db.reportArchive.filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), tasks=(db.tasks||[]).filter(x=>String(x.student)===String(sid));
- const ids={archiveProgramCount:pro.length,archiveExamCount:ex.length,archiveReportCount:reps.length,archiveTaskCount:tasks.length};Object.entries(ids).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
+ ensureArchives();
+ const archiveSel=document.getElementById('archiveStudent');
+ if(archiveSel){
+  const prev=archiveSel.value;
+  archiveSel.innerHTML=(db.students||[]).map(v=>`<option value="${esc(v.id)}">${esc(v.name||'Öğrenci')}</option>`).join('');
+  const chosen=(prev&&(db.students||[]).some(v=>String(v.id)===String(prev)))?prev:(selectedStudent||db.students[0]?.id||'');
+  if(chosen)archiveSel.value=chosen;
+ }
+ const sid=String(archiveSel?.value||selectedStudent||student()?.id||'');
+ const s=(db.students||[]).find(v=>String(v.id)===sid);if(!s)return;
+ selectedStudent=sid;
+ const allPrograms=(db.programs||[]).filter(x=>String(x.student)===sid);
+ const dateFilter=document.getElementById('archiveDate')?.value||'';
+ const targetWeek=dateFilter?programCycleStartISO(new Date(dateFilter+'T12:00:00')):'';
+ const pro=dateFilter?allPrograms.filter(x=>String(storedProgramWeekDisplayKey(x.weekKey||'Arşivsiz'))===targetWeek):allPrograms;
+ const ex=(db.exams||[]).filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), reps=db.reportArchive.filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), tasks=(db.tasks||[]).filter(x=>String(x.student)===String(sid));
+ const ids={archiveProgramCount:allPrograms.length,archiveExamCount:ex.length,archiveReportCount:reps.length,archiveTaskCount:tasks.length};Object.entries(ids).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
  renderGoalSummary(s);
  const eh=document.getElementById('archiveExamHistory'); eh.innerHTML=ex.length?ex.map((x,i)=>`<div class="item"><b>${esc(x.name||'Deneme')}</b><div class="small muted">${esc(x.date||'')} · Toplam net: <b>${totalNet(x).toFixed(1)}</b>${i<ex.length-1?' · Önceki karşılaştırma mevcut':''}</div></div>`).join(''):'<p class="muted">Henüz deneme yok.</p>';
  const weeks={};pro.forEach(x=>{const k=x.weekKey||'Arşivsiz';(weeks[k]??=[]).push(x)}); const ph=document.getElementById('archiveProgramHistory');ph.innerHTML=Object.keys(weeks).sort((a,b)=>storedProgramWeekDisplayKey(b).localeCompare(storedProgramWeekDisplayKey(a))).map(k=>{const a=weeks[k],d=a.filter(x=>studentProgramCompleted(x.id,sid)).length,pct=a.length?Math.round(d*100/a.length):0;return `<div class="item"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b>Hafta: ${k==='Arşivsiz'?'Tarihi belirlenmemiş':esc(weekRangeLabel(k))}</b><div class="small muted">${d}/${a.length} çalışma tamamlandı · %${pct}</div><div class="small muted">${[...new Set(a.map(x=>x.subject).filter(Boolean))].join(', ')||'Program kaydı'}</div></div><div class="row" style="gap:6px"><button class="secondary" onclick="openProgramArchiveWeek('${esc(k)}')">HAFTAYI AÇ</button><button class="danger" onclick="deleteProgramArchiveWeek('${esc(k)}')">SİL</button></div></div></div>`}).join('')||'<p class="muted">Program arşivi yok.</p>';
  const rh=document.getElementById('archiveReportHistory');rh.innerHTML=reps.length?reps.map(r=>`<div class="item"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><div><b>${esc(r.title||'Veli raporu')}</b><div class="small muted">${esc(r.date||'')}</div><div class="small">${esc(r.summary||'')}</div></div><button class="danger" onclick="deleteReportArchive('${r.id}')">SİL</button></div></div>`).join(''):'<p class="muted">Arşivlenmiş rapor yok.</p>';
 }
+function openArchiveSelectedWeek(){
+ const sid=String(document.getElementById('archiveStudent')?.value||selectedStudent||'');
+ const date=document.getElementById('archiveDate')?.value||'';
+ if(!sid)return alert('Önce öğrenci seçin.');
+ if(!date)return alert('Önce program haftasından bir tarih seçin.');
+ selectedStudent=sid;
+ const week=programCycleStartISO(new Date(date+'T12:00:00'));
+ const matching=(db.programs||[]).filter(x=>String(x.student)===sid&&String(storedProgramWeekDisplayKey(x.weekKey||'Arşivsiz'))===week);
+ if(!matching.length)return alert('Seçilen tarih aralığında bu öğrenci için program kaydı bulunamadı.');
+ const key=matching[0].weekKey||week;
+ openProgramArchiveWeek(key);
+}
+function clearArchiveDateFilter(){const d=document.getElementById('archiveDate');if(d)d.value='';renderArchive();}
 function openProgramArchiveWeek(weekKey){
  const sid=selectedStudent||student()?.id||'';
  if(!weekKey||weekKey==='Arşivsiz')return alert('Bu kayıt için açılabilir bir hafta bilgisi yok.');
