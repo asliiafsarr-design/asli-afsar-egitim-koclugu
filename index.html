@@ -2325,7 +2325,7 @@ function programCloudNotes(x){
  const meta={weekKey:x.weekKey||'',order:Number.isFinite(Number(x.order))?Number(x.order):null,startTime:x.startTime||'',endTime:x.endTime||'',programType:x.programType||'study',workType:x.workType||'',content:x.content||'',topic:x.topic||'',duration:Number(x.duration)||0,questions:x.questions===''?'':Number(x.questions)||0};
  return '__V20_PROGRAM_META__'+JSON.stringify({...meta,plainNotes:String(x.notes||'')});
 }
-function programCloudRow(x){return {id:x.id,student_id:x.student,day:x.day||'',subject:x.subject||'',topic:x.topic||'',duration:Number(x.duration)||0,question_count:x.questions===''?0:Number(x.questions)||0,completed:!!x.done,notes:programCloudNotes(x)};}
+function programCloudRow(x){const rawQuestions=x.questions===''||x.questions==null?0:Number(x.questions);const rawDuration=Number(x.duration)||0;return {id:x.id,student_id:x.student,day:x.day||'',subject:x.subject||'',topic:x.topic||'',duration:Math.max(0,Math.round(rawDuration)),question_count:Math.max(0,Math.round(Number.isFinite(rawQuestions)?rawQuestions:0)),completed:!!x.done,notes:programCloudNotes({...x,questions:Number.isFinite(rawQuestions)?Math.max(0,Math.round(rawQuestions)):0,duration:Math.max(0,Math.round(rawDuration))})};}
 function programDisplayText(x){return x.programType==='timeblock'?(x.content||x.workType||x.topic||x.subject||'Zaman bloğu'):(x.content||x.topic||'Çalışma');}
 function programTimeLabel(x){return x.startTime&&x.endTime?x.startTime+'–'+x.endTime:(x.startTime||x.endTime||'');}
 function timeHourOptions(start=9,end=23,selected=''){let h='';for(let m=start*60;m<=end*60;m+=60){const hh=String(Math.floor(m/60)).padStart(2,'0')+':00';h+=`<option value="${hh}" ${hh===selected?'selected':''}>${hh}</option>`;}return h;}
