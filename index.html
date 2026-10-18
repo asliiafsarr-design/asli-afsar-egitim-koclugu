@@ -2385,7 +2385,14 @@ async function saveWeeklyProgram(){
 
 function programCompletionRecord(programId,studentId){const rows=(db.programCompletions||[]).filter(x=>String(x.programId)===String(programId)&&String(x.student)===String(studentId));return rows.slice().sort((a,b)=>String(b.updatedAt||b.completedAt||'').localeCompare(String(a.updatedAt||a.completedAt||'')))[0]||null;}
 function studentProgramCompleted(programId,studentId){const r=programCompletionRecord(programId,studentId);return !!r?.completed;}
-function programStudentStats(studentId,weekKey){const arr=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&(!weekKey||x.weekKey===weekKey));const done=arr.filter(x=>studentProgramCompleted(x.id,studentId)).length,total=arr.length;return {arr,total,done,pct:total?Math.round(done/total*100):0};}
+function programStudentStats(studentId,weekKey){
+ const all=(db.programs||[]).filter(x=>String(x.student)===String(studentId));
+ const exact=weekKey?all.filter(x=>String(x.weekKey||'')===String(weekKey)):all;
+ const legacy=weekKey&&!exact.length?all.filter(x=>String(storedProgramWeekDisplayKey(x.weekKey||''))===String(weekKey)):[];
+ const arr=exact.length||!weekKey?exact:legacy;
+ const done=arr.filter(x=>studentProgramCompleted(x.id,studentId)).length,total=arr.length;
+ return {arr,total,done,pct:total?Math.round(done/total*100):0};
+}
 function programStats(studentId,weekKey){return programStudentStats(studentId,weekKey);}
 function renderStudentProgramProgress(){const el=document.getElementById('studentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey(s.id):(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);el.innerHTML=`<div class="card" style="margin-top:12px"><h3>Program İlerlemesi</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div></div>`;}
 let programCompletionRefreshInFlight=false;
