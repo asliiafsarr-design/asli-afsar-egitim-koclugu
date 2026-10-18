@@ -796,7 +796,7 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
 
  <section id="tasks" class="view">
   <div class="card"><h3>Öğrenciye Görev Ata</h3>
-   <div class="grid"><div><label>Öğrenci</label><select id="taskStudent"></select></div><div><label>Görev başlığı</label><input id="taskTitle" placeholder="Örn. 40 paragraf sorusu çöz"></div></div>
+   <div class="grid"><div><label>Öğrenci</label><select id="taskStudent" onchange="renderTasks()"></select></div><div><label>Görev başlığı</label><input id="taskTitle" placeholder="Örn. 40 paragraf sorusu çöz"></div></div>
    <div class="grid"><div><label>Açıklama</label><textarea id="taskDescription" rows="3" placeholder="Görevin ayrıntısı"></textarea></div><div><label>Son tarih</label><input id="taskDueDate" type="date"></div></div>
    <button onclick="addTask()">Görevi Ata</button>
   </div>
@@ -2682,8 +2682,10 @@ async function deleteTask(id){
  }
 }
 function renderTasks(){
-  const a=db.tasks||[];
-  document.getElementById('taskList').innerHTML=a.length?a.map(x=>{
+  const selectedTaskStudent=String(document.getElementById('taskStudent')?.value||'');
+  const a=(db.tasks||[]).filter(x=>String(x.student)===selectedTaskStudent);
+  const list=document.getElementById('taskList');if(!list)return;
+  list.innerHTML=a.length?a.map(x=>{
    const st=getTaskStatus(x);
    return `<div class="item ${st.studentDone?'done':''}"><div class="row" style="align-items:flex-start;gap:8px"><div style="flex:1"><b>${esc(x.title)}</b><div class="small muted">${esc(x.description||'')}${x.dueDate?' · Son tarih: '+esc(x.dueDate):''}</div><div class="small" style="margin-top:6px"><b>Öğrenci:</b> ${st.studentDone?'TAMAMLANDI ✓':'Tamamlanmadı'} · <b>Koç:</b> ${st.coachDone?'TAMAMLANDI ✓':'Tamamlanmadı'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="light" onclick="setCoachTaskDone('${x.id}')">${st.coachDone?'Koç Geri Al':'Koç Tamamladı'}</button><button class="task-delete-btn" onclick="deleteTask('${x.id}')">SİL</button></div></div></div>`;
   }).join(''):'<p class="muted">Henüz atanmış görev yok.</p>';
