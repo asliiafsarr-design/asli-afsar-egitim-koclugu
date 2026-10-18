@@ -3547,7 +3547,7 @@ function renderPortalWeeklyProgram(studentId){
  const s=(db.students||[]).find(x=>String(x.id)===String(studentId));
  if(!s){el.innerHTML='';return;}
  const today=todayISO();
- const studentPrograms=(db.programs||[]).filter(x=>String(x.student)===String(s.id)&&/^\\d{4}-\\d{2}-\\d{2}$/.test(String(x.weekKey||'')));
+ const studentPrograms=(db.programs||[]).filter(x=>String(x.student)===String(s.id)&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
  // Portal, koç ekranıyla aynı öğrenciye özel hafta seçimini kullanır.
  // Eski programların hafta anahtarı 2026-10-17 gibi hafta sonuna kayıtlıysa
  // ham anahtarı koruyup görünür başlangıcı storedProgramWeekDisplayKey ile hesaplarız.
