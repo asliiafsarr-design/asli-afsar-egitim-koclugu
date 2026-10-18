@@ -2559,16 +2559,22 @@ async function deleteCurrentWeekProgram(){
 
 function getTaskStatus(task){
  const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id));
- // Student and coach devices may have created separate legacy status rows. Use the newest row consistently.
+ // The task UUID is the canonical status-row UUID. Prefer it over duplicate legacy rows.
+ const canonical=matches.find(v=>String(v.id)===String(task.id));
+ if(canonical)return canonical;
  matches.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
  return matches[0]||{id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false};
 }
 function ensureTaskStatus(task){
+ const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id));
  let x=getTaskStatus(task);
- if(!(db.taskStatuses||[]).some(v=>String(v.taskId)===String(task.id))){
+ if(!matches.length){
   x={id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false,updatedAt:new Date().toISOString()};
-  db.taskStatuses.push(x);
  }
+ // Collapse device-created duplicate rows locally and make both devices upsert the same cloud row.
+ x.id=String(task.id);x.taskId=task.id;x.student=task.student;
+ db.taskStatuses=(db.taskStatuses||[]).filter(v=>String(v.taskId)!==String(task.id));
+ db.taskStatuses.push(x);
  return x;
 }
 function taskStudentDone(task){return !!getTaskStatus(task).studentDone}
@@ -2605,9 +2611,15 @@ async function addTask(){
   }
 }
 async function saveTaskStatusToCloud(task,st){
- const row={id:st.id,student_id:task.student,report_type:'task_status',content:JSON.stringify({taskId:task.id,student:task.student,studentDone:!!st.studentDone,coachDone:!!st.coachDone,updatedAt:st.updatedAt})};
+ const row={id:String(task.id),student_id:task.student,report_type:'task_status',content:JSON.stringify({taskId:task.id,student:task.student,studentDone:!!st.studentDone,coachDone:!!st.coachDone,updatedAt:st.updatedAt||new Date().toISOString()})};
  const result=await supa.from('reports').upsert(row,{onConflict:'id'});
  if(result?.error)throw result.error;
+ // Read back the canonical row so success means the shared status really persisted.
+ const check=await supa.from('reports').select('id,student_id,content').eq('id',String(task.id)).eq('report_type','task_status').maybeSingle();
+ if(check?.error)throw check.error;
+ if(!check?.data)throw new Error('Görev durumu kaydı doğrulanamadı.');
+ const saved=JSON.parse(check.data.content||'{}');
+ if(String(saved.taskId)!==String(task.id)||!!saved.studentDone!==!!st.studentDone||!!saved.coachDone!==!!st.coachDone)throw new Error('Görev durumu doğrulaması başarısız.');
 }
 async function setCoachTaskDone(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
