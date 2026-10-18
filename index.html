@@ -3528,12 +3528,14 @@ function renderPortalWeeklyProgram(studentId){
  if(!s){el.innerHTML='';return;}
  const today=todayISO();
  const studentPrograms=(db.programs||[]).filter(x=>String(x.student)===String(s.id)&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
- const weekKeys=[...new Set(studentPrograms.map(x=>String(x.weekKey)))].sort();
- const currentKey=weekKeys.filter(k=>{const range=programCycleRange(k);return range.start<=today&&today<=range.end;}).sort((a,b)=>programCycleRange(b).start.localeCompare(programCycleRange(a).start))[0]||'';
- const nextKey=weekKeys.find(k=>k>today);
- const activeWeek=currentKey||nextKey||'';
- const arr=activeWeek?studentPrograms.filter(x=>String(x.weekKey)===activeWeek):[];
- const info=document.getElementById('portalProgramWeekInfo');if(info)info.textContent=activeWeek?(currentKey?'Aktif program dönemi: ':'Sıradaki program dönemi: ')+programCycleLabel(activeWeek)+' · Önceki haftaların kayıtları korunur.':'Henüz bu öğrenci için tarihli bir program atanmadı.';
+ // Use the same student-specific week as the portal summary. Legacy week keys must
+ // remain unchanged in storage; comparing their raw date to today hid the 17–23 program.
+ const activeWeek=activePortalProgramWeekKey(s.id);
+ const arr=activeWeek?studentPrograms.filter(x=>String(x.weekKey)===String(activeWeek)):[];
+ const rawStart=activeWeek||'';
+ const rawEnd=rawStart?(()=>{const d=new Date(rawStart+'T12:00:00');d.setDate(d.getDate()+6);return localISODate(d);})():'';
+ const info=document.getElementById('portalProgramWeekInfo');
+ if(info)info.textContent=activeWeek?('Program dönemi: '+(()=>{const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(rawStart)+' – '+fmt(rawEnd);})()+' · Kayıtlı program korunmuştur.'):'Henüz bu öğrenci için tarihli bir program atanmadı.';
  // Öğrenci ekranı koç ekranındaki kayıt sırasını aynen korur; saat kullanılmaz.
  const orderedArr=arr.slice().sort(programSort);
  const days=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
