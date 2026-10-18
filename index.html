@@ -1062,8 +1062,10 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
  </section>
 
  <section id="archive" class="view">
-  <div class="card"><h3>Arşiv & Gelişim Merkezi</h3><p class="muted small">Eski haftalık programlar, denemeler, raporlar ve öğrencinin gelişim özeti burada tarih sırasıyla tutulur.</p>
-   <div class="grid"><div class="kpi"><b id="archiveProgramCount">0</b><div class="small muted">Program kaydı</div></div><div class="kpi"><b id="archiveExamCount">0</b><div class="small muted">Deneme</div></div><div class="kpi"><b id="archiveReportCount">0</b><div class="small muted">Arşiv raporu</div></div><div class="kpi"><b id="archiveTaskCount">0</b><div class="small muted">Görev</div></div></div>
+  <div class="card"><h3>Arşiv & Gelişim Merkezi</h3><p class="muted small">Öğrenciyi veya tarihi seçerek o haftanın programını açabilirsin. Geçmiş programlar haftalık olarak korunur.</p>
+   <div class="grid"><div><label>Öğrenci</label><select id="archiveStudent" onchange="renderArchive()"></select></div><div><label>Program haftasından bir tarih</label><input id="archiveDate" type="date" onchange="renderArchive()"></div></div>
+   <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px"><button class="secondary" onclick="openArchiveSelectedWeek()">SEÇİLİ TARİHİN PROGRAMINI AÇ</button><button class="secondary" onclick="clearArchiveDateFilter()">TÜM HAFTALARI GÖSTER</button></div>
+   <div class="grid" style="margin-top:12px"><div class="kpi"><b id="archiveProgramCount">0</b><div class="small muted">Program kaydı</div></div><div class="kpi"><b id="archiveExamCount">0</b><div class="small muted">Deneme</div></div><div class="kpi"><b id="archiveReportCount">0</b><div class="small muted">Arşiv raporu</div></div><div class="kpi"><b id="archiveTaskCount">0</b><div class="small muted">Görev</div></div></div>
   </div>
   <div class="card"><h3>Hedef & Mevcut Durum</h3><div id="archiveGoalSummary"></div></div>
   <div class="card"><h3>Deneme Geçmişi</h3><div id="archiveExamHistory"></div></div>
@@ -1340,7 +1342,7 @@ async function syncCloud(force=false){
    ['tasks',await supa.from('tasks').upsert(db.tasks.map(x=>({id:x.id,student_id:x.student,title:x.title||'Görev',description:x.description||'',due_date:x.dueDate||null,completed:!!x.done})),{onConflict:'id'})],
    ['exams',await supa.from('exams').upsert(db.exams.map(x=>({id:x.id,student_id:x.student,exam_name:x.name,exam_date:x.date||null,turkish:Number(x.nets?.Türkçe||0),math:Number(x.nets?.Matematik||0),science:Number(x.nets?.Fen||0),social:Number(x.nets?.Sosyal||0),total_net:Object.values(x.nets||{}).reduce((a,b)=>a+Number(b||0),0),errors:x.errors||[],notes:JSON.stringify({notes:x.notes||'',duration:x.duration||0,kind:x.kind||'genel',level:x.level||'TYT',area:x.area||'',branch:x.branch||'Genel',studentName:x.studentName||'',fileName:x.fileName||'',fileType:x.fileType||'',fileUrl:x.fileUrl||'',filePath:x.filePath||'',fileData:x.fileData||'',status:x.status||'assigned',assignedAt:x.assignedAt||'',submission:x.submission||null,analysis:x.analysis||null,analysisPublished:!!x.analysisPublished})})),{onConflict:'id'})],
    ['inventories',await supa.from('inventories').upsert(db.inventories.map(x=>({id:x.id,student_id:x.student,test_type:x.type,score:Number(x.result?.score||0),result_text:JSON.stringify(x.result||{}),answers:x.answers||[],created_at:(x.date?x.date+'T00:00:00Z':new Date().toISOString())})),{onConflict:'id'})],
-   ['reports',await supa.from('reports').upsert([...(db.reports||[]).map(x=>({id:x.id,student_id:x.student,report_type:x.type||'',content:x.content||''})),...(db.sources||[]).map(x=>({id:x.id,student_id:x.student,report_type:'source_record',content:JSON.stringify(x)})),...(db.branchExams||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'branch_exam_record',content:JSON.stringify(x)})),...(db.taskStatuses||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'task_status',content:JSON.stringify({taskId:x.taskId,student:x.student,studentDone:!!x.studentDone,coachDone:!!x.coachDone,updatedAt:x.updatedAt||new Date().toISOString()})})),...(db.programCompletions||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'program_completion',content:JSON.stringify({programId:x.programId,student:x.student,completed:!!x.completed,completedAt:x.completedAt||'',updatedAt:x.updatedAt||new Date().toISOString()})})),...(db.topicTracking||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'topic_tracking',content:JSON.stringify(x)})),...(db.programRevisions||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'program_revision',content:JSON.stringify(x)}))],{onConflict:'id'})]
+   ['reports',await supa.from('reports').upsert(Array.from(new Map([...(db.reports||[]).map(x=>({id:x.id,student_id:x.student,report_type:x.type||'',content:x.content||''})),...(db.sources||[]).map(x=>({id:x.id,student_id:x.student,report_type:'source_record',content:JSON.stringify(x)})),...(db.branchExams||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'branch_exam_record',content:JSON.stringify(x)})),...(db.taskStatuses||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'task_status',content:JSON.stringify({taskId:x.taskId,student:x.student,studentDone:!!x.studentDone,coachDone:!!x.coachDone,updatedAt:x.updatedAt||new Date().toISOString()})})),...(db.programCompletions||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'program_completion',content:JSON.stringify({programId:x.programId,student:x.student,completed:!!x.completed,completedAt:x.completedAt||'',updatedAt:x.updatedAt||new Date().toISOString()})})),...(db.topicTracking||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'topic_tracking',content:JSON.stringify(x)})),...(db.programRevisions||[]).map(x=>({id:x.id,student_id:x.student||null,report_type:'program_revision',content:JSON.stringify(x)}))].map(row=>[String(row.id),row])).values()),{onConflict:'id'})]
   ];
   const failed=ops.filter(([,r])=>r?.error);
   if(failed.length){failed.forEach(([name,r])=>console.warn(name+' eşitleme hatası:',r.error.message));return false;}
@@ -1388,6 +1390,7 @@ function setPortalSession(token){
  if(portalSessionToken){
   localStorage.setItem('v20PortalSession',portalSessionToken);
   try{supa=initSupabaseClient(portalSessionToken);}catch(e){console.warn(e);}
+  startTaskStatusSync();
  }
 }
 function portalAuthMessage(authRole,kind,detail){
@@ -1575,7 +1578,7 @@ function renderPortalArchive(studentId,source){
  const src=source||{};const allPro=source?(src.programs||[]):(db.programs||[]).filter(x=>String(x.student)===String(studentId));
  const ex=source?(src.exams||[]):(db.exams||[]).filter(x=>String(x.student)===String(studentId));
  const reps=source?(src.reports||[]):(db.reportArchive||[]).filter(x=>String(x.student)===String(studentId));
- const active=activePortalProgramWeekKey(),prev=programCycleStartISO(new Date(active+'T12:00:00'),-1);
+ const active=activePortalProgramWeekKey(studentId),prev=programCycleStartISO(new Date(active+'T12:00:00'),-1);
  const cur=allPro.filter(x=>String(x.weekKey||'')===String(active));
  const old=allPro.filter(x=>String(x.weekKey||'')===String(prev));
  const doneOld=old.filter(x=>studentProgramCompleted(x.id,studentId));
@@ -1643,7 +1646,7 @@ function renderPortalForStudent(portalRole,studentId){
  document.getElementById('portalTitle').textContent=(portalRole==='parent'?'Veli — ':'Öğrenci — ')+s.name;
  document.getElementById('portalProfile').innerHTML='<div class="grid"><div class="kpi"><span class="muted">Sınıf</span><br><b>'+esc(s.grade)+'</b></div><div class="kpi"><span class="muted">Alan</span><br><b>'+esc(s.area)+'</b></div><div class="kpi"><span class="muted">Hedef</span><br><b>'+esc(pinfo.goal||'Belirtilmedi')+'</b></div><div class="kpi"><span class="muted">Üniversite</span><br><b>'+esc(pinfo.university||'Belirtilmedi')+'</b></div></div>';
  renderPortalMembership(studentId);
- const sid=String(s.id),activeWeek=activePortalProgramWeekKey(),pro=(db.programs||[]).filter(x=>String(x.student)===sid&&String(x.weekKey||'')===String(activeWeek)),tasks=(db.tasks||[]).filter(x=>String(x.student)===sid),ex=(db.exams||[]).filter(x=>String(x.student)===sid),src=(db.sources||[]).filter(x=>String(x.student)===sid);
+ const sid=String(s.id),activeWeek=activePortalProgramWeekKey(s.id),pro=(db.programs||[]).filter(x=>String(x.student)===sid&&String(x.weekKey||'')===String(activeWeek)),tasks=(db.tasks||[]).filter(x=>String(x.student)===sid),ex=(db.exams||[]).filter(x=>String(x.student)===sid),src=(db.sources||[]).filter(x=>String(x.student)===sid);
  document.getElementById('portalProgram').innerHTML=pro.length?pro.map(x=>'<div class="item '+(x.done?'done':'')+'"><b>'+esc(x.day)+' — '+esc(x.subject)+'</b><div class="small">'+esc(x.topic)+' · '+x.duration+' dk · '+x.questions+' soru · '+(x.done?'Tamamlandı ✓':'Bekliyor')+'</div></div>').join(''):'<p class="muted">Program yok.</p>';
  renderPortalTopicTracking(s.id);
  renderPortalQuestionAndSwot(s.id);
@@ -1830,7 +1833,7 @@ async function deleteInventory(id){
  try{const r=await supa.from('inventories').delete().eq('id',id);if(r?.error)throw r.error;renderPortalQuestionAndSwot(x.student);}
  catch(e){db.inventories.splice(Math.min(i,db.inventories.length),0,x);persistLocalDB();renderInventoryResults();alert('Test buluttan silinemedi; kayıt geri yüklendi.');console.warn('Test kaydı silme:',e?.message||e);}
 }
-function weekRangeFromDate(dateStr,studentId){const d=new Date((dateStr||todayISO())+'T12:00:00');if(isNaN(d))return programCycleRange(currentProgramCycleKey());d.setHours(12,0,0,0);const iso=x=>localISODate(x);const sid=studentId==null?'':String(studentId);const keys=[...new Set((db.programs||[]).filter(x=>(!sid||String(x.student)===sid)&&String(x.weekKey||'').length===10&&String(x.weekKey||'')[4]==='-'&&String(x.weekKey||'')[7]==='-').map(x=>String(x.weekKey)))].sort();let anchor='';for(const key of keys){if(key<=iso(d))anchor=key;else break;}if(anchor){const a=new Date(anchor+'T12:00:00');const weeks=Math.floor((d.getTime()-a.getTime())/(7*86400000));a.setDate(a.getDate()+Math.max(0,weeks)*7);const end=new Date(a);end.setDate(a.getDate()+6);return {start:iso(a),end:iso(end),key:iso(a)};}const start=new Date(d);start.setDate(start.getDate()-((start.getDay()+1)%7));const end=new Date(start);end.setDate(start.getDate()+6);return {start:iso(start),end:iso(end),key:iso(start)};}
+function weekRangeFromDate(dateStr,studentId){const d=new Date((dateStr||todayISO())+'T12:00:00');if(isNaN(d))return programCycleRange(currentProgramCycleKey());d.setHours(12,0,0,0);const iso=x=>localISODate(x);if(iso(d)>='2026-10-19'){const start=new Date(d);start.setDate(start.getDate()-((start.getDay()+6)%7));const monday=iso(start);const sid=studentId==null?'':String(studentId);const rows=studentId==null?[]:(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));const exact=rows.some(x=>String(x.weekKey)===monday);const legacy=exact?null:rows.find(x=>String(storedProgramWeekDisplayKey(x.weekKey))===monday);const key=exact?monday:(legacy?String(legacy.weekKey):monday);const end=new Date(start);end.setDate(end.getDate()+6);return {start:monday,end:iso(end),key};}const sid=studentId==null?'':String(studentId);const keys=[...new Set((db.programs||[]).filter(x=>(!sid||String(x.student)===sid)&&String(x.weekKey||'').length===10&&String(x.weekKey||'')[4]==='-'&&String(x.weekKey||'')[7]==='-').map(x=>String(x.weekKey)))].sort();let anchor='';for(const key of keys){if(key<=iso(d))anchor=key;else break;}if(anchor){const a=new Date(anchor+'T12:00:00');const weeks=Math.floor((d.getTime()-a.getTime())/(7*86400000));a.setDate(a.getDate()+Math.max(0,weeks)*7);const end=new Date(a);end.setDate(a.getDate()+6);return {start:iso(a),end:iso(end),key:iso(a)};}const start=new Date(d);start.setDate(start.getDate()-((start.getDay()+1)%7));const end=new Date(start);end.setDate(start.getDate()+6);return {start:iso(start),end:iso(end),key:iso(start)};}
 function minutesLabel(min){min=Math.max(0,Math.round(Number(min)||0));return Math.floor(min/60)+' saat '+(min%60)+' dakika';}
 function weeklyReportData(sid,dateStr){const wr=weekRangeFromDate(dateStr,sid);const same=x=>String(x.student)===String(sid);const pro=(db.programs||[]).filter(x=>same(x)&&String(x.weekKey||'')===wr.key);const done=pro.filter(x=>studentProgramCompleted(x.id,sid)).length;const q=(db.questionTracking||[]).filter(x=>same(x)&&String(x.date||'')>=wr.start&&String(x.date||'')<=wr.end);const qsum=q.reduce((a,x)=>{a.count+=Number(x.questionCount||0);a.c+=Number(x.correct||0);a.w+=Number(x.wrong||0);a.b+=Number(x.blank||0);a.net+=Number(x.net||0);const sub=x.subject||'Diğer';a.subjects[sub]=(a.subjects[sub]||0)+Number(x.questionCount||0);return a},{count:0,c:0,w:0,b:0,net:0,subjects:{}});const topicDate=x=>String(x.updatedAt||x.createdAt||x.date||'').slice(0,10);const topics=(db.topicTracking||[]).filter(x=>same(x)&&topicDate(x)>=wr.start&&topicDate(x)<=wr.end);const topicDone=topics.filter(x=>x.status==='Tamamlandı').map(x=>x.topic).filter(Boolean),topicMissing=topics.filter(x=>x.status!=='Tamamlandı').map(x=>x.topic).filter(Boolean),topicRepeat=topics.filter(x=>x.status==='Tekrar Gerekiyor'||x.mastery==='Tekrar gerekli'||x.mastery==='Zayıf').map(x=>x.topic).filter(Boolean);const exams=(db.exams||[]).filter(x=>same(x)&&String(x.date||'')>=wr.start&&String(x.date||'')<=wr.end).sort((a,b)=>String(a.date).localeCompare(String(b.date)));const allEx=(db.exams||[]).filter(x=>same(x)&&String(x.date||'')<=wr.end).sort((a,b)=>String(a.date).localeCompare(String(b.date)));const last=exams[exams.length-1],prev=last&&allEx.length>1?allEx[allEx.length-2]:null;const sessions=studentSessionSummary(sid),weekSessions=sessions.arr.filter(x=>String(x.loginAt||'').slice(0,10)>=wr.start&&String(x.loginAt||'').slice(0,10)<=wr.end&&x.logoutAt);const portalMin=weekSessions.reduce((a,x)=>a+Number(x.durationMinutes||0),0);const taskDate=x=>String(x.dueDate||x.updatedAt||x.createdAt||'').slice(0,10);const tasks=(db.tasks||[]).filter(x=>same(x)&&taskDate(x)>=wr.start&&taskDate(x)<=wr.end);const taskDone=tasks.filter(x=>getTaskStatus(x).studentDone).length;const activeWorkMin=pro.filter(x=>{const c=programCompletionRecord(x.id,sid);return c?.completed&&String(c.completedAt||'').slice(0,10)>=wr.start&&String(c.completedAt||'').slice(0,10)<=wr.end}).reduce((a,x)=>a+Number(x.duration||0),0);return {wr,pro,done,q,qsum,topics,topicDone,topicMissing,topicRepeat,exams,last,prev,portalMin,tasks,taskDone,activeWorkMin};}
 
@@ -2323,7 +2326,7 @@ function programCloudNotes(x){
  const meta={weekKey:x.weekKey||'',order:Number.isFinite(Number(x.order))?Number(x.order):null,startTime:x.startTime||'',endTime:x.endTime||'',programType:x.programType||'study',workType:x.workType||'',content:x.content||'',topic:x.topic||'',duration:Number(x.duration)||0,questions:x.questions===''?'':Number(x.questions)||0};
  return '__V20_PROGRAM_META__'+JSON.stringify({...meta,plainNotes:String(x.notes||'')});
 }
-function programCloudRow(x){return {id:x.id,student_id:x.student,day:x.day||'',subject:x.subject||'',topic:x.topic||'',duration:Number(x.duration)||0,question_count:x.questions===''?0:Number(x.questions)||0,completed:!!x.done,notes:programCloudNotes(x)};}
+function programCloudRow(x){const rawQuestions=x.questions===''||x.questions==null?0:Number(x.questions);const rawDuration=Number(x.duration)||0;return {id:x.id,student_id:x.student,day:x.day||'',subject:x.subject||'',topic:x.topic||'',duration:Math.max(0,Math.round(rawDuration)),question_count:Math.max(0,Math.round(Number.isFinite(rawQuestions)?rawQuestions:0)),completed:!!x.done,notes:programCloudNotes({...x,questions:Number.isFinite(rawQuestions)?Math.max(0,Math.round(rawQuestions)):0,duration:Math.max(0,Math.round(rawDuration))})};}
 function programDisplayText(x){return x.programType==='timeblock'?(x.content||x.workType||x.topic||x.subject||'Zaman bloğu'):(x.content||x.topic||'Çalışma');}
 function programTimeLabel(x){return x.startTime&&x.endTime?x.startTime+'–'+x.endTime:(x.startTime||x.endTime||'');}
 function timeHourOptions(start=9,end=23,selected=''){let h='';for(let m=start*60;m<=end*60;m+=60){const hh=String(Math.floor(m/60)).padStart(2,'0')+':00';h+=`<option value="${hh}" ${hh===selected?'selected':''}>${hh}</option>`;}return h;}
@@ -2336,8 +2339,18 @@ function selectedProgramTopic(){return document.getElementById('manualTopic')?.v
 function calculatedDuration(a,b,f){if(a&&b){const p=a.split(':').map(Number),q=b.split(':').map(Number);let d=(q[0]*60+q[1])-(p[0]*60+p[1]);if(d<0)d+=1440;if(d>0)return d;}return Number(f)||0;}
 
 async function saveWeeklyProgram(){
- const wk=selectedProgramWeekKey||currentWeekKey();
  const student=document.getElementById('programStudent')?.value||selectedStudent;
+ const dateValue=document.getElementById('programCalendarDate')?.value||'';
+ const calendarWeek=dateValue?programCycleStartISO(new Date(dateValue+'T12:00:00')):'';
+ let wk=selectedProgramWeekKey||currentWeekKey();
+ // Arşivden açılan eski Cumartesi anahtarı ile takvimde görünen Pazartesi tarihi farklı olabilir.
+ // Yalnızca yeni taslakları görünen haftanın anahtarına taşır; geçmiş kayıtları değiştirmez.
+ if(calendarWeek&&calendarWeek!==String(wk)&&String(storedProgramWeekDisplayKey(wk))===String(calendarWeek)){
+  programDrafts.forEach(x=>{if(String(x.student)===String(student)&&String(x.weekKey)===String(wk))x.weekKey=calendarWeek;});
+  wk=calendarWeek;
+  selectedProgramWeekKey=calendarWeek;
+ }
+ if((db.programs||[]).some(x=>String(x.student)===String(student)&&String(x.weekKey)===String(wk)&&new Date(String(x.weekKey)+'T12:00:00').getDay()===6))return alert('Geçmiş hafta arşivini görüntülüyorsunuz. Yeni program için takvimden istediğiniz haftanın bir tarihini seçin.');
  const drafts=programDrafts.filter(x=>String(x.student)===String(student)&&String(x.weekKey)===String(wk));
  const originals=db.programs.slice();
  const ids=new Set(drafts.map(x=>String(x.id)));
@@ -2350,21 +2363,11 @@ async function saveWeeklyProgram(){
  const weekRows=db.programs.filter(x=>String(x.student)===String(student)&&String(x.weekKey)===String(wk));
  if(!weekRows.length)return alert('Bu hafta için kaydedilecek program yok. Önce Programa Ekle ile çalışmaları oluştur.');
  try{
-  // Bulutu seçili haftanın yerel programıyla BİREBİR eşitle.
-  // Önceden Supabase'de kalmış eski/test kayıtları da temizle; yalnızca upsert yapmak
-  // eski satırları bırakıp öğrenci portalında görünmelerine neden oluyordu.
-  const remote=await supa.from('programs').select('id,notes').eq('student_id',student);
-  if(remote?.error)throw remote.error;
-  const keepIds=new Set(weekRows.map(x=>String(x.id)));
-  const stale=(remote.data||[]).filter(row=>{
-    const m=parseProgramMeta(row.notes);
-    // Any legacy program row without V20 metadata is stale for the new authoritative weekly save.
-    return (!String(m.weekKey||'') || String(m.weekKey||'')===String(wk)) && !keepIds.has(String(row.id));
-  }).map(row=>String(row.id));
-  if(stale.length){
-    const del=await supa.from('programs').delete().in('id',stale);
-    if(del?.error)throw del.error;
-  }
+  // Güvenli kayıt: yalnızca seçili öğrencinin seçili haftadaki satırlarını ekle/güncelle.
+  // Diğer haftalar, eski kayıtlar ve başka programlar silinmez.
+  const validWeek=/^\d{4}-\d{2}-\d{2}$/.test(String(wk))&&!isNaN(new Date(wk+'T12:00:00'));
+  if(!validWeek)throw new Error('Geçersiz program hafta tarihi: '+wk);
+  if(weekRows.some(x=>String(x.student)!==String(student)||String(x.weekKey)!==String(wk)))throw new Error('Öğrenci veya hafta eşleşmesi doğrulanamadı.');
   const r=await supa.from('programs').upsert(weekRows.map(programCloudRow),{onConflict:'id'});
   if(r?.error)throw r.error;
   renderProgram();
@@ -2384,7 +2387,7 @@ function programCompletionRecord(programId,studentId){const rows=(db.programComp
 function studentProgramCompleted(programId,studentId){const r=programCompletionRecord(programId,studentId);return !!r?.completed;}
 function programStudentStats(studentId,weekKey){const arr=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&(!weekKey||x.weekKey===weekKey));const done=arr.filter(x=>studentProgramCompleted(x.id,studentId)).length,total=arr.length;return {arr,total,done,pct:total?Math.round(done/total*100):0};}
 function programStats(studentId,weekKey){return programStudentStats(studentId,weekKey);}
-function renderStudentProgramProgress(){const el=document.getElementById('studentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey():(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);el.innerHTML=`<div class="card" style="margin-top:12px"><h3>Program İlerlemesi</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div></div>`;}
+function renderStudentProgramProgress(){const el=document.getElementById('studentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey(s.id):(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);el.innerHTML=`<div class="card" style="margin-top:12px"><h3>Program İlerlemesi</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div></div>`;}
 let programCompletionRefreshInFlight=false;
 function renderCoachProgramProgress(skipCloudRefresh=false){
  const el=document.getElementById('coachWeeklyProgramProgress');if(!el)return;
@@ -2416,7 +2419,7 @@ function renderCoachProgramProgress(skipCloudRefresh=false){
  el.innerHTML=`<h3>Haftalık Program Tamamlama — ${esc(s.name||'Öğrenci')}</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı · ${esc(weekRangeLabel(wk))}</div></div>${rows||'<p class="muted">Seçilen hafta için program kaydı yok.</p>'}`;
 }
 
-function renderParentProgramProgress(){const el=document.getElementById('parentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey():(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);const rows=p.arr.map(x=>{const c=programCompletionRecord(x.id,s.id),done=!!c?.completed;return `<div class="item"><b>${esc(x.subject||'Ders')}</b><div class="small">${esc(x.topic||x.content||'')} · ${done?'TAMAMLANDI':'AKTİF / TAMAMLANMADI'}</div>${done?`<div class="small muted">Tamamlanma: ${esc(formatDateTimeTR(c.completedAt))}</div>`:''}</div>`}).join('');el.innerHTML=`<h3>Program Tamamlama Durumu</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div>${rows}`;}
+function renderParentProgramProgress(){const el=document.getElementById('parentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey(s.id):(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);const rows=p.arr.map(x=>{const c=programCompletionRecord(x.id,s.id),done=!!c?.completed;return `<div class="item"><b>${esc(x.subject||'Ders')}</b><div class="small">${esc(x.topic||x.content||'')} · ${done?'TAMAMLANDI':'AKTİF / TAMAMLANMADI'}</div>${done?`<div class="small muted">Tamamlanma: ${esc(formatDateTimeTR(c.completedAt))}</div>`:''}</div>`}).join('');el.innerHTML=`<h3>Program Tamamlama Durumu</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div>${rows}`;}
 
 function renderWeeklyProgramGrid(){
  const el=document.getElementById('weeklyProgramGrid'); if(!el)return;
@@ -2556,40 +2559,112 @@ async function deleteCurrentWeekProgram(){
 }
 
 function getTaskStatus(task){
- const x=(db.taskStatuses||[]).find(v=>String(v.taskId)===String(task.id));
- return x||{id:'',taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false};
+ const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id));
+ // The task UUID is the canonical status-row UUID. Prefer it over duplicate legacy rows.
+ const canonical=matches.find(v=>String(v.id)===String(task.id));
+ if(canonical)return canonical;
+ matches.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+ return matches[0]||{id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false};
 }
 function ensureTaskStatus(task){
- let x=(db.taskStatuses||[]).find(v=>String(v.taskId)===String(task.id));
- if(!x){x={id:uuid(),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false,updatedAt:new Date().toISOString()};db.taskStatuses.push(x);}
+ const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id));
+ let x=getTaskStatus(task);
+ if(!matches.length){
+  x={id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false,updatedAt:new Date().toISOString()};
+ }
+ // Collapse device-created duplicate rows locally and make both devices upsert the same cloud row.
+ x.id=String(task.id);x.taskId=task.id;x.student=task.student;
+ db.taskStatuses=(db.taskStatuses||[]).filter(v=>String(v.taskId)!==String(task.id));
+ db.taskStatuses.push(x);
  return x;
 }
 function taskStudentDone(task){return !!getTaskStatus(task).studentDone}
 function taskCoachDone(task){return !!getTaskStatus(task).coachDone}
 function taskStatusText(task){const st=getTaskStatus(task);return `${st.studentDone?'Öğrenci: Tamamlandı':'Öğrenci: Bekliyor'} · ${st.coachDone?'Koç: Tamamlandı':'Koç: Bekliyor'}`;}
-function addTask(){
-  let s=document.getElementById('taskStudent').value, title=document.getElementById('taskTitle').value.trim();
-  if(!s)return alert('Öğrenci ekleyin.');
+async function addTask(){
+  const studentId=document.getElementById('taskStudent').value;
+  const title=document.getElementById('taskTitle').value.trim();
+  if(!studentId)return alert('Öğrenci seçin.');
   if(!title)return alert('Görev başlığı girin.');
-  const task={id:uuid(),student:s,title,description:document.getElementById('taskDescription').value.trim(),dueDate:document.getElementById('taskDueDate').value||'',done:false};
-  db.tasks.unshift(task);
-  save();
-  document.getElementById('taskTitle').value=''; document.getElementById('taskDescription').value=''; document.getElementById('taskDueDate').value='';
-  renderAll(); alert('Görev öğrenciye atandı.');
+  const button=document.querySelector('#tasks button[onclick="addTask()"]');
+  if(button?.disabled)return;
+  if(button)button.disabled=true;
+  const task={id:uuid(),student:studentId,title,description:document.getElementById('taskDescription').value.trim(),dueDate:document.getElementById('taskDueDate').value||'',done:false};
+  try{
+    const result=await supa.from('tasks').upsert({id:task.id,student_id:task.student,title:task.title,description:task.description,due_date:task.dueDate||null,completed:false},{onConflict:'id'});
+    if(result?.error)throw result.error;
+    db.tasks=db.tasks.filter(x=>String(x.id)!==String(task.id));
+    db.tasks.unshift(task);
+    persistLocalDB();
+    document.getElementById('taskTitle').value='';
+    document.getElementById('taskDescription').value='';
+    document.getElementById('taskDueDate').value='';
+    renderAll();
+    alert('Görev buluta kaydedildi ve öğrenciye atandı.');
+  }catch(e){
+    db.tasks=db.tasks.filter(x=>String(x.id)!==String(task.id));
+    persistLocalDB();
+    renderAll();
+    alert('Görev kaydedilemedi. Öğrenciye atanmadı. Bağlantıyı kontrol edip yeniden deneyin.');
+    console.warn('Görev atama hatası:',e?.message||e);
+  }finally{
+    if(button)button.disabled=false;
+  }
+}
+async function saveTaskStatusToCloud(task,st){
+ const row={id:String(task.id),student_id:task.student,report_type:'task_status',content:JSON.stringify({taskId:task.id,student:task.student,studentDone:!!st.studentDone,coachDone:!!st.coachDone,updatedAt:st.updatedAt||new Date().toISOString()})};
+ const result=await supa.from('reports').upsert(row,{onConflict:'id'});
+ if(result?.error)throw result.error;
+ // Read back the canonical row so success means the shared status really persisted.
+ const check=await supa.from('reports').select('id,student_id,content').eq('id',String(task.id)).eq('report_type','task_status').maybeSingle();
+ if(check?.error)throw check.error;
+ if(!check?.data)throw new Error('Görev durumu kaydı doğrulanamadı.');
+ const saved=JSON.parse(check.data.content||'{}');
+ if(String(saved.taskId)!==String(task.id)||!!saved.studentDone!==!!st.studentDone||!!saved.coachDone!==!!st.coachDone)throw new Error('Görev durumu doğrulaması başarısız.');
+}
+async function refreshTaskStatusesFromCloud(){
+ if(!portalSessionToken||!supa||!(db.tasks||[]).length)return;
+ const result=await supa.from('reports').select('id,student_id,content,created_at').eq('report_type','task_status');
+ if(result?.error)throw result.error;
+ const cloud=(result.data||[]).map(row=>{try{const v=JSON.parse(row.content||'{}');return {id:row.id,taskId:String(v.taskId||''),student:row.student_id||v.student||'',studentDone:!!v.studentDone,coachDone:!!v.coachDone,updatedAt:v.updatedAt||row.created_at||''};}catch(_){return null;}}).filter(x=>x&&x.taskId);
+ let changed=false;
+ for(const task of db.tasks){
+  const matches=cloud.filter(x=>String(x.taskId)===String(task.id));
+  if(!matches.length)continue;
+  const saved=matches.find(x=>String(x.id)===String(task.id))||matches.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')))[0];
+  const current=getTaskStatus(task);
+  if(String(current.id)!==String(task.id)||!!current.studentDone!==!!saved.studentDone||!!current.coachDone!==!!saved.coachDone||String(current.updatedAt||'')!==String(saved.updatedAt||''))changed=true;
+  db.taskStatuses=(db.taskStatuses||[]).filter(x=>String(x.taskId)!==String(task.id));
+  db.taskStatuses.push({...saved,id:String(task.id),taskId:String(task.id),student:task.student});
+ }
+ if(changed){
+  persistLocalDB();
+  if(document.getElementById('portal')?.classList.contains('active'))renderPortalForStudent(role,selectedStudent);
+  if(document.getElementById('tasks')?.classList.contains('active'))renderTasks();
+ }
+}
+function startTaskStatusSync(){
+ if(window.__taskStatusSyncStarted)return;
+ window.__taskStatusSyncStarted=true;
+ setInterval(()=>{refreshTaskStatusesFromCloud().catch(e=>console.warn('Görev durumu yenileme:',e?.message||e));},10000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshTaskStatusesFromCloud().catch(e=>console.warn('Görev durumu yenileme:',e?.message||e));});
 }
 async function setCoachTaskDone(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
- const st=ensureTaskStatus(task),previous=!!st.coachDone;st.coachDone=!previous;st.updatedAt=new Date().toISOString();st.student=task.student;
+ const st=ensureTaskStatus(task),previous=!!st.coachDone,previousUpdatedAt=st.updatedAt;
+ st.coachDone=!previous;st.updatedAt=new Date().toISOString();st.student=task.student;
  persistLocalDB();renderAll();
- try{const row={id:st.id,student_id:task.student,report_type:'task_status',content:JSON.stringify({taskId:task.id,student:task.student,studentDone:!!st.studentDone,coachDone:!!st.coachDone,updatedAt:st.updatedAt})};const r=await supa.from('reports').upsert(row,{onConflict:'id'});if(r?.error)throw r.error;}catch(e){st.coachDone=previous;st.updatedAt=new Date().toISOString();persistLocalDB();renderAll();alert('Koç tamamlandı durumu buluta kaydedilemedi. Bağlantıyı kontrol edip yeniden deneyin.');console.warn('Koç görev durumu kaydı:',e?.message||e);}
+ try{await saveTaskStatusToCloud(task,st);}
+ catch(e){st.coachDone=previous;st.updatedAt=previousUpdatedAt||new Date().toISOString();persistLocalDB();renderAll();alert('Koç görev durumu buluta kaydedilemedi. Eski durum korundu.');console.warn('Koç görev durumu kaydı:',e?.message||e);}
 }
 async function setStudentTaskDone(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
- const st=ensureTaskStatus(task);st.studentDone=!st.studentDone;st.updatedAt=new Date().toISOString();st.student=task.student;
+ const st=ensureTaskStatus(task),previous=!!st.studentDone,previousUpdatedAt=st.updatedAt;
+ st.studentDone=!previous;st.updatedAt=new Date().toISOString();st.student=task.student;
  persistLocalDB();
- renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');
- const ok=await syncCloud();
- if(!ok){st.studentDone=!st.studentDone;st.updatedAt=new Date().toISOString();persistLocalDB();renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');alert('Görev durumu kaydedilemedi. Eski durum geri yüklendi.');}
+ renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');
+ try{await saveTaskStatusToCloud(task,st);}
+ catch(e){st.studentDone=previous;st.updatedAt=previousUpdatedAt||new Date().toISOString();persistLocalDB();renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');alert('Görev durumu kaydedilemedi. Eski durum korundu; bağlantıyı kontrol edip yeniden deneyin.');console.warn('Öğrenci görev durumu kaydı:',e?.message||e);}
 }
 async function deleteTask(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
@@ -2607,7 +2682,7 @@ async function deleteTask(id){
  }
 }
 function renderTasks(){
-  let s=student(),a=db.tasks.filter(x=>!s||String(x.student)===String(s.id));
+  const a=db.tasks||[];
   document.getElementById('taskList').innerHTML=a.length?a.map(x=>{
    const st=getTaskStatus(x);
    return `<div class="item ${st.studentDone?'done':''}"><div class="row" style="align-items:flex-start;gap:8px"><div style="flex:1"><b>${esc(x.title)}</b><div class="small muted">${esc(x.description||'')}${x.dueDate?' · Son tarih: '+esc(x.dueDate):''}</div><div class="small" style="margin-top:6px"><b>Öğrenci:</b> ${st.studentDone?'TAMAMLANDI ✓':'Tamamlanmadı'} · <b>Koç:</b> ${st.coachDone?'TAMAMLANDI ✓':'Tamamlanmadı'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="light" onclick="setCoachTaskDone('${x.id}')">${st.coachDone?'Koç Geri Al':'Koç Tamamladı'}</button><button class="task-delete-btn" onclick="deleteTask('${x.id}')">SİL</button></div></div></div>`;
@@ -2778,15 +2853,25 @@ function localISODate(d){const x=new Date(d);if(isNaN(x))return todayISO();retur
 function programCycleStartISO(inputDate=new Date(), offsetWeeks=0){
  const d=new Date(inputDate); if(isNaN(d)) return todayISO();
  const day=d.getDay();
- const diff=(day===0?1:0); // Pazar -> önceki Cumartesi
  d.setHours(12,0,0,0);
- d.setDate(d.getDate()-((day+1)%7)+(Number(offsetWeeks||0)*7));
+ // Haftalık program pazartesi başlar.
+ d.setDate(d.getDate()-(day===0?6:day-1)+(Number(offsetWeeks||0)*7));
+ return localISODate(d);
+}
+function storedProgramWeekDisplayKey(key){
+ const raw=String(key||'');
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(raw))return currentProgramCycleKey();
+ const d=new Date(raw+'T12:00:00');if(isNaN(d))return currentProgramCycleKey();
+ // Eski sürümlerde hafta anahtarı cumartesiydi (Cumartesi-Cuma).
+ // Aynı 7 günlük dönemi pazartesi başlangıcına eşlemek için iki gün ileri al;
+ // geçmiş satırların weekKey değerlerini değiştirme.
+ if(d.getDay()===6)d.setDate(d.getDate()+2);
  return localISODate(d);
 }
 function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date(),offset);}
-function programCycleRange(key){const d=new Date((key||currentProgramCycleKey())+'T12:00:00');const end=new Date(d);end.setDate(d.getDate()+6);return {start:localISODate(d),end:localISODate(end),key:localISODate(d)};}
+function programCycleRange(key){const d=new Date(storedProgramWeekDisplayKey(key)+'T12:00:00');const end=new Date(d);end.setDate(d.getDate()+7);return {start:localISODate(d),end:localISODate(end),key:localISODate(d)};}
 function programCycleLabel(key){const r=programCycleRange(key);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(r.start)+' – '+fmt(r.end);}
-function activePortalProgramWeekKey(){return currentProgramCycleKey(0);}
+function activePortalProgramWeekKey(studentId){const monday=currentProgramCycleKey(0);if(!studentId)return monday;const sid=String(studentId),today=todayISO();const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));if(rows.some(x=>String(x.weekKey||'')===monday))return monday;const eligible=rows.filter(x=>{const start=storedProgramWeekDisplayKey(x.weekKey);const end=new Date(start+'T12:00:00');end.setDate(end.getDate()+7);return start<=today&&today<=localISODate(end);}).sort((a,b)=>storedProgramWeekDisplayKey(b.weekKey).localeCompare(storedProgramWeekDisplayKey(a.weekKey)));if(eligible.length)return String(eligible[0].weekKey);const future=rows.filter(x=>storedProgramWeekDisplayKey(x.weekKey)>today).sort((a,b)=>storedProgramWeekDisplayKey(a.weekKey).localeCompare(storedProgramWeekDisplayKey(b.weekKey)));return future.length?String(future[0].weekKey):monday;}
 function migrateLegacyProgramWeekKeys(){
  // Legacy rows without V20 metadata cannot be assigned a reliable week from created_at alone.
  // Keep them unassigned instead of accidentally making an old program appear as this week's program.
@@ -2888,7 +2973,7 @@ function renderCoachGrowthSummary(){const el=document.getElementById('coachGrowt
 function renderPortalDashboardProgramCard(studentId){
  const el=document.getElementById('portalArchive'); if(!el)return;
  const s=(db.students||[]).find(x=>String(x.id)===String(studentId));
- const wk=activePortalProgramWeekKey();
+ const wk=activePortalProgramWeekKey(studentId);
  const arr=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&String(x.weekKey||'')===String(wk));
  const done=arr.filter(x=>x.done).length,total=arr.length,questions=arr.reduce((n,x)=>n+Number(x.questions||0),0);
  const all=(db.programs||[]).filter(x=>String(x.student)===String(studentId));
@@ -2897,7 +2982,7 @@ function renderPortalDashboardProgramCard(studentId){
 }
 function renderPortalTodayCard(studentId){
  const el=document.getElementById('portalTodayPlan'); if(!el)return;
- const html=featureTodayPlan(studentId,activePortalProgramWeekKey());
+ const html=featureTodayPlan(studentId,activePortalProgramWeekKey(studentId));
  el.innerHTML=html&&html.includes('atanmış program yok')?'<div class="notice"><b>Bugün için program</b><div class="small" style="margin-top:5px">Bugün için henüz kayıtlı çalışma yok. Yeni haftalık program kaydedildiğinde burada görünecek.</div></div>':html;
 }
 function renderPortalGoalCard(studentId){
@@ -2916,7 +3001,7 @@ function renderPortalJourneyCard(studentId){
  journey.innerHTML=`<div class="small" style="margin-bottom:8px"><b>${esc(p.goal||p.faculty||'YKS hedefi')}</b></div>`+steps.map((x,i)=>`<div class="journey-step ${i<idx?'done':''} ${i===idx?'active':''}"><div class="journey-dot">${i<idx?'✓':i+1}</div><div><b>${esc(x[0])}</b><div class="small muted">${esc(x[1])}</div></div></div>`).join('');
 }
 function renderPortalFeatureCards(studentId){
- renderWeeklyProgressCard(studentId,'portalWeeklyProgress',activePortalProgramWeekKey());
+ renderWeeklyProgressCard(studentId,'portalWeeklyProgress',activePortalProgramWeekKey(studentId));
  renderPortalTaskTracker(studentId);
  renderPortalGrowthChart(studentId);
  renderPortalGoalCard(studentId);
@@ -2948,21 +3033,54 @@ function renderGoalSummary(studentId,targetId='archiveGoalSummary'){
  el.innerHTML=`<div class="grid"><div class="kpi"><span class="muted">Hedef</span><br><b>${esc(p.goal||'Belirlenmedi')}</b><div class="small">${esc(p.university||'')} ${p.faculty?'· '+esc(p.faculty):''}</div></div><div class="kpi"><span class="muted">Son toplam net</span><br><b>${net===null?'—':net.toFixed(1)}</b><div class="small">${last?esc(last.date):'Henüz deneme yok'}</div></div></div>`;
 }
 function renderArchive(){
- ensureArchives(); const s=student(); if(!s)return; const sid=s.id;
- const pro=(db.programs||[]).filter(x=>String(x.student)===String(sid)), ex=(db.exams||[]).filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), reps=db.reportArchive.filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), tasks=(db.tasks||[]).filter(x=>String(x.student)===String(sid));
- const ids={archiveProgramCount:pro.length,archiveExamCount:ex.length,archiveReportCount:reps.length,archiveTaskCount:tasks.length};Object.entries(ids).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
+ ensureArchives();
+ const archiveSel=document.getElementById('archiveStudent');
+ if(archiveSel){
+  const prev=archiveSel.value;
+  archiveSel.innerHTML=(db.students||[]).map(v=>`<option value="${esc(v.id)}">${esc(v.name||'Öğrenci')}</option>`).join('');
+  const chosen=(prev&&(db.students||[]).some(v=>String(v.id)===String(prev)))?prev:(selectedStudent||db.students[0]?.id||'');
+  if(chosen)archiveSel.value=chosen;
+ }
+ const sid=String(archiveSel?.value||selectedStudent||student()?.id||'');
+ const s=(db.students||[]).find(v=>String(v.id)===sid);if(!s)return;
+ selectedStudent=sid;
+ const allPrograms=(db.programs||[]).filter(x=>String(x.student)===sid);
+ const dateFilter=document.getElementById('archiveDate')?.value||'';
+ const targetWeek=dateFilter?programCycleStartISO(new Date(dateFilter+'T12:00:00')):'';
+ const pro=dateFilter?allPrograms.filter(x=>String(storedProgramWeekDisplayKey(x.weekKey||'Arşivsiz'))===targetWeek):allPrograms;
+ const ex=(db.exams||[]).filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), reps=db.reportArchive.filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), tasks=(db.tasks||[]).filter(x=>String(x.student)===String(sid));
+ const ids={archiveProgramCount:allPrograms.length,archiveExamCount:ex.length,archiveReportCount:reps.length,archiveTaskCount:tasks.length};Object.entries(ids).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
  renderGoalSummary(s);
  const eh=document.getElementById('archiveExamHistory'); eh.innerHTML=ex.length?ex.map((x,i)=>`<div class="item"><b>${esc(x.name||'Deneme')}</b><div class="small muted">${esc(x.date||'')} · Toplam net: <b>${totalNet(x).toFixed(1)}</b>${i<ex.length-1?' · Önceki karşılaştırma mevcut':''}</div></div>`).join(''):'<p class="muted">Henüz deneme yok.</p>';
- const weeks={};pro.forEach(x=>{const k=x.weekKey||'Arşivsiz';(weeks[k]??=[]).push(x)}); const ph=document.getElementById('archiveProgramHistory');ph.innerHTML=Object.keys(weeks).sort().reverse().map(k=>{const a=weeks[k],d=a.filter(x=>studentProgramCompleted(x.id,sid)).length,pct=a.length?Math.round(d/a.length*100):0;return `<div class="item"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b>Hafta: ${esc(k)}</b><div class="small muted">${d}/${a.length} çalışma tamamlandı · %${pct}</div><div class="small muted">${[...new Set(a.map(x=>x.subject).filter(Boolean))].join(', ')||'Program kaydı'}</div></div><div class="row" style="gap:6px"><button class="secondary" onclick="openProgramArchiveWeek('${esc(k)}')">HAFTAYI AÇ</button><button class="danger" onclick="deleteProgramArchiveWeek('${esc(k)}')">SİL</button></div></div></div>`}).join('')||'<p class="muted">Program arşivi yok.</p>';
+ const weeks={};pro.forEach(x=>{const k=x.weekKey||'Arşivsiz';(weeks[k]??=[]).push(x)}); const ph=document.getElementById('archiveProgramHistory');ph.innerHTML=Object.keys(weeks).sort((a,b)=>storedProgramWeekDisplayKey(b).localeCompare(storedProgramWeekDisplayKey(a))).map(k=>{const a=weeks[k],d=a.filter(x=>studentProgramCompleted(x.id,sid)).length,pct=a.length?Math.round(d*100/a.length):0;return `<div class="item"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b>Hafta: ${k==='Arşivsiz'?'Tarihi belirlenmemiş':esc(weekRangeLabel(k))}</b><div class="small muted">${d}/${a.length} çalışma tamamlandı · %${pct}</div><div class="small muted">${[...new Set(a.map(x=>x.subject).filter(Boolean))].join(', ')||'Program kaydı'}</div></div><div class="row" style="gap:6px"><button class="secondary" onclick="openProgramArchiveWeek('${esc(k)}')">HAFTAYI AÇ</button><button class="danger" onclick="deleteProgramArchiveWeek('${esc(k)}')">SİL</button></div></div></div>`}).join('')||'<p class="muted">Program arşivi yok.</p>';
  const rh=document.getElementById('archiveReportHistory');rh.innerHTML=reps.length?reps.map(r=>`<div class="item"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><div><b>${esc(r.title||'Veli raporu')}</b><div class="small muted">${esc(r.date||'')}</div><div class="small">${esc(r.summary||'')}</div></div><button class="danger" onclick="deleteReportArchive('${r.id}')">SİL</button></div></div>`).join(''):'<p class="muted">Arşivlenmiş rapor yok.</p>';
 }
+function openArchiveSelectedWeek(){
+ const sid=String(document.getElementById('archiveStudent')?.value||selectedStudent||'');
+ const date=document.getElementById('archiveDate')?.value||'';
+ if(!sid)return alert('Önce öğrenci seçin.');
+ if(!date)return alert('Önce program haftasından bir tarih seçin.');
+ selectedStudent=sid;
+ const week=programCycleStartISO(new Date(date+'T12:00:00'));
+ const matching=(db.programs||[]).filter(x=>String(x.student)===sid&&String(storedProgramWeekDisplayKey(x.weekKey||'Arşivsiz'))===week);
+ if(!matching.length)return alert('Seçilen tarih aralığında bu öğrenci için program kaydı bulunamadı.');
+ const key=matching[0].weekKey||week;
+ openProgramArchiveWeek(key);
+}
+function clearArchiveDateFilter(){const d=document.getElementById('archiveDate');if(d)d.value='';renderArchive();}
 function openProgramArchiveWeek(weekKey){
  const sid=selectedStudent||student()?.id||'';
  if(!weekKey||weekKey==='Arşivsiz')return alert('Bu kayıt için açılabilir bir hafta bilgisi yok.');
+ // Arşiv satırlarının eski hafta anahtarını aynen koru ki program filtre dışında kalmasın.
  selectedProgramWeekKey=String(weekKey);
  const sel=document.getElementById('programStudent');if(sel&&sid)sel.value=sid;
  show('program');
- selectProgramDate(String(weekKey).slice(0,10));
+ const displayKey=storedProgramWeekDisplayKey(weekKey),range=programCycleRange(displayKey);
+ const cal=document.getElementById('programCalendarDate');if(cal)cal.value=displayKey;
+ const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=range.end;
+ const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Arşiv program dönemi: '+weekRangeLabel(weekKey)+' (7 gün)';
+ const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=weekRangeLabel(weekKey);
+ renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();
 }
 async function deleteProgramArchiveWeek(weekKey){
  const s=student();if(!s)return;
@@ -3170,9 +3288,11 @@ async function saveStudentPortalAssessment(sid){const v=document.getElementById(
 let selectedProgramWeekKey = currentProgramCycleKey();
 function weekRangeLabel(key){return programCycleLabel(key);}
 function selectProgramDate(dateStr){
- const chosen=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
+ const raw=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
+ const parsed=new Date(raw+'T12:00:00');
+ const chosen=isNaN(parsed)?currentProgramCycleKey():programCycleStartISO(parsed);
  selectedProgramWeekKey=chosen;
- const end=new Date(chosen+'T12:00:00');end.setDate(end.getDate()+6);const endISO=localISODate(end);
+ const end=new Date(chosen+'T12:00:00');end.setDate(end.getDate()+7);const endISO=localISODate(end);
  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=chosen;
  const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=endISO;
  const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Program dönemi: '+weekRangeLabel(selectedProgramWeekKey)+' (7 gün)';
@@ -3409,7 +3529,7 @@ function renderPortalWeeklyProgram(studentId){
  const today=todayISO();
  const studentPrograms=(db.programs||[]).filter(x=>String(x.student)===String(s.id)&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
  const weekKeys=[...new Set(studentPrograms.map(x=>String(x.weekKey)))].sort();
- const currentKey=weekKeys.find(k=>k<=today&&today<=programCycleRange(k).end);
+ const currentKey=weekKeys.filter(k=>{const range=programCycleRange(k);return range.start<=today&&today<=range.end;}).sort((a,b)=>programCycleRange(b).start.localeCompare(programCycleRange(a).start))[0]||'';
  const nextKey=weekKeys.find(k=>k>today);
  const activeWeek=currentKey||nextKey||'';
  const arr=activeWeek?studentPrograms.filter(x=>String(x.weekKey)===activeWeek):[];
