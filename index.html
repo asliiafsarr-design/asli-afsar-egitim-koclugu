@@ -1390,6 +1390,7 @@ function setPortalSession(token){
  if(portalSessionToken){
   localStorage.setItem('v20PortalSession',portalSessionToken);
   try{supa=initSupabaseClient(portalSessionToken);}catch(e){console.warn(e);}
+  startTaskStatusSync();
  }
 }
 function portalAuthMessage(authRole,kind,detail){
@@ -2620,6 +2621,33 @@ async function saveTaskStatusToCloud(task,st){
  if(!check?.data)throw new Error('Görev durumu kaydı doğrulanamadı.');
  const saved=JSON.parse(check.data.content||'{}');
  if(String(saved.taskId)!==String(task.id)||!!saved.studentDone!==!!st.studentDone||!!saved.coachDone!==!!st.coachDone)throw new Error('Görev durumu doğrulaması başarısız.');
+}
+async function refreshTaskStatusesFromCloud(){
+ if(!portalSessionToken||!supa||!(db.tasks||[]).length)return;
+ const result=await supa.from('reports').select('id,student_id,content,created_at').eq('report_type','task_status');
+ if(result?.error)throw result.error;
+ const cloud=(result.data||[]).map(row=>{try{const v=JSON.parse(row.content||'{}');return {id:row.id,taskId:String(v.taskId||''),student:row.student_id||v.student||'',studentDone:!!v.studentDone,coachDone:!!v.coachDone,updatedAt:v.updatedAt||row.created_at||''};}catch(_){return null;}}).filter(x=>x&&x.taskId);
+ let changed=false;
+ for(const task of db.tasks){
+  const matches=cloud.filter(x=>String(x.taskId)===String(task.id));
+  if(!matches.length)continue;
+  const saved=matches.find(x=>String(x.id)===String(task.id))||matches.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')))[0];
+  const current=getTaskStatus(task);
+  if(String(current.id)!==String(task.id)||!!current.studentDone!==!!saved.studentDone||!!current.coachDone!==!!saved.coachDone||String(current.updatedAt||'')!==String(saved.updatedAt||''))changed=true;
+  db.taskStatuses=(db.taskStatuses||[]).filter(x=>String(x.taskId)!==String(task.id));
+  db.taskStatuses.push({...saved,id:String(task.id),taskId:String(task.id),student:task.student});
+ }
+ if(changed){
+  persistLocalDB();
+  if(document.getElementById('portal')?.classList.contains('active'))renderPortalForStudent(role,selectedStudent);
+  if(document.getElementById('tasks')?.classList.contains('active'))renderTasks();
+ }
+}
+function startTaskStatusSync(){
+ if(window.__taskStatusSyncStarted)return;
+ window.__taskStatusSyncStarted=true;
+ setInterval(()=>{refreshTaskStatusesFromCloud().catch(e=>console.warn('Görev durumu yenileme:',e?.message||e));},10000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshTaskStatusesFromCloud().catch(e=>console.warn('Görev durumu yenileme:',e?.message||e));});
 }
 async function setCoachTaskDone(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
