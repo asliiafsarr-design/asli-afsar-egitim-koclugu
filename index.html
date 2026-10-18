@@ -2385,7 +2385,14 @@ async function saveWeeklyProgram(){
 
 function programCompletionRecord(programId,studentId){const rows=(db.programCompletions||[]).filter(x=>String(x.programId)===String(programId)&&String(x.student)===String(studentId));return rows.slice().sort((a,b)=>String(b.updatedAt||b.completedAt||'').localeCompare(String(a.updatedAt||a.completedAt||'')))[0]||null;}
 function studentProgramCompleted(programId,studentId){const r=programCompletionRecord(programId,studentId);return !!r?.completed;}
-function programStudentStats(studentId,weekKey){const arr=(db.programs||[]).filter(x=>String(x.student)===String(studentId)&&(!weekKey||x.weekKey===weekKey));const done=arr.filter(x=>studentProgramCompleted(x.id,studentId)).length,total=arr.length;return {arr,total,done,pct:total?Math.round(done/total*100):0};}
+function programStudentStats(studentId,weekKey){
+ const all=(db.programs||[]).filter(x=>String(x.student)===String(studentId));
+ const exact=weekKey?all.filter(x=>String(x.weekKey||'')===String(weekKey)):all;
+ const legacy=weekKey&&!exact.length?all.filter(x=>String(storedProgramWeekDisplayKey(x.weekKey||''))===String(weekKey)):[];
+ const arr=exact.length||!weekKey?exact:legacy;
+ const done=arr.filter(x=>studentProgramCompleted(x.id,studentId)).length,total=arr.length;
+ return {arr,total,done,pct:total?Math.round(done/total*100):0};
+}
 function programStats(studentId,weekKey){return programStudentStats(studentId,weekKey);}
 function renderStudentProgramProgress(){const el=document.getElementById('studentProgramProgress');if(!el)return;const s=student();if(!s){el.innerHTML='';return;}const wk=(role==='student'||role==='parent')?activePortalProgramWeekKey(s.id):(selectedProgramWeekKey||currentProgramCycleKey());const p=programStudentStats(s.id,wk);el.innerHTML=`<div class="card" style="margin-top:12px"><h3>Program İlerlemesi</h3><div class="kpi"><b>%${p.pct} tamamlandı</b><div class="small">${p.done} / ${p.total} çalışma tamamlandı</div></div></div>`;}
 let programCompletionRefreshInFlight=false;
@@ -2425,7 +2432,14 @@ function renderWeeklyProgramGrid(){
  const el=document.getElementById('weeklyProgramGrid'); if(!el)return;
  const selected=document.getElementById('programStudent')?.value;
  const s=(db.students||[]).find(x=>String(x.id)===String(selected))||student();
- const wk=selectedProgramWeekKey||currentProgramCycleKey(); const arr=[...(db.programs||[]),...programDrafts].filter(x=>(!s||String(x.student)===String(s.id))&&String(x.weekKey||currentProgramCycleKey())===String(wk));
+ const wk=selectedProgramWeekKey||currentProgramCycleKey();
+ const studentRows=(db.programs||[]).filter(x=>(!s||String(x.student)===String(s.id))&&String(x.weekKey||currentProgramCycleKey())===String(wk));
+ // Pazartesi anahtarlı yeni hafta varsa onu göster; yoksa aynı görüntü haftasına
+ // eşlenen eski Cumartesi anahtarlı kayıtları göster. Hiçbir kayıt taşınmaz/değiştirilmez.
+ const legacyRows=studentRows.length?[]:(db.programs||[]).filter(x=>(!s||String(x.student)===String(s.id))&&String(storedProgramWeekDisplayKey(x.weekKey||''))===String(wk));
+ const sourceRows=studentRows.length?studentRows:legacyRows;
+ const draftRows=programDrafts.filter(x=>(!s||String(x.student)===String(s.id))&&String(x.weekKey||currentProgramCycleKey())===String(wk));
+ const arr=[...sourceRows,...draftRows];
  const days=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
  const subjectClass=(subject)=>{const v=String(subject||'').toLowerCase();if(v.includes('matematik'))return 'math';if(v.includes('geometri'))return 'geometry';if(v.includes('türkçe')||v.includes('edebiyat'))return 'turkish';if(v.includes('tarih')||v.includes('coğrafya')||v.includes('din')||v.includes('felsefe'))return 'social';if(v.includes('fizik')||v.includes('kimya')||v.includes('biyoloji'))return 'science';if(v.includes('ingilizce')||v.includes('ydt')||v.includes('dil'))return 'language';return '';};
  el.innerHTML=days.map(dayName=>{
@@ -3290,7 +3304,13 @@ function weekRangeLabel(key){return programCycleLabel(key);}
 function selectProgramDate(dateStr){
  const raw=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
  const parsed=new Date(raw+'T12:00:00');
- const chosen=isNaN(parsed)?currentProgramCycleKey():programCycleStartISO(parsed);
+ const sid=String(document.getElementById('programStudent')?.value||selectedStudent||'');
+ // Eski programların bazıları Cumartesi anahtarıyla saklandı. Tarih seçicide
+ // o kayıt anahtarına basılınca aynı haftanın önceki Pazartesi'sine geri düşme.
+ // Eski anahtarı yalnızca görüntüleme haftasına eşleştir; veritabanındaki satıra dokunma.
+ const legacySaturday=(db.programs||[]).some(x=>String(x.student)===sid&&String(x.weekKey||'')===raw&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&new Date(raw+'T12:00:00').getDay()===6);
+ const parsedKey=isNaN(parsed)?currentProgramCycleKey():programCycleStartISO(parsed);
+ const chosen=legacySaturday?storedProgramWeekDisplayKey(raw):parsedKey;
  selectedProgramWeekKey=chosen;
  const end=new Date(chosen+'T12:00:00');end.setDate(end.getDate()+7);const endISO=localISODate(end);
  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=chosen;
