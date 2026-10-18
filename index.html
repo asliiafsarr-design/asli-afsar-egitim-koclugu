@@ -1596,7 +1596,9 @@ function scopePortalDBForStudent(studentId){
  // Final isolation boundary: before any student/parent UI renders, drop every cached row
  // that is not explicitly owned by the authenticated student. This also removes stale
  // rows left in an older browser/localStorage build, not only rows from the current RPC.
- const owned=(rows)=>Array.isArray(rows)?rows.filter(x=>x&&String(x.student??x.student_id??'')===sid):[];
+ const owned=(rows)=>Array.isArray(rows)?rows.filter(x=>x&&
+  (x.student==null||String(x.student)===sid)&&
+  (x.student_id==null||String(x.student_id)===sid)):[];
  db.students=db.students.filter(s=>String(s.id)===sid);
  ['programs','tasks','exams','inventories','reports','reportArchive','taskStatuses','programCompletions','questionTracking','swotRecords','topicTracking','programRevisions','sources','branchExams','mockExams','memberships'].forEach(k=>{db[k]=owned(db[k]);});
  db.studentSessions=(Array.isArray(db.studentSessions)?db.studentSessions:[]).filter(x=>String(x.studentId??x.student_id??x.student??'')===sid);
@@ -2559,22 +2561,22 @@ async function deleteCurrentWeekProgram(){
 }
 
 function getTaskStatus(task){
- const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id));
- // The task UUID is the canonical status-row UUID. Prefer it over duplicate legacy rows.
- const canonical=matches.find(v=>String(v.id)===String(task.id));
+ const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id)&&(!v.student||String(v.student)===String(task.student)));
+ // A status belongs to both the task UUID and its student; never borrow another student's status.
+ const canonical=matches.find(v=>String(v.id)===String(task.id)&&(!v.student||String(v.student)===String(task.student)));
  if(canonical)return canonical;
  matches.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
  return matches[0]||{id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false};
 }
 function ensureTaskStatus(task){
- const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id));
+ const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id)&&(!v.student||String(v.student)===String(task.student)));
  let x=getTaskStatus(task);
  if(!matches.length){
   x={id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false,updatedAt:new Date().toISOString()};
  }
- // Collapse device-created duplicate rows locally and make both devices upsert the same cloud row.
+ // Collapse only this student's duplicate rows; preserve status rows owned by other students.
  x.id=String(task.id);x.taskId=task.id;x.student=task.student;
- db.taskStatuses=(db.taskStatuses||[]).filter(v=>String(v.taskId)!==String(task.id));
+ db.taskStatuses=(db.taskStatuses||[]).filter(v=>!(String(v.taskId)===String(task.id)&&(!v.student||String(v.student)===String(task.student))));
  db.taskStatuses.push(x);
  return x;
 }
@@ -2629,7 +2631,7 @@ async function refreshTaskStatusesFromCloud(){
  const cloud=(result.data||[]).map(row=>{try{const v=JSON.parse(row.content||'{}');return {id:row.id,taskId:String(v.taskId||''),student:row.student_id||v.student||'',studentDone:!!v.studentDone,coachDone:!!v.coachDone,updatedAt:v.updatedAt||row.created_at||''};}catch(_){return null;}}).filter(x=>x&&x.taskId);
  let changed=false;
  for(const task of db.tasks){
-  const matches=cloud.filter(x=>String(x.taskId)===String(task.id));
+  const matches=cloud.filter(x=>String(x.taskId)===String(task.id)&&String(x.student)===String(task.student));
   if(!matches.length)continue;
   const saved=matches.find(x=>String(x.id)===String(task.id))||matches.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')))[0];
   const current=getTaskStatus(task);
@@ -2862,10 +2864,11 @@ function storedProgramWeekDisplayKey(key){
  const raw=String(key||'');
  if(!/^\d{4}-\d{2}-\d{2}$/.test(raw))return currentProgramCycleKey();
  const d=new Date(raw+'T12:00:00');if(isNaN(d))return currentProgramCycleKey();
- // Eski sürümlerde hafta anahtarı cumartesiydi (Cumartesi-Cuma).
- // Aynı 7 günlük dönemi pazartesi başlangıcına eşlemek için iki gün ileri al;
- // geçmiş satırların weekKey değerlerini değiştirme.
- if(d.getDay()===6)d.setDate(d.getDate()+2);
+ // Eski dönemlerde hafta anahtarı hafta sonuna kaydedilmiş olabilir.
+ // Cumartesi ve 19 Ekim öncesi pazar anahtarlarını yeni pazartesi başlangıcına eşle;
+ // veritabanındaki özgün weekKey değerlerini değiştirme.
+ if(raw<'2026-10-19'&&d.getDay()===6)d.setDate(d.getDate()+2);
+ else if(raw<'2026-10-19'&&d.getDay()===0)d.setDate(d.getDate()+1);
  return localISODate(d);
 }
 function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date(),offset);}
@@ -3290,8 +3293,14 @@ function weekRangeLabel(key){return programCycleLabel(key);}
 function selectProgramDate(dateStr){
  const raw=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
  const parsed=new Date(raw+'T12:00:00');
- const chosen=isNaN(parsed)?currentProgramCycleKey():programCycleStartISO(parsed);
- selectedProgramWeekKey=chosen;
+ const sid=String(document.getElementById('programStudent')?.value||selectedStudent||'');
+ const studentRows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
+ // Resolve legacy weekend keys to their display Monday without changing stored row keys.
+ const rawIsStoredKey=studentRows.some(x=>String(x.weekKey)===raw);
+ const chosen=isNaN(parsed)?currentProgramCycleKey():(rawIsStoredKey?storedProgramWeekDisplayKey(raw):programCycleStartISO(parsed));
+ const exact=studentRows.some(x=>String(x.weekKey)===chosen);
+ const legacy=exact?null:studentRows.find(x=>storedProgramWeekDisplayKey(x.weekKey)===chosen);
+ selectedProgramWeekKey=exact?chosen:(legacy?String(legacy.weekKey):chosen);
  const end=new Date(chosen+'T12:00:00');end.setDate(end.getDate()+7);const endISO=localISODate(end);
  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=chosen;
  const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=endISO;
@@ -3301,8 +3310,19 @@ function selectProgramDate(dateStr){
 }
 function renderProgramWeekSelector(){selectProgramDate(selectedProgramWeekKey||todayISO());}
 function selectProgramWeek(key){selectProgramDate(key||todayISO());}
-function changeProgramWeek(offset){const d=new Date((selectedProgramWeekKey||currentProgramCycleKey())+'T12:00:00');d.setDate(d.getDate()+Number(offset||0)*7);selectProgramDate(localISODate(d));}
-function renderProgram(){if(!selectedProgramWeekKey)selectedProgramWeekKey=currentProgramCycleKey();selectProgramDate(selectedProgramWeekKey);};
+function changeProgramWeek(offset){const base=storedProgramWeekDisplayKey(selectedProgramWeekKey||currentProgramCycleKey());const d=new Date(base+'T12:00:00');d.setDate(d.getDate()+Number(offset||0)*7);selectProgramDate(localISODate(d));}
+let lastProgramStudentId='';
+function renderProgram(){
+ const sid=String(document.getElementById('programStudent')?.value||selectedStudent||'');
+ if(sid&&sid!==lastProgramStudentId){
+  lastProgramStudentId=sid;
+  // On student change, open that student's active/next saved period.
+  const active=activePortalProgramWeekKey(sid);
+  if(active)selectedProgramWeekKey=active;
+ }
+ if(!selectedProgramWeekKey)selectedProgramWeekKey=currentProgramCycleKey();
+ selectProgramDate(selectedProgramWeekKey);
+};
 
 function renderBranchSubjects(){
  const level=document.getElementById('branchLevel')?.value||'TYT';
