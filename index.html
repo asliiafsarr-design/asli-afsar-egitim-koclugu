@@ -2558,12 +2558,17 @@ async function deleteCurrentWeekProgram(){
 }
 
 function getTaskStatus(task){
- const x=(db.taskStatuses||[]).find(v=>String(v.taskId)===String(task.id));
- return x||{id:'',taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false};
+ const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id));
+ // Student and coach devices may have created separate legacy status rows. Use the newest row consistently.
+ matches.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+ return matches[0]||{id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false};
 }
 function ensureTaskStatus(task){
- let x=(db.taskStatuses||[]).find(v=>String(v.taskId)===String(task.id));
- if(!x){x={id:uuid(),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false,updatedAt:new Date().toISOString()};db.taskStatuses.push(x);}
+ let x=getTaskStatus(task);
+ if(!(db.taskStatuses||[]).some(v=>String(v.taskId)===String(task.id))){
+  x={id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false,updatedAt:new Date().toISOString()};
+  db.taskStatuses.push(x);
+ }
  return x;
 }
 function taskStudentDone(task){return !!getTaskStatus(task).studentDone}
