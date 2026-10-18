@@ -2559,22 +2559,22 @@ async function deleteCurrentWeekProgram(){
 }
 
 function getTaskStatus(task){
- const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id));
- // The task UUID is the canonical status-row UUID. Prefer it over duplicate legacy rows.
- const canonical=matches.find(v=>String(v.id)===String(task.id));
+ const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id)&&(!v.student||String(v.student)===String(task.student)));
+ // A status belongs to both the task UUID and its student; never borrow another student's status.
+ const canonical=matches.find(v=>String(v.id)===String(task.id)&&(!v.student||String(v.student)===String(task.student)));
  if(canonical)return canonical;
  matches.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
  return matches[0]||{id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false};
 }
 function ensureTaskStatus(task){
- const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id));
+ const matches=(db.taskStatuses||[]).filter(v=>String(v.taskId)===String(task.id)&&(!v.student||String(v.student)===String(task.student)));
  let x=getTaskStatus(task);
  if(!matches.length){
   x={id:String(task.id),taskId:task.id,student:task.student,studentDone:!!task.done,coachDone:false,updatedAt:new Date().toISOString()};
  }
- // Collapse device-created duplicate rows locally and make both devices upsert the same cloud row.
+ // Collapse only this student's duplicate rows; preserve status rows owned by other students.
  x.id=String(task.id);x.taskId=task.id;x.student=task.student;
- db.taskStatuses=(db.taskStatuses||[]).filter(v=>String(v.taskId)!==String(task.id));
+ db.taskStatuses=(db.taskStatuses||[]).filter(v=>!(String(v.taskId)===String(task.id)&&(!v.student||String(v.student)===String(task.student))));
  db.taskStatuses.push(x);
  return x;
 }
