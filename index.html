@@ -2569,29 +2569,57 @@ function ensureTaskStatus(task){
 function taskStudentDone(task){return !!getTaskStatus(task).studentDone}
 function taskCoachDone(task){return !!getTaskStatus(task).coachDone}
 function taskStatusText(task){const st=getTaskStatus(task);return `${st.studentDone?'Öğrenci: Tamamlandı':'Öğrenci: Bekliyor'} · ${st.coachDone?'Koç: Tamamlandı':'Koç: Bekliyor'}`;}
-function addTask(){
-  let s=document.getElementById('taskStudent').value, title=document.getElementById('taskTitle').value.trim();
-  if(!s)return alert('Öğrenci ekleyin.');
+async function addTask(){
+  const studentId=document.getElementById('taskStudent').value;
+  const title=document.getElementById('taskTitle').value.trim();
+  if(!studentId)return alert('Öğrenci seçin.');
   if(!title)return alert('Görev başlığı girin.');
-  const task={id:uuid(),student:s,title,description:document.getElementById('taskDescription').value.trim(),dueDate:document.getElementById('taskDueDate').value||'',done:false};
-  db.tasks.unshift(task);
-  save();
-  document.getElementById('taskTitle').value=''; document.getElementById('taskDescription').value=''; document.getElementById('taskDueDate').value='';
-  renderAll(); alert('Görev öğrenciye atandı.');
+  const button=document.querySelector('#tasks button[onclick="addTask()"]');
+  if(button?.disabled)return;
+  if(button)button.disabled=true;
+  const task={id:uuid(),student:studentId,title,description:document.getElementById('taskDescription').value.trim(),dueDate:document.getElementById('taskDueDate').value||'',done:false};
+  try{
+    const result=await supa.from('tasks').upsert({id:task.id,student_id:task.student,title:task.title,description:task.description,due_date:task.dueDate||null,completed:false},{onConflict:'id'});
+    if(result?.error)throw result.error;
+    db.tasks=db.tasks.filter(x=>String(x.id)!==String(task.id));
+    db.tasks.unshift(task);
+    persistLocalDB();
+    document.getElementById('taskTitle').value='';
+    document.getElementById('taskDescription').value='';
+    document.getElementById('taskDueDate').value='';
+    renderAll();
+    alert('Görev buluta kaydedildi ve öğrenciye atandı.');
+  }catch(e){
+    db.tasks=db.tasks.filter(x=>String(x.id)!==String(task.id));
+    persistLocalDB();
+    renderAll();
+    alert('Görev kaydedilemedi. Öğrenciye atanmadı. Bağlantıyı kontrol edip yeniden deneyin.');
+    console.warn('Görev atama hatası:',e?.message||e);
+  }finally{
+    if(button)button.disabled=false;
+  }
+}
+async function saveTaskStatusToCloud(task,st){
+ const row={id:st.id,student_id:task.student,report_type:'task_status',content:JSON.stringify({taskId:task.id,student:task.student,studentDone:!!st.studentDone,coachDone:!!st.coachDone,updatedAt:st.updatedAt})};
+ const result=await supa.from('reports').upsert(row,{onConflict:'id'});
+ if(result?.error)throw result.error;
 }
 async function setCoachTaskDone(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
- const st=ensureTaskStatus(task),previous=!!st.coachDone;st.coachDone=!previous;st.updatedAt=new Date().toISOString();st.student=task.student;
+ const st=ensureTaskStatus(task),previous=!!st.coachDone,previousUpdatedAt=st.updatedAt;
+ st.coachDone=!previous;st.updatedAt=new Date().toISOString();st.student=task.student;
  persistLocalDB();renderAll();
- try{const row={id:st.id,student_id:task.student,report_type:'task_status',content:JSON.stringify({taskId:task.id,student:task.student,studentDone:!!st.studentDone,coachDone:!!st.coachDone,updatedAt:st.updatedAt})};const r=await supa.from('reports').upsert(row,{onConflict:'id'});if(r?.error)throw r.error;}catch(e){st.coachDone=previous;st.updatedAt=new Date().toISOString();persistLocalDB();renderAll();alert('Koç tamamlandı durumu buluta kaydedilemedi. Bağlantıyı kontrol edip yeniden deneyin.');console.warn('Koç görev durumu kaydı:',e?.message||e);}
+ try{await saveTaskStatusToCloud(task,st);}
+ catch(e){st.coachDone=previous;st.updatedAt=previousUpdatedAt||new Date().toISOString();persistLocalDB();renderAll();alert('Koç görev durumu buluta kaydedilemedi. Eski durum korundu.');console.warn('Koç görev durumu kaydı:',e?.message||e);}
 }
 async function setStudentTaskDone(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
- const st=ensureTaskStatus(task);st.studentDone=!st.studentDone;st.updatedAt=new Date().toISOString();st.student=task.student;
+ const st=ensureTaskStatus(task),previous=!!st.studentDone,previousUpdatedAt=st.updatedAt;
+ st.studentDone=!previous;st.updatedAt=new Date().toISOString();st.student=task.student;
  persistLocalDB();
- renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');
- const ok=await syncCloud();
- if(!ok){st.studentDone=!st.studentDone;st.updatedAt=new Date().toISOString();persistLocalDB();renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');alert('Görev durumu kaydedilemedi. Eski durum geri yüklendi.');}
+ renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');
+ try{await saveTaskStatusToCloud(task,st);}
+ catch(e){st.studentDone=previous;st.updatedAt=previousUpdatedAt||new Date().toISOString();persistLocalDB();renderPortalForStudent('student',task.student);renderPortalFeatureCards(task.student);renderPortalTopicTracking(task.student);renderTodayTaskAndAlerts(task.student,'todayPlanCard');alert('Görev durumu kaydedilemedi. Eski durum korundu; bağlantıyı kontrol edip yeniden deneyin.');console.warn('Öğrenci görev durumu kaydı:',e?.message||e);}
 }
 async function deleteTask(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
@@ -2609,7 +2637,7 @@ async function deleteTask(id){
  }
 }
 function renderTasks(){
-  let s=student(),a=db.tasks.filter(x=>!s||String(x.student)===String(s.id));
+  const a=db.tasks||[];
   document.getElementById('taskList').innerHTML=a.length?a.map(x=>{
    const st=getTaskStatus(x);
    return `<div class="item ${st.studentDone?'done':''}"><div class="row" style="align-items:flex-start;gap:8px"><div style="flex:1"><b>${esc(x.title)}</b><div class="small muted">${esc(x.description||'')}${x.dueDate?' · Son tarih: '+esc(x.dueDate):''}</div><div class="small" style="margin-top:6px"><b>Öğrenci:</b> ${st.studentDone?'TAMAMLANDI ✓':'Tamamlanmadı'} · <b>Koç:</b> ${st.coachDone?'TAMAMLANDI ✓':'Tamamlanmadı'}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="light" onclick="setCoachTaskDone('${x.id}')">${st.coachDone?'Koç Geri Al':'Koç Tamamladı'}</button><button class="task-delete-btn" onclick="deleteTask('${x.id}')">SİL</button></div></div></div>`;
