@@ -1646,7 +1646,7 @@ function renderPortalForStudent(portalRole,studentId){
  document.getElementById('portalTitle').textContent=(portalRole==='parent'?'Veli — ':'Öğrenci — ')+s.name;
  document.getElementById('portalProfile').innerHTML='<div class="grid"><div class="kpi"><span class="muted">Sınıf</span><br><b>'+esc(s.grade)+'</b></div><div class="kpi"><span class="muted">Alan</span><br><b>'+esc(s.area)+'</b></div><div class="kpi"><span class="muted">Hedef</span><br><b>'+esc(pinfo.goal||'Belirtilmedi')+'</b></div><div class="kpi"><span class="muted">Üniversite</span><br><b>'+esc(pinfo.university||'Belirtilmedi')+'</b></div></div>';
  renderPortalMembership(studentId);
- const sid=String(s.id),activeWeek=activePortalProgramWeekKey(s.id),pro=(db.programs||[]).filter(x=>String(x.student)===sid&&String(x.weekKey||'')===String(activeWeek)),tasks=(db.tasks||[]).filter(x=>String(x.student)===sid),ex=(db.exams||[]).filter(x=>String(x.student)===sid),src=(db.sources||[]).filter(x=>String(x.student)===sid);
+ const sid=String(s.id),activeWeek=activePortalProgramWeekKey(s.id),pro=portalProgramsForWeek(s.id,activeWeek),tasks=(db.tasks||[]).filter(x=>String(x.student)===sid),ex=(db.exams||[]).filter(x=>String(x.student)===sid),src=(db.sources||[]).filter(x=>String(x.student)===sid);
  document.getElementById('portalProgram').innerHTML=pro.length?pro.map(x=>'<div class="item '+(x.done?'done':'')+'"><b>'+esc(x.day)+' — '+esc(x.subject)+'</b><div class="small">'+esc(x.topic)+' · '+x.duration+' dk · '+x.questions+' soru · '+(x.done?'Tamamlandı ✓':'Bekliyor')+'</div></div>').join(''):'<p class="muted">Program yok.</p>';
  renderPortalTopicTracking(s.id);
  renderPortalQuestionAndSwot(s.id);
@@ -2874,6 +2874,7 @@ function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date()
 function programCycleRange(key){const d=new Date(storedProgramWeekDisplayKey(key)+'T12:00:00');const end=new Date(d);end.setDate(d.getDate()+7);return {start:localISODate(d),end:localISODate(end),key:localISODate(d)};}
 function programCycleLabel(key){const r=programCycleRange(key);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(r.start)+' – '+fmt(r.end);}
 function activePortalProgramWeekKey(studentId){const monday=currentProgramCycleKey(0);if(!studentId)return monday;const sid=String(studentId),today=todayISO();const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));if(rows.some(x=>String(x.weekKey||'')===monday))return monday;const eligible=rows.filter(x=>{const start=storedProgramWeekDisplayKey(x.weekKey);const end=new Date(start+'T12:00:00');end.setDate(end.getDate()+7);return start<=today&&today<=localISODate(end);}).sort((a,b)=>storedProgramWeekDisplayKey(b.weekKey).localeCompare(storedProgramWeekDisplayKey(a.weekKey)));if(eligible.length)return String(eligible[0].weekKey);const future=rows.filter(x=>storedProgramWeekDisplayKey(x.weekKey)>today).sort((a,b)=>storedProgramWeekDisplayKey(a.weekKey).localeCompare(storedProgramWeekDisplayKey(b.weekKey)));return future.length?String(future[0].weekKey):monday;}
+function portalProgramsForWeek(studentId,weekKey){const sid=String(studentId||''),target=storedProgramWeekDisplayKey(weekKey||currentProgramCycleKey());return (db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&storedProgramWeekDisplayKey(x.weekKey)===target);}
 function migrateLegacyProgramWeekKeys(){
  // Legacy rows without V20 metadata cannot be assigned a reliable week from created_at alone.
  // Keep them unassigned instead of accidentally making an old program appear as this week's program.
@@ -3522,8 +3523,8 @@ function renderPortalWeeklyProgram(studentId){
  // Use the same student-specific week as the portal summary. Legacy week keys must
  // remain unchanged in storage; comparing their raw date to today hid the 17–23 program.
  const activeWeek=activePortalProgramWeekKey(s.id);
- const arr=activeWeek?studentPrograms.filter(x=>String(x.weekKey)===String(activeWeek)):[];
- const rawStart=activeWeek||'';
+ const arr=activeWeek?portalProgramsForWeek(s.id,activeWeek):[];
+ const rawStart=activeWeek?storedProgramWeekDisplayKey(activeWeek):'';
  const rawEnd=rawStart?(()=>{const d=new Date(rawStart+'T12:00:00');d.setDate(d.getDate()+6);return localISODate(d);})():'';
  const info=document.getElementById('portalProgramWeekInfo');
  if(info)info.textContent=activeWeek?('Program dönemi: '+(()=>{const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(rawStart)+' – '+fmt(rawEnd);})()+' · Kayıtlı program korunmuştur.'):'Henüz bu öğrenci için tarihli bir program atanmadı.';
