@@ -2873,7 +2873,8 @@ function storedProgramWeekDisplayKey(key){
 function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date(),offset);}
 function programCycleRange(key){const d=new Date(storedProgramWeekDisplayKey(key)+'T12:00:00');const end=new Date(d);end.setDate(d.getDate()+7);return {start:localISODate(d),end:localISODate(end),key:localISODate(d)};}
 function programCycleLabel(key){const r=programCycleRange(key);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(r.start)+' – '+fmt(r.end);}
-function activePortalProgramWeekKey(studentId){const monday=currentProgramCycleKey(0);if(!studentId)return monday;const sid=String(studentId),today=todayISO();const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));if(!rows.length)return monday;const display=x=>storedProgramWeekDisplayKey(x.weekKey);const groups=new Map();rows.forEach(x=>{const key=display(x);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(x);});const latestCreated=arr=>arr.reduce((v,x)=>String(x.createdAt||'')>v?String(x.createdAt||''):v,'');const candidates=[...groups.entries()].filter(([key])=>{const end=new Date(key+'T12:00:00');end.setDate(end.getDate()+6);return localISODate(end)>=today;});if(!candidates.length)return monday;const current=candidates.find(([key])=>key===monday);const latest=candidates.slice().sort((a,b)=>{const ta=latestCreated(a[1]),tb=latestCreated(b[1]);if(ta!==tb)return tb.localeCompare(ta);return b[0].localeCompare(a[0]);})[0];const latestKey=latest?.[0]||monday;const latestRows=latest?.[1]||[];const currentRows=current?.[1]||[];if(currentRows.length&&latestCreated(currentRows)>=latestCreated(latestRows))return String(currentRows[0].weekKey);return String(latestRows[0]?.weekKey||latestKey);}
+function activePortalProgramWeekKey(studentId){const monday=currentProgramCycleKey(0);if(!studentId)return monday;const sid=String(studentId),today=todayISO();const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));if(!rows.length)return monday;const display=x=>storedProgramWeekDisplayKey(x.weekKey);const groups=new Map();rows.forEach(x=>{const key=display(x);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(x);});const latestCreated=arr=>arr.reduce((v,x)=>String(x.createdAt||'')>v?String(x.createdAt||''):v,'');const candidates=[...groups.entries()].filter(([key])=>{const end=new Date(key+'T12:00:00');end.setDate(end.getDate()+6);return localISODate(end)>=today;});if(!candidates.length)return monday;const current=candidates.find(([key])=>key===monday);const latest=candidates.slice().sort((a,b)=>{const ta=latestCreated(a[1]),tb=latestCreated(b[1]);if(ta!==tb)return tb.localeCompare(ta);return b[0].localeCompare(a[0]);})[0];const latestKey=latest?.[0]||monday;const latestRows=latest?.[1]||[];const currentRows=current?.[1]||[];// İçinde bulunduğumuz haftanın programı pazar gününün sonuna kadar önceliklidir.
+if(currentRows.length)return String(currentRows[0].weekKey);return String(latestRows[0]?.weekKey||latestKey);}
 function portalProgramsForWeek(studentId,weekKey){const sid=String(studentId||''),target=storedProgramWeekDisplayKey(weekKey||currentProgramCycleKey());return (db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&storedProgramWeekDisplayKey(x.weekKey)===target);}
 function migrateLegacyProgramWeekKeys(){
  // Legacy rows without V20 metadata cannot be assigned a reliable week from created_at alone.
@@ -3291,7 +3292,7 @@ async function saveStudentPortalAssessment(sid){const v=document.getElementById(
 
 let selectedProgramWeekKey = currentProgramCycleKey();
 function weekRangeLabel(key){return programCycleLabel(key);}
-function selectProgramDate(dateStr){  const raw=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);  const parsed=new Date(raw+'T12:00:00');  const valid=!isNaN(parsed),startISO=valid?localISODate(parsed):currentProgramCycleKey();  const sid=document.getElementById('programStudent')?.value||selectedStudent||student()?.id||'';  const rows=(db.programs||[]).filter(x=>String(x.student)===String(sid)&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));  const exact=rows.some(x=>String(x.weekKey)===startISO);  const range=valid?weekRangeFromDate(startISO,sid):{key:currentProgramCycleKey()};  const chosen=exact?startISO:(range?.key||programCycleStartISO(parsed));  selectedProgramWeekKey=chosen;  const end=new Date((valid?startISO:chosen)+'T12:00:00');end.setDate(end.getDate()+6);const endISO=localISODate(end);  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=startISO;  const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=endISO;  const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});  const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Program dönemi: '+fmt(startISO)+' – '+fmt(endISO)+' (7 gün)';  const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=weekRangeLabel(selectedProgramWeekKey);  renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress(); } function renderProgramWeekSelector(){selectProgramDate(selectedProgramWeekKey||todayISO());}
+function selectProgramDate(dateStr){  const raw=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);  const parsed=new Date(raw+'T12:00:00');  const valid=!isNaN(parsed),startISO=valid?programCycleStartISO(parsed):currentProgramCycleKey();  const sid=document.getElementById('programStudent')?.value||selectedStudent||student()?.id||'';  const rows=(db.programs||[]).filter(x=>String(x.student)===String(sid)&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));  const exact=rows.some(x=>String(x.weekKey)===startISO);  const range=valid?weekRangeFromDate(startISO,sid):{key:currentProgramCycleKey()};  const chosen=exact?startISO:(range?.key||programCycleStartISO(parsed));  selectedProgramWeekKey=chosen;  const displayStart=storedProgramWeekDisplayKey(chosen);const end=new Date(displayStart+'T12:00:00');end.setDate(end.getDate()+7);const endISO=localISODate(end);  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=displayStart;  const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=endISO;  const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});  const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Program dönemi: '+fmt(displayStart)+' – '+fmt(endISO)+' (Pazartesi–Pazartesi, 7 gün)';  const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=weekRangeLabel(selectedProgramWeekKey);  renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress(); } function renderProgramWeekSelector(){selectProgramDate(selectedProgramWeekKey||todayISO());}
 function selectProgramWeek(key){selectProgramDate(key||todayISO());}
 function changeProgramWeek(offset){const d=new Date((selectedProgramWeekKey||currentProgramCycleKey())+'T12:00:00');d.setDate(d.getDate()+Number(offset||0)*7);selectProgramDate(localISODate(d));}
 function renderProgram(){if(!selectedProgramWeekKey)selectedProgramWeekKey=currentProgramCycleKey();selectProgramDate(selectedProgramWeekKey);};
@@ -3557,6 +3558,40 @@ function renderPortalWeeklyProgram(studentId){
    </div>`;
  }).join('');
 }
+
+
+let portalProgramRefreshBusy=false;
+async function refreshPortalProgramSnapshot(){
+ const portalRole=String(role||''),token=String(portalSessionToken||'');
+ if(!token||!['student','parent'].includes(portalRole)||portalProgramRefreshBusy||!supa)return;
+ portalProgramRefreshBusy=true;
+ try{
+  const r=await supa.rpc('portal_get_bundle',{p_token:token,p_device_key:portalDeviceKey});
+  if(r?.error)return;
+  const bundle=typeof r.data==='string'?JSON.parse(r.data):r.data;
+  if(!bundle?.ok||String(portalSessionToken||'')!==token||String(role||'')!==portalRole)return;
+  const sid=String((db.students||[])[0]?.id||'');
+  if(!sid||String(bundle.student?.id||'')!==sid)return;
+  const rows=(Array.isArray(bundle.programs)?bundle.programs:[])
+   .filter(x=>String(x.student_id||'')===sid)
+   .map(x=>{
+    const m=parseProgramMeta(x.notes);
+    return {id:x.id,student:sid,day:x.day||'',subject:x.subject||'',topic:(m.topic??x.topic)||'',duration:(m.duration??x.duration)||0,questions:(m.questions??x.question_count)||0,done:!!x.completed,weekKey:m.weekKey||'',order:Number.isFinite(Number(m.order))?Number(m.order):null,startTime:m.startTime||'',endTime:m.endTime||'',programType:m.programType||'study',workType:m.workType||'',content:m.content||'',notes:m.plainNotes||'',createdAt:x.created_at||''};
+   });
+  db.programs=(db.programs||[]).filter(x=>String(x.student)!==sid).concat(rows);
+  const active=activePortalProgramWeekKey(sid),pro=portalProgramsForWeek(sid,active);
+  const summary=document.getElementById('portalProgram');
+  if(summary)summary.innerHTML=pro.length?pro.map(x=>'<div class="item '+(x.done?'done':'')+'"><b>'+esc(x.day)+' — '+esc(x.subject)+'</b><div class="small">'+esc(x.topic)+' · '+x.duration+' dk · '+x.questions+' soru · '+(x.done?'Tamamlandı ✓':'Bekliyor')+'</div></div>').join(''):'<p class="muted">Program yok.</p>';
+  renderPortalWeeklyProgram(sid);
+  if(typeof renderStudentProgramProgress==='function')renderStudentProgramProgress();
+  if(typeof renderParentProgramProgress==='function')renderParentProgramProgress();
+  if(typeof renderWeeklyProgressCard==='function')renderWeeklyProgressCard(sid,'portalWeeklyProgress',active);
+ }catch(e){console.warn('Program portalı güncellenemedi:',e?.message||e);}
+ finally{portalProgramRefreshBusy=false;}
+}
+window.addEventListener('focus',()=>{void refreshPortalProgramSnapshot();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshPortalProgramSnapshot();});
+setInterval(()=>{if(!document.hidden)void refreshPortalProgramSnapshot();},60000);
 
 async function portalToggleProgram(programId,studentId){
  const sid=String(studentId||'').trim();
