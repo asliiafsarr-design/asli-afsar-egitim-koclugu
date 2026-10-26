@@ -3296,7 +3296,7 @@ function selectProgramDate(dateStr){
  const parsed=new Date(raw+'T12:00:00');
  const valid=!isNaN(parsed);
  const sid=String(document.getElementById('programStudent')?.value||selectedStudent||student()?.id||'');
- const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\\d{4}-\\d{2}-\\d{2}$/.test(String(x.weekKey||'')));
+ const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
  const exact=rows.some(x=>String(x.weekKey)===raw);
  const legacySaturday=exact&&valid&&parsed.getDay()===6;
  const chosen=legacySaturday?raw:programCycleStartISO(valid?parsed:new Date());
