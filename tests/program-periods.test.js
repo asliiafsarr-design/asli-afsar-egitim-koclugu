@@ -1,63 +1,87 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
 
-function iso(date) {
-  const d = date instanceof Date ? date : new Date(date + 'T12:00:00');
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const html = fs.readFileSync('index.html', 'utf8');
+const lines = html.split(/\r?\n/);
+function sourceLine(prefix) {
+  const line = lines.find(x => x.trimStart().startsWith(prefix));
+  assert.ok(line, 'Missing production helper: ' + prefix);
+  return line.trim();
 }
-function period(start) {
-  const d = new Date(start + 'T12:00:00');
-  const end = new Date(d);
-  end.setDate(end.getDate() + 6);
-  const boundary = new Date(end);
-  boundary.setDate(boundary.getDate() + 1);
-  return { start, end: iso(end), boundary: iso(boundary) };
+function sourceBlock(prefix) {
+  const start = lines.findIndex(x => x.trimStart().startsWith(prefix));
+  assert.notEqual(start, -1, 'Missing production helper: ' + prefix);
+  let end = start + 1;
+  while (end < lines.length && lines[end] !== '}') end++;
+  assert.ok(end < lines.length, 'Unclosed production helper: ' + prefix);
+  return lines.slice(start, end + 1).join('\n');
 }
-function contains(start, date) {
-  const d = new Date(date + 'T12:00:00');
-  const end = new Date(start + 'T12:00:00');
-  end.setDate(end.getDate() + 6);
-  return d >= new Date(start + 'T12:00:00') && d <= end;
-}
-function activeStart(starts, today) {
-  return starts.filter(start => contains(start, today)).sort().pop() || starts.filter(start => start > today).sort()[0] || null;
+const helpers = [
+  sourceLine('function programCycleRange('),
+  sourceLine('function programStartKeyForDate('),
+  sourceLine('function programPeriodContainsDate('),
+  sourceBlock('function activePortalProgramWeekKey(')
+].join('\n');
+function makeContext(rows, today) {
+  const ctx = {
+    db: { programs: rows },
+    todayISO: () => today,
+    currentProgramCycleKey: () => '2026-10-26',
+    localISODate: d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0')
+  };
+  vm.createContext(ctx);
+  vm.runInContext(helpers, ctx);
+  return ctx;
 }
 
-test('any weekday can start a 7-calendar-day inclusive period', () => {
+test('production helper allows any weekday and includes exactly seven calendar days', () => {
+  const ctx = makeContext([], '2026-10-28');
   for (const start of ['2026-10-26','2026-10-27','2026-10-28','2026-10-29','2026-10-30','2026-10-31','2026-11-01']) {
-    const p = period(start);
-    assert.equal(contains(start, p.end), true);
-    assert.equal(contains(start, p.boundary), false);
-    assert.equal(iso(new Date(new Date(start + 'T12:00:00').setDate(new Date(start + 'T12:00:00').getDate()+6))), p.end);
+    const p = ctx.programCycleRange(start);
+    assert.equal(p.start, start);
+    const expectedEnd = new Date(start + 'T12:00:00');
+    expectedEnd.setDate(expectedEnd.getDate() + 6);
+    assert.equal(p.end, ctx.localISODate(expectedEnd));
+    assert.equal(ctx.programPeriodContainsDate(start, p.end), true);
+    const next = new Date(expectedEnd);
+    next.setDate(next.getDate() + 1);
+    assert.equal(ctx.programPeriodContainsDate(start, ctx.localISODate(next)), false);
   }
 });
 
-test('Wednesday period ends Tuesday and next period starts Wednesday', () => {
-  assert.deepEqual(period('2026-10-28'), {start:'2026-10-28',end:'2026-11-03',boundary:'2026-11-04'});
+test('Wednesday 28 October period ends Tuesday 3 November; next day is the next start', () => {
+  const ctx = makeContext([], '2026-10-28');
+  const p = ctx.programCycleRange('2026-10-28');
+  assert.equal(p.end, '2026-11-03');
+  assert.equal(p.boundary, '2026-11-04');
+  assert.equal(ctx.programStartKeyForDate('student-a','2026-11-04'), '2026-11-04');
 });
 
-test('period boundary is exclusive for persistence range', () => {
-  assert.equal(period('2026-10-26').boundary, '2026-11-02');
-  assert.equal(contains('2026-10-26','2026-11-01'), true);
-  assert.equal(contains('2026-10-26','2026-11-02'), false);
-});
-
-test('overlapping periods select the most recently started active period', () => {
-  assert.equal(activeStart(['2026-10-26','2026-10-30'],'2026-10-31'),'2026-10-30');
-});
-
-test('student-specific periods remain isolated by student key', () => {
+test('student portal picks the active period for that student only', () => {
   const rows = [
-    {student:'Belemir',weekKey:'2026-10-26',topic:'existing'},
-    {student:'Elmas Kaya',weekKey:'2026-10-27',topic:'existing'},
-    {student:'Zeynep Rana',weekKey:'2026-10-28',topic:'existing'},
-    {student:'Test Student',weekKey:'2026-10-29',topic:'new'}
+    {student:'Belemir',weekKey:'2026-10-26'},
+    {student:'Elmas Kaya',weekKey:'2026-10-27'},
+    {student:'Zeynep Rana',weekKey:'2026-10-28'},
+    {student:'Test Student',weekKey:'2026-10-29'}
   ];
-  const selected = rows.filter(x => x.student === 'Test Student' && x.weekKey === '2026-10-29');
-  assert.deepEqual(selected.map(x => x.topic), ['new']);
-  assert.equal(rows.filter(x => ['Belemir','Elmas Kaya','Zeynep Rana'].includes(x.student)).length, 3);
+  const ctx = makeContext(rows, '2026-10-31');
+  assert.equal(ctx.activePortalProgramWeekKey('Test Student'), '2026-10-29');
+  assert.equal(ctx.activePortalProgramWeekKey('Zeynep Rana'), '2026-10-28');
+  assert.equal(ctx.activePortalProgramWeekKey('Unknown'), '2026-10-26');
 });
 
-test('invalid date is not treated as a valid program start', () => {
-  assert.equal(Number.isNaN(new Date('not-a-dateT12:00:00').getTime()), true);
+test('when periods overlap, the latest-starting period is selected', () => {
+  const rows = [
+    {student:'S1',weekKey:'2026-10-26'},
+    {student:'S1',weekKey:'2026-10-30'}
+  ];
+  const ctx = makeContext(rows, '2026-10-31');
+  assert.equal(ctx.activePortalProgramWeekKey('S1'), '2026-10-30');
+});
+
+test('invalid date does not become a valid selected program start', () => {
+  const ctx = makeContext([], '2026-10-26');
+  assert.equal(ctx.programStartKeyForDate('S1','not-a-date'), '2026-10-26');
 });
