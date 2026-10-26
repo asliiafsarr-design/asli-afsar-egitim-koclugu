@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 function iso(date) {
-  const d = new Date(date + 'T12:00:00');
+  const d = date instanceof Date ? date : new Date(date + 'T12:00:00');
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 function period(start) {
@@ -11,7 +11,7 @@ function period(start) {
   end.setDate(end.getDate() + 6);
   const boundary = new Date(end);
   boundary.setDate(boundary.getDate() + 1);
-  return { start, end: iso(iso(end)), boundary: iso(boundary) };
+  return { start, end: iso(end), boundary: iso(boundary) };
 }
 function contains(start, date) {
   const d = new Date(date + 'T12:00:00');
