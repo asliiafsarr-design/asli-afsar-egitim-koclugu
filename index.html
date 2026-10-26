@@ -3054,8 +3054,8 @@ function renderArchive(){
  selectedStudent=sid;
  const allPrograms=(db.programs||[]).filter(x=>String(x.student)===sid);
  const dateFilter=document.getElementById('archiveDate')?.value||'';
- const targetWeek=dateFilter?programCycleStartISO(new Date(dateFilter+'T12:00:00')):'';
- const pro=dateFilter?allPrograms.filter(x=>String(storedProgramWeekDisplayKey(x.weekKey||'Arşivsiz'))===targetWeek):allPrograms;
+ const targetWeek=dateFilter?String(dateFilter).slice(0,10):'';
+ const pro=dateFilter?allPrograms.filter(x=>programPeriodContainsDate(x.weekKey,targetWeek)):allPrograms;
  const ex=(db.exams||[]).filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), reps=db.reportArchive.filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), tasks=(db.tasks||[]).filter(x=>String(x.student)===String(sid));
  const ids={archiveProgramCount:allPrograms.length,archiveExamCount:ex.length,archiveReportCount:reps.length,archiveTaskCount:tasks.length};Object.entries(ids).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
  renderGoalSummary(s);
@@ -3069,8 +3069,8 @@ function openArchiveSelectedWeek(){
  if(!sid)return alert('Önce öğrenci seçin.');
  if(!date)return alert('Önce program haftasından bir tarih seçin.');
  selectedStudent=sid;
- const week=programCycleStartISO(new Date(date+'T12:00:00'));
- const matching=(db.programs||[]).filter(x=>String(x.student)===sid&&String(storedProgramWeekDisplayKey(x.weekKey||'Arşivsiz'))===week);
+ const week=String(date).slice(0,10);
+ const matching=(db.programs||[]).filter(x=>String(x.student)===sid&&programPeriodContainsDate(x.weekKey,week));
  if(!matching.length)return alert('Seçilen tarih aralığında bu öğrenci için program kaydı bulunamadı.');
  const key=matching[0].weekKey||week;
  openProgramArchiveWeek(key);
