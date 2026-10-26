@@ -2865,7 +2865,8 @@ function storedProgramWeekDisplayKey(key){
 function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date(),offset);}
 function programCycleRange(key){const raw=String(key||currentProgramCycleKey());const d=new Date(raw+'T12:00:00');if(isNaN(d))return programCycleRange(currentProgramCycleKey());const end=new Date(d);end.setDate(d.getDate()+6);const boundary=new Date(end);boundary.setDate(boundary.getDate()+1);return {start:localISODate(d),end:localISODate(end),boundary:localISODate(boundary),key:raw};}
 function programCycleLabel(key){const r=programCycleRange(key);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(r.start)+' – '+fmt(r.end)+' (7 gün)';}
-function programStartKeyForDate(studentId,dateStr){const raw=String(dateStr||todayISO()).slice(0,10),d=new Date(raw+'T12:00:00');if(isNaN(d))return todayISO();const sid=String(studentId||'');const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));const exact=rows.find(x=>String(x.weekKey)===raw);if(exact)return raw;const containing=rows.find(x=>{const start=new Date(String(x.weekKey)+'T12:00:00');const end=new Date(start);end.setDate(end.getDate()+6);return d>=start&&d<=end;});return containing?String(containing.weekKey):raw;}
+function programStartKeyForDate(studentId,dateStr){const raw=String(dateStr||todayISO()).slice(0,10),d=new Date(raw+'T12:00:00');return /^\d{4}-\d{2}-\d{2}$/.test(raw)&&!isNaN(d)?raw:todayISO();}
+function programPeriodContainsDate(startKey,dateStr){const start=new Date(String(startKey||'')+'T12:00:00'),date=new Date(String(dateStr||'')+'T12:00:00');if(isNaN(start)||isNaN(date))return false;const end=new Date(start);end.setDate(end.getDate()+6);return date>=start&&date<=end;}
 function activePortalProgramWeekKey(studentId){
  const fallback=currentProgramCycleKey();if(!studentId)return fallback;
  const sid=String(studentId),today=todayISO();
@@ -2873,7 +2874,7 @@ function activePortalProgramWeekKey(studentId){
  if(!rows.length)return fallback;
  const groups=new Map();rows.forEach(x=>{const key=String(x.weekKey);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(x);});
  const starts=[...groups.keys()].sort();
- const active=starts.find(key=>{const end=new Date(key+'T12:00:00');end.setDate(end.getDate()+6);return key<=today&&localISODate(end)>=today;});
+ const active=starts.filter(key=>programPeriodContainsDate(key,today)).sort().pop();
  if(active)return active;
  const next=starts.find(key=>key>today);if(next)return next;
  const isBelemir=sid==='4237ffa6-8776-4241-888b-d019ea54ff00';
@@ -3304,7 +3305,7 @@ function selectProgramDate(dateStr){
  const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
  const exact=rows.some(x=>String(x.weekKey)===raw);
  const legacySaturday=exact&&valid&&parsed.getDay()===6;
- const chosen=legacySaturday?raw:programStartKeyForDate(sid,valid?raw:todayISO());
+ const chosen=programStartKeyForDate(sid,valid?raw:todayISO());
  selectedProgramWeekKey=chosen;
  const startISO=chosen;
  const end=new Date(startISO+'T12:00:00');end.setDate(end.getDate()+6);
