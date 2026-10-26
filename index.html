@@ -2859,18 +2859,26 @@ function programCycleStartISO(inputDate=new Date(), offsetWeeks=0){
 function storedProgramWeekDisplayKey(key){
  const raw=String(key||'');
  if(!/^\d{4}-\d{2}-\d{2}$/.test(raw))return currentProgramCycleKey();
- const d=new Date(raw+'T12:00:00');if(isNaN(d))return currentProgramCycleKey();
- // Eski sürümlerde hafta anahtarı cumartesiydi (Cumartesi-Cuma).
- // Aynı 7 günlük dönemi pazartesi başlangıcına eşlemek için iki gün ileri al;
- // geçmiş satırların weekKey değerlerini değiştirme.
- if(d.getDay()===6)d.setDate(d.getDate()+2);
- return localISODate(d);
+ const d=new Date(raw+'T12:00:00');
+ return isNaN(d)?currentProgramCycleKey():raw;
 }
 function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date(),offset);}
 function programCycleRange(key){const raw=String(key||currentProgramCycleKey());const d=new Date(raw+'T12:00:00');if(isNaN(d))return programCycleRange(currentProgramCycleKey());const end=new Date(d);end.setDate(d.getDate()+6);const boundary=new Date(end);boundary.setDate(boundary.getDate()+1);return {start:localISODate(d),end:localISODate(end),boundary:localISODate(boundary),key:raw};}
 function programCycleLabel(key){const r=programCycleRange(key);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(r.start)+' – '+fmt(r.end)+' (7 gün)';}
-function programStartKeyForDate(studentId,dateStr){const raw=String(dateStr||todayISO()).slice(0,10),d=new Date(raw+'T12:00:00');if(isNaN(d))return todayISO();const sid=String(studentId||'');const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\\d{4}-\\d{2}-\\d{2}$/.test(String(x.weekKey||'')));const exact=rows.find(x=>String(x.weekKey)===raw);if(exact)return raw;const containing=rows.find(x=>{const start=new Date(String(x.weekKey)+'T12:00:00');const end=new Date(start);end.setDate(end.getDate()+6);return d>=start&&d<=end;});return containing?String(containing.weekKey):raw;}
-function activePortalProgramWeekKey(studentId){const monday=currentProgramCycleKey(0);if(!studentId)return monday;const sid=String(studentId),today=todayISO();const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));if(!rows.length)return monday;const display=x=>storedProgramWeekDisplayKey(x.weekKey);const groups=new Map();rows.forEach(x=>{const key=display(x);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(x);});const latestCreated=arr=>arr.reduce((v,x)=>String(x.createdAt||'')>v?String(x.createdAt||''):v,'');const candidates=[...groups.entries()].filter(([key])=>{const end=new Date(key+'T12:00:00');end.setDate(end.getDate()+6);return localISODate(end)>=today;});const isBelemir=String(studentId)==='4237ffa6-8776-4241-888b-d019ea54ff00';const pool=candidates.length?candidates:(isBelemir?[...groups.entries()]:[]);if(!pool.length)return monday;const current=pool.find(([key])=>key===monday);const latest=pool.slice().sort((a,b)=>{const ta=latestCreated(a[1]),tb=latestCreated(b[1]);if(ta!==tb)return tb.localeCompare(ta);return b[0].localeCompare(a[0]);})[0];const latestKey=latest?.[0]||monday;const latestRows=latest?.[1]||[];const currentRows=current?.[1]||[];if(currentRows.length&&latestCreated(currentRows)>=latestCreated(latestRows))return String(currentRows[0].weekKey);return String(latestRows[0]?.weekKey||latestKey);}
+function programStartKeyForDate(studentId,dateStr){const raw=String(dateStr||todayISO()).slice(0,10),d=new Date(raw+'T12:00:00');if(isNaN(d))return todayISO();const sid=String(studentId||'');const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));const exact=rows.find(x=>String(x.weekKey)===raw);if(exact)return raw;const containing=rows.find(x=>{const start=new Date(String(x.weekKey)+'T12:00:00');const end=new Date(start);end.setDate(end.getDate()+6);return d>=start&&d<=end;});return containing?String(containing.weekKey):raw;}
+function activePortalProgramWeekKey(studentId){
+ const fallback=currentProgramCycleKey();if(!studentId)return fallback;
+ const sid=String(studentId),today=todayISO();
+ const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
+ if(!rows.length)return fallback;
+ const groups=new Map();rows.forEach(x=>{const key=String(x.weekKey);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(x);});
+ const starts=[...groups.keys()].sort();
+ const active=starts.find(key=>{const end=new Date(key+'T12:00:00');end.setDate(end.getDate()+6);return key<=today&&localISODate(end)>=today;});
+ if(active)return active;
+ const next=starts.find(key=>key>today);if(next)return next;
+ const isBelemir=sid==='4237ffa6-8776-4241-888b-d019ea54ff00';
+ return isBelemir?starts[starts.length-1]:fallback;
+}
 function portalProgramsForWeek(studentId,weekKey){const sid=String(studentId||''),target=storedProgramWeekDisplayKey(weekKey||currentProgramCycleKey());return (db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&storedProgramWeekDisplayKey(x.weekKey)===target);}
 function migrateLegacyProgramWeekKeys(){
  // Legacy rows without V20 metadata cannot be assigned a reliable week from created_at alone.
