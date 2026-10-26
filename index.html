@@ -2864,10 +2864,9 @@ async function deleteSource(id){db.sources=(db.sources||[]).filter(x=>String(x.i
 function localISODate(d){const x=new Date(d);if(isNaN(x))return todayISO();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
 function programCycleStartISO(inputDate=new Date(), offsetWeeks=0){
  const d=new Date(inputDate); if(isNaN(d)) return todayISO();
- const day=d.getDay();
+ // Program dönemi seçilen takvim gününden başlar; pazartesiye yuvarlama yapılmaz.
  d.setHours(12,0,0,0);
- // Haftalık program pazartesi başlar.
- d.setDate(d.getDate()-(day===0?6:day-1)+(Number(offsetWeeks||0)*7));
+ d.setDate(d.getDate()+(Number(offsetWeeks||0)*7));
  return localISODate(d);
 }
 function storedProgramWeekDisplayKey(key){
