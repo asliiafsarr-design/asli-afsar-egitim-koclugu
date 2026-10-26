@@ -85,3 +85,35 @@ test('invalid date does not become a valid selected program start', () => {
   const ctx = makeContext([], '2026-10-26');
   assert.equal(ctx.programStartKeyForDate('S1','not-a-date'), '2026-10-26');
 });
+
+test('actual selectProgramDate preserves Tuesday, Wednesday, Thursday and month-boundary dates', () => {
+  const selectionFunction = sourceBlock('function selectProgramDate(');
+  const ctx = makeContext([], '2026-10-26');
+  const elements = {
+    programStudent: { value: 'synthetic-student' },
+    programCalendarDate: { value: '' },
+    programEndDate: { value: '' },
+    programWeekLabel: { textContent: '' },
+    programSelectedWeekBig: { textContent: '' }
+  };
+  ctx.document = { getElementById: id => elements[id] || null };
+  ctx.selectedProgramWeekKey = '';
+  ctx.selectedStudent = 'synthetic-student';
+  ctx.student = () => ({ id: 'synthetic-student' });
+  ctx.renderWeeklyProgramGrid = () => {};
+  ctx.renderStudentProgramProgress = () => {};
+  ctx.renderCoachProgramProgress = () => {};
+  ctx.renderParentProgramProgress = () => {};
+  vm.runInContext(selectionFunction, ctx);
+  for (const [start, end] of [
+    ['2026-10-27','2026-11-02'],
+    ['2026-10-28','2026-11-03'],
+    ['2026-10-29','2026-11-04'],
+    ['2026-11-30','2026-12-06']
+  ]) {
+    ctx.selectProgramDate(start);
+    assert.equal(elements.programCalendarDate.value, start, 'calendar must preserve selected date');
+    assert.equal(ctx.selectedProgramWeekKey, start, 'selected period key must preserve selected date');
+    assert.equal(elements.programEndDate.value, end, 'end date must be start plus six days');
+  }
+});
