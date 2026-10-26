@@ -2435,7 +2435,7 @@ function renderWeeklyProgramGrid(){
  const el=document.getElementById('weeklyProgramGrid'); if(!el)return;
  const selected=document.getElementById('programStudent')?.value;
  const s=(db.students||[]).find(x=>String(x.id)===String(selected))||student();
- const wk=selectedProgramWeekKey||currentProgramCycleKey(); const arr=[...(db.programs||[]),...programDrafts].filter(x=>(!s||String(x.student)===String(s.id))&&String(x.weekKey||currentProgramCycleKey())===String(wk));
+ const wk=selectedProgramWeekKey||currentProgramCycleKey(); const arr=[...(db.programs||[]),...programDrafts].filter(x=>{if(s&&String(x.student)!==String(s.id))return false;const key=String(x.weekKey||'');return key===String(wk)||(/^\\d{4}-\\d{2}-\\d{2}$/.test(key)&&programPeriodContainsDate(key,wk));});
  const days=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
  const subjectClass=(subject)=>{const v=String(subject||'').toLowerCase();if(v.includes('matematik'))return 'math';if(v.includes('geometri'))return 'geometry';if(v.includes('türkçe')||v.includes('edebiyat'))return 'turkish';if(v.includes('tarih')||v.includes('coğrafya')||v.includes('din')||v.includes('felsefe'))return 'social';if(v.includes('fizik')||v.includes('kimya')||v.includes('biyoloji'))return 'science';if(v.includes('ingilizce')||v.includes('ydt')||v.includes('dil'))return 'language';return '';};
  el.innerHTML=days.map(dayName=>{
