@@ -14,7 +14,7 @@ function sourceBlock(prefix) {
   const start = lines.findIndex(x => x.trimStart().startsWith(prefix));
   assert.notEqual(start, -1, 'Missing production helper: ' + prefix);
   let end = start + 1;
-  while (end < lines.length && lines[end] !== '}') end++;
+  while (end < lines.length && lines[end].trim() !== '}') end++;
   assert.ok(end < lines.length, 'Unclosed production helper: ' + prefix);
   return lines.slice(start, end + 1).join('\n');
 }
