@@ -2903,7 +2903,13 @@ function activePortalProgramWeekKey(studentId){
  const active=starts.filter(key=>programPeriodContainsDate(key,today,sid)).sort().pop();
  if(active)return active;
  const prior=starts.filter(key=>key<=today);
- if(prior.length){const latest=prior[prior.length-1],end=new Date(programPeriodEndDate(latest,sid)+'T12:00:00');end.setDate(end.getDate()+1);return localISODate(end);}
+ if(prior.length){
+  const latest=prior[prior.length-1],end=new Date(programPeriodEndDate(latest,sid)+'T12:00:00');end.setDate(end.getDate()+1);
+  const anchor=localISODate(end),todayParts=today.split('-').map(Number),anchorParts=anchor.split('-').map(Number);
+  const days=Math.floor((Date.UTC(todayParts[0],todayParts[1]-1,todayParts[2])-Date.UTC(anchorParts[0],anchorParts[1]-1,anchorParts[2]))/86400000);
+  if(days>0)end.setDate(end.getDate()+Math.floor(days/7)*7);
+  return localISODate(end);
+ }
  const next=starts.find(key=>key>today);return next||fallback;
 }
 function portalProgramsForWeek(studentId,weekKey){const sid=String(studentId||''),target=storedProgramWeekDisplayKey(weekKey||currentProgramCycleKey());return (db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&storedProgramWeekDisplayKey(x.weekKey)===target);}
