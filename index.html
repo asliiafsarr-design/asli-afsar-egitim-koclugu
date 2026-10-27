@@ -3572,7 +3572,7 @@ function renderPortalWeeklyProgram(studentId){
  const activeWeek=activePortalProgramWeekKey(s.id);
  const arr=activeWeek?portalProgramsForWeek(s.id,activeWeek):[];
  const rawStart=activeWeek?storedProgramWeekDisplayKey(activeWeek):'';
- const rawEnd=rawStart?(()=>{const d=new Date(rawStart+'T12:00:00');d.setDate(d.getDate()+6);return localISODate(d);})():'';
+ const rawEnd=rawStart?programPeriodEndDate(rawStart,s.id):'';
  const info=document.getElementById('portalProgramWeekInfo');
  if(info)info.textContent=activeWeek?('Program dönemi: '+(()=>{const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(rawStart)+' – '+fmt(rawEnd);})()+' · Kayıtlı program korunmuştur.'):'Henüz bu öğrenci için tarihli bir program atanmadı.';
  // Öğrenci ekranı koç ekranındaki kayıt sırasını aynen korur; saat kullanılmaz.
