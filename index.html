@@ -2917,6 +2917,10 @@ function activePortalProgramWeekKey(studentId){
  if(!rows.length)return fallback;
  const starts=[...new Set(rows.map(x=>String(x.weekKey)))].sort();
  const active=starts.filter(key=>programPeriodContainsDate(key,today,sid)).sort().pop();
+ const upcoming=starts.filter(key=>key>today).sort().pop();
+ // If a newer program has already been assigned for a future period, show that
+ // assigned program instead of leaving the student on the previous period.
+ if(upcoming && (!active || upcoming>active))return upcoming;
  if(active)return active;
  const prior=starts.filter(key=>key<=today);
  if(prior.length){
