@@ -736,7 +736,7 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
    <div class="row" style="gap:14px;flex-wrap:wrap;align-items:stretch">
     <div style="flex:1;min-width:280px">
      <h3>Program Tarihi</h3>
-     <p class="muted small">Her öğrenci için program başlangıç tarihini seç. Bitiş tarihi otomatik olarak 6 gün sonrası olur; program dönemi tam 7 gündür. Eski haftaların kayıtları korunur.</p>
+     <p class="muted small">Her öğrencinin dönem başlangıç ve bitişi kendi kayıtlarına göre hesaplanır. Yeni dönemler 7 takvim günüdür; kayıtlı özel bitiş tarihleri korunur. Eski programlar silinmez.</p>
      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
       <div><label>Başlangıç tarihi</label><input id="programCalendarDate" type="date" min="2026-01-01" max="2027-06-30" onchange="selectProgramDate(this.value)" style="font-size:16px"></div>
       <div><label>Bitiş tarihi (otomatik)</label><input id="programEndDate" type="date" readonly disabled style="font-size:16px;opacity:.85"></div>
@@ -1293,7 +1293,7 @@ async function loadCloud(){
    return cloud.map(x=>{const old=byId.get(String(x.id));if(old&&old.fileUrl&&!x.fileUrl)x.fileUrl=old.fileUrl;if(old&&old.fileData&&!x.fileData)x.fileData=old.fileData;if(old&&old.submission?.fileData&&!x.submission?.fileData)x.submission={...x.submission,fileData:old.submission.fileData};if(old&&old.submission?.fileUrl&&!x.submission?.fileUrl)x.submission={...x.submission,fileUrl:old.submission.fileUrl};return x;}).concat(local.filter(x=>!cloud.some(c=>String(c.id)===String(x.id))));
   };
   // PROGRAMS: Supabase is the single source of truth across devices. Do not merge stale local program rows back into cloud data.
-  if(!pr.error) db.programs=(pr.data||[]).map(x=>{const m=parseProgramMeta(x.notes);return {id:x.id,student:x.student_id,day:x.day||'',subject:x.subject||'',topic:(m.topic??x.topic)||'',duration:(m.duration??x.duration)||0,questions:(m.questions??x.question_count)||0,done:!!x.completed,weekKey:m.weekKey||'',order:Number.isFinite(Number(m.order))?Number(m.order):null,startTime:m.startTime||'',endTime:m.endTime||'',programType:m.programType||'study',workType:m.workType||'',content:m.content||'',notes:m.plainNotes||'',createdAt:x.created_at||''};});
+  if(!pr.error) db.programs=(pr.data||[]).map(x=>{const m=parseProgramMeta(x.notes);return {id:x.id,student:x.student_id,day:x.day||'',subject:x.subject||'',topic:(m.topic??x.topic)||'',duration:(m.duration??x.duration)||0,questions:(m.questions??x.question_count)||0,done:!!x.completed,weekKey:m.weekKey||'',periodEnd:m.periodEnd||'',order:Number.isFinite(Number(m.order))?Number(m.order):null,startTime:m.startTime||'',endTime:m.endTime||'',programType:m.programType||'study',workType:m.workType||'',content:m.content||'',notes:m.plainNotes||'',createdAt:x.created_at||''};});
   if(!ta.error) db.tasks=mergeKeepLocal((ta.data||[]).map(x=>({id:x.id,student:x.student_id,title:x.title||'Görev',description:x.description||'',dueDate:x.due_date||'',done:!!x.completed})),db.tasks);
   if(!ex.error) db.exams=mergeKeepLocal((ex.data||[]).map(x=>{
    let meta={};try{meta=x.notes?JSON.parse(x.notes):{};}catch(_){}
@@ -1377,7 +1377,7 @@ function portalScopedDBFromBundle(bundle){
  const topics=rows.filter(x=>x.report_type==='topic_tracking').map(x=>{const v=parseContent(x);return {...v,id:x.id,student:sid,createdAt:x.created_at||v.createdAt||''};});
  const revisions=rows.filter(x=>x.report_type==='program_revision').map(x=>{const v=parseContent(x);return {...v,id:x.id,student:sid};});
  const branches=rows.filter(x=>x.report_type==='branch_exam_record').map(x=>parseContent(x)).filter(Boolean);
- db={students:[studentFromRow(st)],memberships:bundle.membership?[{...bundle.membership,student:sid}]:[],programs:ownRows(bundle.programs).map(x=>{const m=parseProgramMeta(x.notes);return {id:x.id,student:sid,day:x.day||'',subject:x.subject||'',topic:(m.topic??x.topic)||'',duration:(m.duration??x.duration)||0,questions:(m.questions??x.question_count)||0,done:!!x.completed,weekKey:m.weekKey||'',order:Number.isFinite(Number(m.order))?Number(m.order):null,startTime:m.startTime||'',endTime:m.endTime||'',programType:m.programType||'study',workType:m.workType||'',content:m.content||'',notes:m.plainNotes||'',createdAt:x.created_at||''};}),tasks:ownRows(bundle.tasks).map(x=>({id:x.id,student:sid,title:x.title||'Görev',description:x.description||'',dueDate:x.due_date||'',done:!!x.completed})),exams:ownRows(bundle.exams).map(x=>{let meta={};try{meta=x.notes?JSON.parse(x.notes):{};}catch(_){}return {id:x.id,student:sid,name:x.exam_name||'Deneme',studentName:meta.studentName||'',date:x.exam_date||'',nets:{Türkçe:Number(x.turkish||0),Matematik:Number(x.math||0),Fen:Number(x.science||0),Sosyal:Number(x.social||0)},errors:x.errors||[],notes:meta.notes||'',duration:meta.duration||0,kind:meta.kind||'genel',level:meta.level||'TYT',area:meta.area||'',branch:meta.branch||'Genel',fileName:meta.fileName||'',fileType:meta.fileType||'',fileUrl:meta.fileUrl||'',fileData:meta.fileData||'',status:meta.status||'assigned',assignedAt:meta.assignedAt||'',submission:meta.submission||null,analysis:meta.analysis||null,analysisPublished:!!meta.analysisPublished};}),inventories:ownRows(bundle.inventories).map(x=>({id:x.id,student:sid,type:x.test_type,answers:x.answers||[],result:x.result_text?JSON.parse(x.result_text):{score:Number(x.score||0),level:''},date:(x.created_at||'').slice(0,10)})),reports,reportArchive:[],taskStatuses:taskStatusRows,programCompletions:completions,questionTracking:questions,swotRecords:swot,topicTracking:topics,programRevisions:revisions,sources:ownRows(bundle.sources).map(x=>({id:x.id,student:sid,grade:x.grade||'',subject:x.subject||'',name:x.source_name||'',topic:x.topic||'',total:x.question_count||0,correct:x.correct||0,wrong:x.wrong||0,blank:x.blank||0,date:x.source_date||'',notes:x.notes||''})),branchExams:branches,mockExams:[]};
+ db={students:[studentFromRow(st)],memberships:bundle.membership?[{...bundle.membership,student:sid}]:[],programs:ownRows(bundle.programs).map(x=>{const m=parseProgramMeta(x.notes);return {id:x.id,student:sid,day:x.day||'',subject:x.subject||'',topic:(m.topic??x.topic)||'',duration:(m.duration??x.duration)||0,questions:(m.questions??x.question_count)||0,done:!!x.completed,weekKey:m.weekKey||'',periodEnd:m.periodEnd||'',order:Number.isFinite(Number(m.order))?Number(m.order):null,startTime:m.startTime||'',endTime:m.endTime||'',programType:m.programType||'study',workType:m.workType||'',content:m.content||'',notes:m.plainNotes||'',createdAt:x.created_at||''};}),tasks:ownRows(bundle.tasks).map(x=>({id:x.id,student:sid,title:x.title||'Görev',description:x.description||'',dueDate:x.due_date||'',done:!!x.completed})),exams:ownRows(bundle.exams).map(x=>{let meta={};try{meta=x.notes?JSON.parse(x.notes):{};}catch(_){}return {id:x.id,student:sid,name:x.exam_name||'Deneme',studentName:meta.studentName||'',date:x.exam_date||'',nets:{Türkçe:Number(x.turkish||0),Matematik:Number(x.math||0),Fen:Number(x.science||0),Sosyal:Number(x.social||0)},errors:x.errors||[],notes:meta.notes||'',duration:meta.duration||0,kind:meta.kind||'genel',level:meta.level||'TYT',area:meta.area||'',branch:meta.branch||'Genel',fileName:meta.fileName||'',fileType:meta.fileType||'',fileUrl:meta.fileUrl||'',fileData:meta.fileData||'',status:meta.status||'assigned',assignedAt:meta.assignedAt||'',submission:meta.submission||null,analysis:meta.analysis||null,analysisPublished:!!meta.analysisPublished};}),inventories:ownRows(bundle.inventories).map(x=>({id:x.id,student:sid,type:x.test_type,answers:x.answers||[],result:x.result_text?JSON.parse(x.result_text):{score:Number(x.score||0),level:''},date:(x.created_at||'').slice(0,10)})),reports,reportArchive:[],taskStatuses:taskStatusRows,programCompletions:completions,questionTracking:questions,swotRecords:swot,topicTracking:topics,programRevisions:revisions,sources:ownRows(bundle.sources).map(x=>({id:x.id,student:sid,grade:x.grade||'',subject:x.subject||'',name:x.source_name||'',topic:x.topic||'',total:x.question_count||0,correct:x.correct||0,wrong:x.wrong||0,blank:x.blank||0,date:x.source_date||'',notes:x.notes||''})),branchExams:branches,mockExams:[]};
  selectedStudent=sid; return true;
 }
 function clearPortalSession(){
@@ -1838,8 +1838,8 @@ function weekRangeFromDate(dateStr,studentId){
  if(isNaN(d))return programCycleRange(currentProgramCycleKey());
  const sid=studentId==null?'':String(studentId);
  const rows=(db.programs||[]).filter(x=>(studentId==null||String(x.student)===sid)&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
- const matches=[...new Set(rows.map(x=>String(x.weekKey)))].filter(key=>programPeriodContainsDate(key,raw)).sort();
- if(matches.length){const key=matches[matches.length-1],r=programCycleRange(key);return {start:r.start,end:r.end,key};}
+ const matches=[...new Set(rows.map(x=>String(x.weekKey)))].filter(key=>programPeriodContainsDate(key,raw,sid)).sort();
+ if(matches.length){const key=matches[matches.length-1],r=programCycleRange(key,sid);return {start:r.start,end:r.end,key};}
  const start=new Date(d);start.setHours(12,0,0,0);start.setDate(start.getDate()-((start.getDay()+6)%7));
  const end=new Date(start);end.setDate(end.getDate()+6);
  const iso=x=>localISODate(x),monday=iso(start);
@@ -1882,7 +1882,7 @@ function loginCodeExists(code,excludeId){
 function generateLoginCode(){
  let code=''; do{code=String(Math.floor(100000+Math.random()*900000));}while(loginCodeExists(code)); return code;
 }
-function todayISO(){return new Date().toISOString().slice(0,10)}
+function todayISO(){return localISODate(new Date())}
 function parseDateOnly(v){const d=new Date(String(v||'')+'T00:00:00');return isNaN(d)?null:d}
 function addDaysISO(dateStr,days){const d=parseDateOnly(dateStr)||new Date();d.setDate(d.getDate()+Number(days||0));return d.toISOString().slice(0,10)}
 function daysLeftISO(dateStr){const d=parseDateOnly(dateStr);if(!d)return null;const now=new Date();now.setHours(0,0,0,0);return Math.ceil((d-now)/86400000)}
@@ -2337,7 +2337,7 @@ function parseProgramMeta(notes){
  return {plainNotes:raw};
 }
 function programCloudNotes(x){
- const meta={weekKey:x.weekKey||'',order:Number.isFinite(Number(x.order))?Number(x.order):null,startTime:x.startTime||'',endTime:x.endTime||'',programType:x.programType||'study',workType:x.workType||'',content:x.content||'',topic:x.topic||'',duration:Number(x.duration)||0,questions:x.questions===''?'':Number(x.questions)||0};
+ const meta={weekKey:x.weekKey||'',periodEnd:x.periodEnd||'',order:Number.isFinite(Number(x.order))?Number(x.order):null,startTime:x.startTime||'',endTime:x.endTime||'',programType:x.programType||'study',workType:x.workType||'',content:x.content||'',topic:x.topic||'',duration:Number(x.duration)||0,questions:x.questions===''?'':Number(x.questions)||0};
  return '__V20_PROGRAM_META__'+JSON.stringify({...meta,plainNotes:String(x.notes||'')});
 }
 function programCloudRow(x){const rawQuestions=x.questions===''||x.questions==null?0:Number(x.questions);const rawDuration=Number(x.duration)||0;return {id:x.id,student_id:x.student,day:x.day||'',subject:x.subject||'',topic:x.topic||'',duration:Math.max(0,Math.round(rawDuration)),question_count:Math.max(0,Math.round(Number.isFinite(rawQuestions)?rawQuestions:0)),completed:!!x.done,notes:programCloudNotes({...x,questions:Number.isFinite(rawQuestions)?Math.max(0,Math.round(rawQuestions)):0,duration:Math.max(0,Math.round(rawDuration))})};}
@@ -2381,7 +2381,7 @@ async function saveWeeklyProgram(){
   const r=await supa.from('programs').upsert(weekRows.map(programCloudRow),{onConflict:'id'});
   if(r?.error)throw r.error;
   renderProgram();
-  alert('Program kaydedildi ve öğrenci portalıyla eşitlendi: '+weekRangeLabel(wk));
+  alert('Program kaydedildi ve öğrenci portalıyla eşitlendi: '+weekRangeLabel(wk,student));
  }catch(e){
   db.programs=originals;
   drafts.forEach(x=>x.__draft=true);
@@ -2876,22 +2876,34 @@ function storedProgramWeekDisplayKey(key){
  return isNaN(d)?currentProgramCycleKey():raw;
 }
 function currentProgramCycleKey(offset=0){return programCycleStartISO(new Date(),offset);}
-function programCycleRange(key){const raw=String(key||currentProgramCycleKey());const d=new Date(raw+'T12:00:00');if(isNaN(d))return programCycleRange(currentProgramCycleKey());const end=new Date(d);end.setDate(d.getDate()+6);const boundary=new Date(end);boundary.setDate(boundary.getDate()+1);return {start:localISODate(d),end:localISODate(end),boundary:localISODate(boundary),key:raw};}
-function programCycleLabel(key){const r=programCycleRange(key);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});return fmt(r.start)+' – '+fmt(r.end)+' (7 gün)';}
+const PROGRAM_MIN_DATE='2026-01-01', PROGRAM_MAX_DATE='2027-06-30';
+function currentProgramOwnerId(){return String(document.getElementById('programStudent')?.value||selectedStudent||student()?.id||'');}
+function programPeriodEndDate(startKey,studentId){
+ const raw=String(startKey||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(raw)||isNaN(new Date(raw+'T12:00:00')))return currentProgramCycleKey();
+ const sid=studentId==null?currentProgramOwnerId():String(studentId);
+ const matches=(db.programs||[]).filter(x=>(!sid||String(x.student)===sid)&&String(x.weekKey||'')===raw);
+ const ends=matches.map(x=>String(x.periodEnd||'').slice(0,10)).filter(v=>/^\d{4}-\d{2}-\d{2}$/.test(v)&&v>=raw&&!isNaN(new Date(v+'T12:00:00'))).sort();
+ if(ends.length)return ends[ends.length-1];
+ const end=new Date(raw+'T12:00:00');end.setDate(end.getDate()+6);return localISODate(end);
+}
+function programCycleRange(key,studentId){
+ const raw=String(key||currentProgramCycleKey());const d=new Date(raw+'T12:00:00');if(isNaN(d))return programCycleRange(currentProgramCycleKey(),studentId);
+ const endISO=programPeriodEndDate(raw,studentId),end=new Date(endISO+'T12:00:00');if(isNaN(end)||end<d){end.setTime(d.getTime());end.setDate(end.getDate()+6);}
+ const boundary=new Date(end);boundary.setDate(boundary.getDate()+1);return {start:localISODate(d),end:localISODate(end),boundary:localISODate(boundary),key:raw};
+}
+function programCycleLabel(key,studentId){const r=programCycleRange(key,studentId);const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});const a=r.start.split('-').map(Number),b=r.end.split('-').map(Number),days=Math.round((Date.UTC(b[0],b[1]-1,b[2])-Date.UTC(a[0],a[1]-1,a[2]))/86400000)+1;return fmt(r.start)+' – '+fmt(r.end)+' ('+days+' gün)';}
 function programStartKeyForDate(studentId,dateStr){const raw=String(dateStr||todayISO()).slice(0,10),d=new Date(raw+'T12:00:00');return /^\d{4}-\d{2}-\d{2}$/.test(raw)&&!isNaN(d)?raw:todayISO();}
-function programPeriodContainsDate(startKey,dateStr){const start=new Date(String(startKey||'')+'T12:00:00'),date=new Date(String(dateStr||'')+'T12:00:00');if(isNaN(start)||isNaN(date))return false;const end=new Date(start);end.setDate(end.getDate()+6);return date>=start&&date<=end;}
+function programPeriodContainsDate(startKey,dateStr,studentId){const start=new Date(String(startKey||'')+'T12:00:00'),date=new Date(String(dateStr||'')+'T12:00:00');if(isNaN(start)||isNaN(date))return false;const end=new Date(programPeriodEndDate(startKey,studentId)+'T12:00:00');return !isNaN(end)&&date>=start&&date<=end;}
 function activePortalProgramWeekKey(studentId){
  const fallback=currentProgramCycleKey();if(!studentId)return fallback;
  const sid=String(studentId),today=todayISO();
  const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
  if(!rows.length)return fallback;
- const groups=new Map();rows.forEach(x=>{const key=String(x.weekKey);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(x);});
- const starts=[...groups.keys()].sort();
- const active=starts.filter(key=>programPeriodContainsDate(key,today)).sort().pop();
+ const starts=[...new Set(rows.map(x=>String(x.weekKey)))].sort();
+ const active=starts.filter(key=>programPeriodContainsDate(key,today,sid)).sort().pop();
  if(active)return active;
  const next=starts.find(key=>key>today);if(next)return next;
- const isBelemir=sid==='4237ffa6-8776-4241-888b-d019ea54ff00';
- return isBelemir?starts[starts.length-1]:fallback;
+ const latest=starts[starts.length-1],end=new Date(programPeriodEndDate(latest,sid)+'T12:00:00');end.setDate(end.getDate()+1);return localISODate(end);
 }
 function portalProgramsForWeek(studentId,weekKey){const sid=String(studentId||''),target=storedProgramWeekDisplayKey(weekKey||currentProgramCycleKey());return (db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&storedProgramWeekDisplayKey(x.weekKey)===target);}
 function migrateLegacyProgramWeekKeys(){
@@ -3069,7 +3081,7 @@ function renderArchive(){
  const allPrograms=(db.programs||[]).filter(x=>String(x.student)===sid);
  const dateFilter=document.getElementById('archiveDate')?.value||'';
  const targetWeek=dateFilter?String(dateFilter).slice(0,10):'';
- const pro=dateFilter?allPrograms.filter(x=>programPeriodContainsDate(x.weekKey,targetWeek)):allPrograms;
+ const pro=dateFilter?allPrograms.filter(x=>programPeriodContainsDate(x.weekKey,targetWeek,sid)):allPrograms;
  const ex=(db.exams||[]).filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), reps=db.reportArchive.filter(x=>String(x.student)===String(sid)).sort((a,b)=>String(b.date).localeCompare(String(a.date))), tasks=(db.tasks||[]).filter(x=>String(x.student)===String(sid));
  const ids={archiveProgramCount:allPrograms.length,archiveExamCount:ex.length,archiveReportCount:reps.length,archiveTaskCount:tasks.length};Object.entries(ids).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
  renderGoalSummary(s);
@@ -3084,7 +3096,7 @@ function openArchiveSelectedWeek(){
  if(!date)return alert('Önce program haftasından bir tarih seçin.');
  selectedStudent=sid;
  const week=String(date).slice(0,10);
- const matching=(db.programs||[]).filter(x=>String(x.student)===sid&&programPeriodContainsDate(x.weekKey,week));
+ const matching=(db.programs||[]).filter(x=>String(x.student)===sid&&programPeriodContainsDate(x.weekKey,week,sid));
  if(!matching.length)return alert('Seçilen tarih aralığında bu öğrenci için program kaydı bulunamadı.');
  const key=matching[0].weekKey||week;
  openProgramArchiveWeek(key);
@@ -3097,7 +3109,7 @@ function openProgramArchiveWeek(weekKey){
  selectedProgramWeekKey=String(weekKey);
  const sel=document.getElementById('programStudent');if(sel&&sid)sel.value=sid;
  show('program');
- const displayKey=storedProgramWeekDisplayKey(weekKey),range=programCycleRange(displayKey);
+ const displayKey=storedProgramWeekDisplayKey(weekKey),range=programCycleRange(displayKey,sid);
  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=displayKey;
  const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=range.end;
  const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Arşiv program dönemi: '+weekRangeLabel(weekKey)+' (7 gün)';
@@ -3309,19 +3321,16 @@ async function saveInventoryCoachComment(id){const x=(db.inventories||[]).find(v
 async function saveStudentPortalAssessment(sid){const v=document.getElementById('portalSelfAssessment')?.value.trim()||'';if(!v)return alert('Öz değerlendirme yazın.');const ok=await saveStudentSelfAssessment(v,sid);if(ok){renderPortalQuestionAndSwot(sid);alert('Öz değerlendirme kaydedildi.');}else alert('Öz değerlendirme yerelde kaydedildi; bulut eşitlemesi başarısız oldu.');}
 
 let selectedProgramWeekKey = currentProgramCycleKey();
-function weekRangeLabel(key){return programCycleLabel(key);}
+function weekRangeLabel(key,studentId){return programCycleLabel(key,studentId||currentProgramOwnerId());}
 function selectProgramDate(dateStr){
- const raw=(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
+ let raw=String(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
+ if(raw<PROGRAM_MIN_DATE)raw=PROGRAM_MIN_DATE;if(raw>PROGRAM_MAX_DATE)raw=PROGRAM_MAX_DATE;
  const parsed=new Date(raw+'T12:00:00');
  const valid=!isNaN(parsed);
  const sid=String(document.getElementById('programStudent')?.value||selectedStudent||student()?.id||'');
  const chosen=programStartKeyForDate(sid,valid?raw:todayISO());
  selectedProgramWeekKey=chosen;
- const startISO=chosen;
- const end=new Date(startISO+'T12:00:00');end.setDate(end.getDate()+6);
- const endISO=localISODate(end);
- const boundary=new Date(end);boundary.setDate(boundary.getDate()+1);
- const boundaryISO=localISODate(boundary);
+ const period=programCycleRange(chosen,sid),startISO=period.start,endISO=period.end;
  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=startISO;
  const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=endISO;
  const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
@@ -3330,8 +3339,8 @@ function selectProgramDate(dateStr){
  renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();
 }function renderProgramWeekSelector(){selectProgramDate(selectedProgramWeekKey||todayISO());}
 function selectProgramWeek(key){selectProgramDate(key||todayISO());}
-function changeProgramWeek(offset){const d=new Date((selectedProgramWeekKey||currentProgramCycleKey())+'T12:00:00');d.setDate(d.getDate()+Number(offset||0)*7);selectProgramDate(localISODate(d));}
-function changeCoachProgramStudent(){const sid=String(document.getElementById('programStudent')?.value||selectedStudent||student()?.id||'');selectedProgramWeekKey=activePortalProgramWeekKey(sid);refreshProgramPalette();renderProgram();}
+function changeProgramWeek(offset){const sid=currentProgramOwnerId(),current=selectedProgramWeekKey||activePortalProgramWeekKey(sid);let target='';if(Number(offset)>0){const r=programCycleRange(current,sid),d=new Date(r.end+'T12:00:00');d.setDate(d.getDate()+1);target=localISODate(d);}else{const prior=[...new Set((db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&String(x.weekKey)<String(current)).map(x=>String(x.weekKey)))].sort();if(prior.length)target=prior[prior.length-1];else{const d=new Date(current+'T12:00:00');d.setDate(d.getDate()-7);target=localISODate(d);}}selectProgramDate(target);}
+function changeCoachProgramStudent(){const sid=currentProgramOwnerId();selectedProgramWeekKey=activePortalProgramWeekKey(sid);refreshProgramPalette();renderProgram();}
 function renderProgram(){if(!selectedProgramWeekKey)selectedProgramWeekKey=currentProgramCycleKey();selectProgramDate(selectedProgramWeekKey);};
 
 function renderBranchSubjects(){
