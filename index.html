@@ -2660,7 +2660,7 @@ function startTaskStatusSync(){
  setInterval(()=>{refreshTaskStatusesFromCloud().catch(e=>console.warn('Görev durumu yenileme:',e?.message||e));},10000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshTaskStatusesFromCloud().catch(e=>console.warn('Görev durumu yenileme:',e?.message||e));});
 }
-async async function refreshStudentPortalBundle(){
+async function refreshStudentPortalBundle(){
  if(!portalSessionToken || !['student','parent'].includes(String(role||window.portalSelectedRole||'').toLowerCase()) || document.hidden || window.__studentBundleRefreshRunning)return;
  window.__studentBundleRefreshRunning=true;
  try{
