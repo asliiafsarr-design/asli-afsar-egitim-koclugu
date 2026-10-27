@@ -2902,8 +2902,9 @@ function activePortalProgramWeekKey(studentId){
  const starts=[...new Set(rows.map(x=>String(x.weekKey)))].sort();
  const active=starts.filter(key=>programPeriodContainsDate(key,today,sid)).sort().pop();
  if(active)return active;
- const next=starts.find(key=>key>today);if(next)return next;
- const latest=starts[starts.length-1],end=new Date(programPeriodEndDate(latest,sid)+'T12:00:00');end.setDate(end.getDate()+1);return localISODate(end);
+ const prior=starts.filter(key=>key<=today);
+ if(prior.length){const latest=prior[prior.length-1],end=new Date(programPeriodEndDate(latest,sid)+'T12:00:00');end.setDate(end.getDate()+1);return localISODate(end);}
+ const next=starts.find(key=>key>today);return next||fallback;
 }
 function portalProgramsForWeek(studentId,weekKey){const sid=String(studentId||''),target=storedProgramWeekDisplayKey(weekKey||currentProgramCycleKey());return (db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&storedProgramWeekDisplayKey(x.weekKey)===target);}
 function migrateLegacyProgramWeekKeys(){
@@ -3339,7 +3340,7 @@ function selectProgramDate(dateStr){
  renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();
 }function renderProgramWeekSelector(){selectProgramDate(selectedProgramWeekKey||todayISO());}
 function selectProgramWeek(key){selectProgramDate(key||todayISO());}
-function changeProgramWeek(offset){const sid=currentProgramOwnerId(),current=selectedProgramWeekKey||activePortalProgramWeekKey(sid);let target='';if(Number(offset)>0){const r=programCycleRange(current,sid),d=new Date(r.end+'T12:00:00');d.setDate(d.getDate()+1);target=localISODate(d);}else{const prior=[...new Set((db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&String(x.weekKey)<String(current)).map(x=>String(x.weekKey)))].sort();if(prior.length)target=prior[prior.length-1];else{const d=new Date(current+'T12:00:00');d.setDate(d.getDate()-7);target=localISODate(d);}}selectProgramDate(target);}
+function changeProgramWeek(offset){const sid=currentProgramOwnerId(),current=selectedProgramWeekKey||activePortalProgramWeekKey(sid);let target='';if(Number(offset)>0){const r=programCycleRange(current,sid),d=new Date(r.end+'T12:00:00');d.setDate(d.getDate()+1);target=localISODate(d);}else{const prior=[...new Set((db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&String(x.weekKey)<String(current)).map(x=>String(x.weekKey)))].sort().reverse();const contiguous=prior.find(key=>{const d=new Date(programPeriodEndDate(key,sid)+'T12:00:00');d.setDate(d.getDate()+1);return localISODate(d)===String(current);});if(contiguous)target=contiguous;else{const d=new Date(current+'T12:00:00');d.setDate(d.getDate()-7);target=localISODate(d);}}selectProgramDate(target);}
 function changeCoachProgramStudent(){const sid=currentProgramOwnerId();selectedProgramWeekKey=activePortalProgramWeekKey(sid);refreshProgramPalette();renderProgram();}
 function renderProgram(){if(!selectedProgramWeekKey)selectedProgramWeekKey=currentProgramCycleKey();selectProgramDate(selectedProgramWeekKey);};
 
