@@ -1835,7 +1835,7 @@ async function deleteInventory(id){
 }
 function weekRangeFromDate(dateStr,studentId){
  const raw=String(dateStr||todayISO()).slice(0,10),d=new Date(raw+'T12:00:00');
- if(isNaN(d))return programCycleRange(currentProgramCycleKey());
+ if(isNaN(d))return programCycleRange(currentProgramCycleKey(),studentId);
  const sid=studentId==null?'':String(studentId);
  const rows=(db.programs||[]).filter(x=>(studentId==null||String(x.student)===sid)&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
  const matches=[...new Set(rows.map(x=>String(x.weekKey)))].filter(key=>programPeriodContainsDate(key,raw,sid)).sort();
@@ -3112,8 +3112,8 @@ function openProgramArchiveWeek(weekKey){
  const displayKey=storedProgramWeekDisplayKey(weekKey),range=programCycleRange(displayKey,sid);
  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=displayKey;
  const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=range.end;
- const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Arşiv program dönemi: '+weekRangeLabel(weekKey)+' (7 gün)';
- const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=weekRangeLabel(weekKey);
+ const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Arşiv program dönemi: '+weekRangeLabel(weekKey,sid);
+ const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=weekRangeLabel(weekKey,sid);
  renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();
 }
 async function deleteProgramArchiveWeek(weekKey){
@@ -3334,8 +3334,8 @@ function selectProgramDate(dateStr){
  const cal=document.getElementById('programCalendarDate');if(cal)cal.value=startISO;
  const endInput=document.getElementById('programEndDate');if(endInput)endInput.value=endISO;
  const fmt=v=>new Date(v+'T12:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
- const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Program dönemi: '+fmt(startISO)+' – '+fmt(endISO)+' (7 gün)';
- const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=fmt(startISO)+' – '+fmt(endISO)+' (7 gün)';
+ const lab=document.getElementById('programWeekLabel');if(lab)lab.textContent='Program dönemi: '+weekRangeLabel(chosen,sid);
+ const big=document.getElementById('programSelectedWeekBig');if(big)big.textContent=weekRangeLabel(chosen,sid);
  renderWeeklyProgramGrid();renderStudentProgramProgress();renderCoachProgramProgress();renderParentProgramProgress();
 }function renderProgramWeekSelector(){selectProgramDate(selectedProgramWeekKey||todayISO());}
 function selectProgramWeek(key){selectProgramDate(key||todayISO());}
