@@ -728,7 +728,7 @@ body.public-site-mode{background:#fff;overflow-x:hidden}
   <div class="card">
    <div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
     <div><h3>Haftalık Program</h3><p class="muted small">Günler soldan sağa ilerler. Dersi seç, konuyu seç; sistem önerilen soru ve süreyi otomatik getirir. İstersen süreyi değiştirebilirsin.</p></div>
-    <div><label>Öğrenci</label><select id="programStudent" onchange="refreshProgramPalette();renderProgram();"></select></div>
+    <div><label>Öğrenci</label><select id="programStudent" onchange="changeCoachProgramStudent();"></select></div>
    </div>
   </div>
 
@@ -3331,6 +3331,7 @@ function selectProgramDate(dateStr){
 }function renderProgramWeekSelector(){selectProgramDate(selectedProgramWeekKey||todayISO());}
 function selectProgramWeek(key){selectProgramDate(key||todayISO());}
 function changeProgramWeek(offset){const d=new Date((selectedProgramWeekKey||currentProgramCycleKey())+'T12:00:00');d.setDate(d.getDate()+Number(offset||0)*7);selectProgramDate(localISODate(d));}
+function changeCoachProgramStudent(){const sid=String(document.getElementById('programStudent')?.value||selectedStudent||student()?.id||'');selectedProgramWeekKey=activePortalProgramWeekKey(sid);refreshProgramPalette();renderProgram();}
 function renderProgram(){if(!selectedProgramWeekKey)selectedProgramWeekKey=currentProgramCycleKey();selectProgramDate(selectedProgramWeekKey);};
 
 function renderBranchSubjects(){
