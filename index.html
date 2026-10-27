@@ -2656,8 +2656,24 @@ async function refreshTaskStatusesFromCloud(){
 function startTaskStatusSync(){
  if(window.__taskStatusSyncStarted)return;
  window.__taskStatusSyncStarted=true;
+ if(!window.__studentBundleRefreshInterval)window.__studentBundleRefreshInterval=setInterval(()=>{refreshStudentPortalBundle().catch(e=>console.warn('Öğrenci paketi yenileme:',e?.message||e));},5000);
  setInterval(()=>{refreshTaskStatusesFromCloud().catch(e=>console.warn('Görev durumu yenileme:',e?.message||e));},10000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshTaskStatusesFromCloud().catch(e=>console.warn('Görev durumu yenileme:',e?.message||e));});
+}
+async function refreshStudentPortalBundle(){
+ if(!portalSessionToken || !['student','parent'].includes(String(role||window.portalSelectedRole||'').toLowerCase()) || document.hidden || window.__studentBundleRefreshRunning)return;
+ window.__studentBundleRefreshRunning=true;
+ try{
+  const loaded=await portalSecureLoad();
+  if(!loaded)return;
+  const sid=String(selectedStudent||'');
+  if(!sid || !(db.students||[]).some(x=>String(x.id)===sid))return;
+  const r=String(role||window.portalSelectedRole||'student').toLowerCase()==='parent'?'parent':'student';
+  renderPortalForStudent(r,sid);
+  renderPortalFeatureCards(sid);
+  renderTodayTaskAndAlerts(sid,'todayPlanCard');
+ }catch(e){console.warn('Öğrenci programı yenileme:',e?.message||e);}
+ finally{window.__studentBundleRefreshRunning=false;}
 }
 async function setCoachTaskDone(id){
  const task=db.tasks.find(x=>String(x.id)===String(id));if(!task)return;
