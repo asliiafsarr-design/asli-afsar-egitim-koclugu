@@ -2916,12 +2916,13 @@ function activePortalProgramWeekKey(studentId){
  const rows=(db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||'')));
  if(!rows.length)return fallback;
  const starts=[...new Set(rows.map(x=>String(x.weekKey)))].sort();
+ // Prefer the period containing today. A later future program must not hide
+ // the student's currently active program.
  const active=starts.filter(key=>programPeriodContainsDate(key,today,sid)).sort().pop();
- const upcoming=starts.filter(key=>key>today).sort().pop();
- // If a newer program has already been assigned for a future period, show that
- // assigned program instead of leaving the student on the previous period.
- if(upcoming && (!active || upcoming>active))return upcoming;
  if(active)return active;
+ // If there is no active period yet, show the nearest upcoming assigned period.
+ const upcoming=starts.filter(key=>key>today).sort();
+ if(upcoming.length)return upcoming[0];
  const prior=starts.filter(key=>key<=today);
  if(prior.length){
   const latest=prior[prior.length-1],end=new Date(programPeriodEndDate(latest,sid)+'T12:00:00');end.setDate(end.getDate()+1);
@@ -2930,7 +2931,7 @@ function activePortalProgramWeekKey(studentId){
   if(days>0)end.setDate(end.getDate()+Math.floor(days/7)*7);
   return localISODate(end);
  }
- const next=starts.find(key=>key>today);return next||fallback;
+ return fallback;
 }
 function portalProgramsForWeek(studentId,weekKey){const sid=String(studentId||''),target=storedProgramWeekDisplayKey(weekKey||currentProgramCycleKey());return (db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&storedProgramWeekDisplayKey(x.weekKey)===target);}
 function migrateLegacyProgramWeekKeys(){
