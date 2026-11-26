@@ -3349,6 +3349,7 @@ async function saveInventoryCoachComment(id){const x=(db.inventories||[]).find(v
 async function saveStudentPortalAssessment(sid){const v=document.getElementById('portalSelfAssessment')?.value.trim()||'';if(!v)return alert('Öz değerlendirme yazın.');const ok=await saveStudentSelfAssessment(v,sid);if(ok){renderPortalQuestionAndSwot(sid);alert('Öz değerlendirme kaydedildi.');}else alert('Öz değerlendirme yerelde kaydedildi; bulut eşitlemesi başarısız oldu.');}
 
 let selectedProgramWeekKey = currentProgramCycleKey();
+let programViewStudentId = ''; // Koç program ekranında öğrenci değişimini izler.
 function weekRangeLabel(key,studentId){return programCycleLabel(key,studentId||currentProgramOwnerId());}
 function selectProgramDate(dateStr){
  let raw=String(dateStr||selectedProgramWeekKey||todayISO()).slice(0,10);
@@ -3368,8 +3369,8 @@ function selectProgramDate(dateStr){
 }function renderProgramWeekSelector(){selectProgramDate(selectedProgramWeekKey||todayISO());}
 function selectProgramWeek(key){selectProgramDate(key||todayISO());}
 function changeProgramWeek(offset){const sid=currentProgramOwnerId(),current=selectedProgramWeekKey||activePortalProgramWeekKey(sid);let target='';if(Number(offset)>0){const r=programCycleRange(current,sid),d=new Date(r.end+'T12:00:00');d.setDate(d.getDate()+1);target=localISODate(d);}else{const prior=[...new Set((db.programs||[]).filter(x=>String(x.student)===sid&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.weekKey||''))&&String(x.weekKey)<String(current)).map(x=>String(x.weekKey)))].sort().reverse();const contiguous=prior.find(key=>{const d=new Date(programPeriodEndDate(key,sid)+'T12:00:00');d.setDate(d.getDate()+1);return localISODate(d)===String(current);});if(contiguous)target=contiguous;else{const d=new Date(current+'T12:00:00');d.setDate(d.getDate()-7);target=localISODate(d);}}selectProgramDate(target);}
-function changeCoachProgramStudent(){const sid=currentProgramOwnerId();selectedProgramWeekKey=activePortalProgramWeekKey(sid);refreshProgramPalette();renderProgram();}
-function renderProgram(){if(!selectedProgramWeekKey)selectedProgramWeekKey=currentProgramCycleKey();selectProgramDate(selectedProgramWeekKey);};
+function changeCoachProgramStudent(){const sid=currentProgramOwnerId();programViewStudentId=sid;selectedProgramWeekKey=activePortalProgramWeekKey(sid);refreshProgramPalette();renderProgram();}
+function renderProgram(){const sid=currentProgramOwnerId();if(sid&&sid!==programViewStudentId){programViewStudentId=sid;selectedProgramWeekKey=activePortalProgramWeekKey(sid);}if(!selectedProgramWeekKey)selectedProgramWeekKey=activePortalProgramWeekKey(sid)||currentProgramCycleKey();selectProgramDate(selectedProgramWeekKey);};
 
 function renderBranchSubjects(){
  const level=document.getElementById('branchLevel')?.value||'TYT';
