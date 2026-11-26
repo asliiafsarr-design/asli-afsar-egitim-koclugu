@@ -1275,7 +1275,7 @@ function studentRow(s){let p=s.profile||{};return {id:s.id,name:s.name||'',stude
 function studentFromRow(r){return {id:r.id,name:r.name,grade:r.grade||'',area:r.area||'',studentPin:String(r.student_pin??'').trim(),parentPin:String(r.parent_pin??'').trim(),profile:{school:r.school||'',goal:r.goal||'',faculty:r.faculty||'',university:r.university||'',motherName:r.mother_name||'',motherPhone:r.mother_phone||'',motherAlive:r.mother_alive||'',fatherName:r.father_name||'',fatherPhone:r.father_phone||'',fatherAlive:r.father_alive||'',parentsStatus:r.parent_status||'',siblings:r.sibling_count||0,motherWA:r.whatsapp||'',fatherWA:'',studentWish:r.notes||''}}}
 async function loadCloud(){
  try{
-  const [st,pr,ta,ex,iv,re]=await Promise.all([supa.from('students').select('*'),supa.from('programs').select('*'),supa.from('tasks').select('*'),supa.from('exams').select('*'),supa.from('inventories').select('*'),supa.from('reports').select('*')]);
+  const [st,pr,ta,ex,iv,re]=await Promise.all([supa.from('students').select('*'),(async()=>{const rows=[];let from=0;while(true){const page=await supa.from('programs').select('*').order('created_at',{ascending:true}).order('id',{ascending:true}).range(from,from+999);if(page.error)return page;const batch=page.data||[];rows.push(...batch);if(batch.length<1000)break;from+=1000;}return {data:rows,error:null};})(),supa.from('tasks').select('*'),supa.from('exams').select('*'),supa.from('inventories').select('*'),supa.from('reports').select('*')]);
   if(st.error) throw st.error;
   if(pr.error) console.warn('Program verisi okunamadı:',pr.error.message);
   if(ta.error) console.warn('Görev verisi okunamadı:',ta.error.message);
