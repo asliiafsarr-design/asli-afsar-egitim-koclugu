@@ -2919,9 +2919,17 @@ function activePortalProgramWeekKey(studentId){
  // Prefer the period containing today. A later future program must not hide
  // the student's currently active program.
  const active=starts.filter(key=>programPeriodContainsDate(key,today,sid)).sort().pop();
- if(active)return active;
- // If there is no active period yet, show the nearest upcoming assigned period.
+ // On the final day of a period, let the student preview the next contiguous week.
  const upcoming=starts.filter(key=>key>today).sort();
+ if(active){
+  if(upcoming.length&&today===programPeriodEndDate(active,sid)){
+   const nextBoundary=new Date(programPeriodEndDate(active,sid)+'T12:00:00');
+   nextBoundary.setDate(nextBoundary.getDate()+1);
+   if(upcoming[0]===localISODate(nextBoundary))return upcoming[0];
+  }
+  return active;
+ }
+ // If there is no active period yet, show the nearest upcoming assigned period.
  if(upcoming.length)return upcoming[0];
  const prior=starts.filter(key=>key<=today);
  if(prior.length){
