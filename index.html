@@ -2919,13 +2919,18 @@ function activePortalProgramWeekKey(studentId){
  // Prefer the period containing today. A later future program must not hide
  // the student's currently active program.
  const active=starts.filter(key=>programPeriodContainsDate(key,today,sid)).sort().pop();
- // On the final day of a period, let the student preview the next contiguous week.
+ // Preview the next contiguous assigned period during the final two days of the
+ // current period. This avoids a one-day timezone/device-date mismatch keeping
+ // students on the previous week when the next week's program is already assigned.
  const upcoming=starts.filter(key=>key>today).sort();
  if(active){
-  if(upcoming.length&&today===programPeriodEndDate(active,sid)){
-   const nextBoundary=new Date(programPeriodEndDate(active,sid)+'T12:00:00');
+  if(upcoming.length){
+   const activeEnd=programPeriodEndDate(active,sid);
+   const nextBoundary=new Date(activeEnd+'T12:00:00');
    nextBoundary.setDate(nextBoundary.getDate()+1);
-   if(upcoming[0]===localISODate(nextBoundary))return upcoming[0];
+   const previewThreshold=new Date(activeEnd+'T12:00:00');
+   previewThreshold.setDate(previewThreshold.getDate()-1);
+   if(upcoming[0]===localISODate(nextBoundary)&&today>=localISODate(previewThreshold))return upcoming[0];
   }
   return active;
  }
